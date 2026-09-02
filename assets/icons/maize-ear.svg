@@ -7,15 +7,18 @@
     <path fill="#C89024" d="M72 20c18 8 25 26 20 48-4 18-15 29-27 35-11-11-16-26-13-43 3-20 10-33 20-40z"/>
     <path fill="#F0C548" stroke="#9A6A18" d="M71 27c10 8 14 21 12 35-2 15-8 25-16 33-7-10-10-21-8-35 2-15 6-26 12-33z"/>
   </g>
-  <g fill="#F8D96A" stroke="#9A6A18" stroke-width="2">
-    <ellipse cx="70" cy="36" rx="4" ry="5"/>
-    <ellipse cx="78" cy="39" rx="4" ry="5"/>
-    <ellipse cx="67" cy="47" rx="4" ry="5"/>
-    <ellipse cx="76" cy="50" rx="4" ry="5"/>
-    <ellipse cx="65" cy="59" rx="4" ry="5"/>
-    <ellipse cx="74" cy="62" rx="4" ry="5"/>
-    <ellipse cx="64" cy="71" rx="4" ry="5"/>
-    <ellipse cx="71" cy="75" rx="4" ry="5"/>
-    <ellipse cx="65" cy="83" rx="4" ry="5"/>
-  </g>
+  <g fill="#FFD86A" stroke="#A86F13" stroke-width="1.5">
+    <ellipse cx="68" cy="35" rx="5" ry="6"/>
+    <ellipse cx="79" cy="38" rx="5" ry="6"/>
+    <ellipse cx="65" cy="47" rx="5" ry="6"/>
+    <ellipse cx="75" cy="49" rx="5" ry="6"/>
+    <ellipse cx="82" cy="53" rx="5" ry="6"/>
+    <ellipse cx="63" cy="59" rx="5" ry="6"/>
+    <ellipse cx="73" cy="61" rx="5" ry="6"/>
+    <ellipse cx="79" cy="66" rx="5" ry="6"/>
+    <ellipse cx="62" cy="71" rx="5" ry="6"/>
+    <ellipse cx="70" cy="74" rx="5" ry="6"/>
+    <ellipse cx="76" cy="79" rx="5" ry="6"/>
+    <ellipse cx="65" cy="83" rx="5" ry="6"/>
+</g>
 </svg>
