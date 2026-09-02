@@ -41,6 +41,7 @@ Use basic shapes for ordinary diagrams. Load Visio Stencils only when the user r
 - Assign or suppress every COM return value. Drawing helpers must not leak Shape, Page, or Document objects into the PowerShell pipeline.
 - Create a dedicated `Visio.Application` instance from an explicit template path. Avoid `Documents.Add('')`, which can open a chooser or hang.
 - Save before closing; close only the document created by the script; release COM references; and quit only the dedicated application instance.
+- If PowerShell COM becomes unstable or a job is long-running, use the optional Python `pywin32` backend with `EnsureDispatch` in a dedicated process; keep COM references local and release them in reverse order. Read [references/python-com-backend.md](references/python-com-backend.md) before using it.
 - After a timeout, inspect the target timestamp and lock state before retrying. Never launch another Visio instance while the previous one may still be active.
 
 ## Workflow
@@ -59,6 +60,7 @@ Use basic shapes for ordinary diagrams. Load Visio Stencils only when the user r
    - Draw panel internals in panel-local normalized coordinates whenever the figure has dense multi-panel content.
    - Decide whether the task is a full rebuild, color/style transfer, local edit, or export-only job.
    - For dense scientific figures, first create a coarse panel map, then draw panel internals. Do not start with small decorative details.
+   - OpenCV contour or OCR extraction may supply a first-pass geometry inventory, but it does not replace semantic annotation for dense scientific figures, charts, or image-like motifs.
 
 3. Prefer Visio automation for native edits.
    - Use COM automation on Windows when Visio is installed.

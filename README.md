@@ -66,6 +66,7 @@
 ├── agents/
 │   └── openai.yaml
 ├── references/
+│   ├── python-com-backend.md
 │   └── rebuild-guidelines.md
 └── scripts/
     ├── visio_export_formats.ps1
@@ -77,6 +78,7 @@
 
 - `SKILL.md`：Codex Skill 的主入口，包含通用 Visio 模式、工作流、验收标准和安全规则。
 - `agents/openai.yaml`：Codex UI 元数据。
+- `references/python-com-backend.md`：PowerShell COM 不稳定时的可选 Python `pywin32` 后端约定。
 - `references/rebuild-guidelines.md`：复杂科学图还原准则，包括面板拆解、绘图顺序、样式参数、导出策略和验证 rubric。
 - `scripts/visio_export_formats.ps1`：可复用导出函数，支持 PNG、SVG、PDF、PPTX。
 - `scripts/visio_page_tools.ps1`：辅助检查脚本，用于备份、导出、检查 `.vsdx` 包结构。
@@ -198,6 +200,7 @@ powershell -ExecutionPolicy Bypass -File scripts\visio_rebuild_scaffold.ps1 `
 - 默认只生成 `.vsdx`，预览和其他格式改为显式请求。
 - 脚手架支持目标不存在时从明确模板新建，并使用单个滚动备份。
 - 增加 Visio COM 输出抑制、保存后关闭、顶层 COM 释放和超时重试规则。
+- 增加 Python `EnsureDispatch` 后端指引，并明确 OpenCV/OCR 只用于图片几何初筛。
 - 吸收通用 Visio 技能中的流程图、架构图、时序图、Stencil 和图片反推组织方式。
 
 ### v1.1.1 - Panel calibration and anti-overlap
