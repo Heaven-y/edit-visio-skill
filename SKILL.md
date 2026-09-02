@@ -5,6 +5,11 @@ description: Create, modify, inspect, export, or rebuild Microsoft Visio diagram
 
 # Visio Automation and Image Rebuilder
 
+This is a portable instruction-and-script bundle for Microsoft Visio. The core
+workflow is not tied to Codex: any AI agent or local automation runner that can
+read this file and execute the bundled scripts can reuse it. The optional
+`agents/openai.yaml` file only supplies Codex UI metadata.
+
 ## Core Rule
 
 Recreate the reference as editable Visio content. Do not satisfy a rebuild request by inserting the whole reference image into the page. Embedding the reference image is only allowed as a temporary locked tracing layer if it is removed or hidden before delivery and the final `.vsdx` remains native shapes, text, connectors, and groups.
@@ -23,7 +28,15 @@ Choose the smallest mode that satisfies the request:
 | Inspect | Check pages, shape count, text, media, locks, or editability | Report only |
 | Export | Render an existing verified `.vsdx` | Only explicitly requested formats |
 
-Use basic shapes for ordinary diagrams. Load Visio Stencils only when the user requests professional icons or the diagram semantically requires device/service masters. For image reconstruction, automatic contour/OCR extraction is only a first pass; dense scientific or chart-heavy images require an agent-assisted native redraw with calibrated panels.
+Use basic shapes for ordinary diagrams. Load Visio Stencils only when the user
+requests professional icons or the diagram semantically requires device/service
+masters. For domain symbols without a suitable local master, use a small,
+licensed SVG/EMF asset or a reusable native-shape helper; do not use Emoji,
+generic clip art, or a large raster crop. Read
+[references/icon-strategy.md](references/icon-strategy.md) before choosing or
+importing an icon. For image reconstruction, automatic contour/OCR extraction
+is only a first pass; dense scientific or chart-heavy images require an
+agent-assisted native redraw with calibrated panels.
 
 ## Request and Output Rules
 
@@ -64,7 +77,8 @@ Use basic shapes for ordinary diagrams. Load Visio Stencils only when the user r
 
 3. Prefer Visio automation for native edits.
    - Use COM automation on Windows when Visio is installed.
-   - Use `DrawRectangle`, `DrawOval`, `DrawLine`, `Page.Import` only for small source assets, and shape cells such as `FillForegnd`, `LineColor`, `LineWeight`, `Char.Size`, `Char.Color`, `Rounding`.
+   - Use `DrawRectangle`, `DrawOval`, `DrawLine`, `Page.Import` only for small vector source assets, and shape cells such as `FillForegnd`, `LineColor`, `LineWeight`, `Char.Size`, `Char.Color`, `Rounding`.
+   - Before importing an icon, inspect available masters with `scripts/visio_stencil_catalog.ps1`; prefer a matching built-in master, then a repository asset, then a native helper.
    - Use explicit coordinates and IDs for fragile edits.
    - Keep grouped structure meaningful: major panels, submodules, repeated blocks, legends.
    - For nested modules, use helpers such as `RectRel`, `TextRel`, `LineRel`, and `OvalRel` so child shapes are constrained by their calibrated parent panel.
@@ -153,10 +167,11 @@ A Visio rebuild is acceptable only when:
 - Major panels are aligned to calibrated bounds, with no obvious submodule drift, collision, or cross-panel overlap.
 - Text remains editable and uses a consistent academic font, usually Times New Roman.
 - Repeated motifs are represented with reusable native shapes rather than pasted raster crops.
+- Domain icons use a matching Visio master, a small licensed vector asset, or a native fallback; no Emoji or low-quality clip art is used.
 - The final `.vsdx` package has no full-page raster reference image in `visio/media`.
 - Only requested export files were produced from the saved `.vsdx` and are non-empty; a source-only rebuild needs no export files.
 - A preview export or package inspection was performed, or the final response explicitly states why verification was skipped.
 
 ## Useful Resource
 
-Use `scripts/visio_page_tools.ps1` for common inspection, backup, preview export, multi-format export, and package checks. Use `scripts/visio_export_formats.ps1` when a custom task script needs reusable export helpers. Use `scripts/visio_rebuild_scaffold.ps1` as the starting point for native-shape drawing scripts; it includes both global top-left helpers and panel-local calibrated helpers. Read `references/rebuild-guidelines.md` when a task requires a full figure reconstruction or careful one-to-one scientific diagram matching.
+Use `scripts/visio_page_tools.ps1` for common inspection, backup, preview export, multi-format export, and package checks. Use `scripts/visio_export_formats.ps1` when a custom task script needs reusable export helpers. Use `scripts/visio_rebuild_scaffold.ps1` as the starting point for native-shape drawing scripts; it includes both global top-left helpers and panel-local calibrated helpers. Use `scripts/visio_stencil_catalog.ps1` to inspect local stencil masters without launching Visio. Read `references/rebuild-guidelines.md` when a task requires a full figure reconstruction or careful one-to-one scientific diagram matching, and read `references/icon-strategy.md` when a diagram contains semantic icons or imported vector assets.

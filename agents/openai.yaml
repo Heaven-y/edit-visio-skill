@@ -1,4 +1,4 @@
 interface:
-  display_name: "Codex 通用 Visio 自动化"
-  short_description: "创建、编辑、检查和按需导出原生可编辑 Visio 图。"
+  display_name: "通用 Visio 自动化"
+  short_description: "创建、编辑、检查和按需导出可编辑 Visio 图。"
   default_prompt: "使用 $visio-image-rebuilder 创建或修改原生可编辑的 Visio .vsdx；按请求处理流程图、架构图、时序图、Stencil、图片重建和多面板科学图，默认不导出其他格式。"

@@ -1,15 +1,13 @@
-# 通用 Visio 自动化 Skill
+# 通用 Visio 自动化工具包
 
-当前版本：`v2.0.0`
+这是一个面向 Microsoft Visio 的通用自动化工具包，当前保持为初版。它支持创建、编辑、检查、显式导出和图片反推，并将结果维护为 **`.vsdx` 原生可编辑图形**。
 
-`通用 Visio 自动化 Skill` 是一个面向 Microsoft Visio 的 Codex Skill。它支持创建、编辑、检查、显式导出和图片反推，并将结果维护为 **`.vsdx` 原生可编辑图形**。
-
-核心目标是让 Codex 通过 Visio 原生形状、文本、连线、分组、Stencil 和样式，稳定完成流程图、架构图、时序图、网络图、过程图以及论文科学图。
+核心内容由 Markdown 说明、PowerShell/Python 脚本和可选矢量资产组成。任何能读取这些说明并执行本地脚本的 AI Agent 或自动化流程都可以复用；`agents/openai.yaml` 只是 Codex 的可选界面元数据，不是功能依赖。
 
 ## 注意！
 图片重建适合结构图、流程图、架构图和多面板示意图。真实数据指标图仍应优先使用 Python/R 生成，再按需把版式元素整理到 Visio。
 
-当前接入Visio COM，由于作者仅使用该绘图软件，暂没有推广到其余绘图App。因此使用Drawio等的朋友，请修改对应接口、且适配自己的Agent。
+当前后端使用 Visio COM，因此完整绘图需要 Windows 和 Microsoft Visio。工具包不把调用方限定为某个 Agent；如果要接入 Draw.io 或其他绘图应用，应保留这里的对象清单、输出边界和验收规则，再替换对应后端。
 
 
 ## 工作模式
@@ -23,7 +21,20 @@
 默认只交付 `.vsdx`。预览和其他格式必须显式请求；临时 JSON、预览图和日志应放到构建目录。
 写入期间只保留一个滚动备份用于回滚；验收成功后清理备份和临时验证文件，失败时保留备份。
 
-本版设计参考了 [deermiya/visio-skill](https://github.com/deermiya/visio-skill) 的通用模式划分、时序图、Stencil 和图片反推思路；COM 会话、备份和输出策略按本地 Windows/Visio 环境重新实现。
+实现参考了 [deermiya/visio-skill](https://github.com/deermiya/visio-skill) 的通用模式划分、时序图、Stencil 和图片反推思路；COM 会话、备份和输出策略按本地 Windows/Visio 环境重新实现。
+
+## 图标与 Stencil 策略
+
+不要为了“有图标”而把低质量剪贴画、Emoji 或整张位图塞进 Visio。按下面的顺序选择：
+
+1. 普通流程、数据和连接关系使用 Visio 原生基本形状。
+2. 服务器、数据库、网络设备等标准对象优先使用本机 Visio Stencil 母版。
+3. 玉米、DNA、植物器官等领域符号在本机没有合适母版时，使用小型自制 SVG/EMF 矢量资产，保持轮廓、线宽和配色可控。
+4. 只有用户明确接受不可编辑细节时，才使用小幅位图；整张参考图始终不能作为最终页面。
+
+图标应满足：轮廓清楚、缩小后仍可辨认、使用有限的填充色和统一线宽，不依赖渐变或照片质感。农业/生物图建议使用“茎、叶、果穗/种子”等少量语义部件表达对象，而不是用多个随意椭圆堆叠。详细选择、导入和许可规则见 [`references/icon-strategy.md`](references/icon-strategy.md)。
+
+`scripts/visio_stencil_catalog.ps1` 可以只读扫描本机 `.vssx/.vss` 文件并列出母版名称，避免凭文件名猜测图标库。
 
 ## 适用场景
 
@@ -66,23 +77,31 @@
 ├── agents/
 │   └── openai.yaml
 ├── references/
+│   ├── icon-strategy.md
 │   ├── python-com-backend.md
 │   └── rebuild-guidelines.md
+├── assets/
+│   └── icons/
+│       └── maize-ear.svg
 └── scripts/
     ├── visio_export_formats.ps1
     ├── visio_page_tools.ps1
-    └── visio_rebuild_scaffold.ps1
+    ├── visio_rebuild_scaffold.ps1
+    └── visio_stencil_catalog.ps1
 ```
 
 文件说明：
 
-- `SKILL.md`：Codex Skill 的主入口，包含通用 Visio 模式、工作流、验收标准和安全规则。
-- `agents/openai.yaml`：Codex UI 元数据。
+- `SKILL.md`：通用入口，包含 Visio 模式、工作流、验收标准和安全规则。
+- `agents/openai.yaml`：可选的 Codex UI 元数据，不影响脚本在其他 Agent 中使用。
+- `references/icon-strategy.md`：内置母版、自制 SVG/EMF 和原生形状的选择规则。
+- `assets/icons/maize-ear.svg`：仓库自有的扁平矢量玉米图标，仅在需要时导入或按其结构改绘。
 - `references/python-com-backend.md`：PowerShell COM 不稳定时的可选 Python `pywin32` 后端约定。
 - `references/rebuild-guidelines.md`：复杂科学图还原准则，包括面板拆解、绘图顺序、样式参数、导出策略和验证 rubric。
 - `scripts/visio_export_formats.ps1`：可复用导出函数，支持 PNG、SVG、PDF、PPTX。
 - `scripts/visio_page_tools.ps1`：辅助检查脚本，用于备份、导出、检查 `.vsdx` 包结构。
 - `scripts/visio_rebuild_scaffold.ps1`：Visio 原生绘图脚手架，用于新建或重建图形，并内置全局坐标和面板局部坐标 helper。
+- `scripts/visio_stencil_catalog.ps1`：只读扫描本机 Stencil 并输出母版目录。
 
 ## 环境要求
 
@@ -93,7 +112,7 @@
 - PowerShell。
 - Microsoft PowerPoint，用于 PPTX 导出。
 - Git。
-- Codex Desktop 或支持本地文件与工具调用的 Codex 环境。
+- 任意支持本地文件和脚本调用的 AI Agent 或自动化流程（Codex 可通过 `agents/openai.yaml` 获得额外界面集成）。
 
 说明：
 
@@ -106,7 +125,7 @@
 
 ## 安装方式
 
-将本仓库克隆或复制到 Codex skills 目录。
+将本仓库克隆或复制到调用方可读取的 skill/tool 目录。核心功能不依赖 Codex；若使用 Codex，可额外放入其 skills 目录以启用自动发现。
 
 Windows 示例：
 
@@ -114,7 +133,7 @@ Windows 示例：
 git clone https://github.com/Heaven-y/edit-visio-skill.git "$env:USERPROFILE\.codex\skills\visio-image-rebuilder"
 ```
 
-安装后重启 Codex 或开启新会话，使 skill 被重新发现。
+在具体 Agent 中按其 skill 发现机制注册该目录；Codex 用户安装后重启 Codex 或开启新会话即可重新发现。
 
 ## 推荐使用方式
 
@@ -134,7 +153,7 @@ git clone https://github.com/Heaven-y/edit-visio-skill.git "$env:USERPROFILE\.co
 
 ## 面板标定与防重叠
 
-v1.1.1 增加了面向复杂多面板图的坐标约束建议和脚手架 helper。推荐流程是：
+复杂多面板图使用面板局部坐标和边界断言。推荐流程是：
 
 1. 先标定整张参考图尺寸和 Visio 页面尺寸。
 2. 再标定每个主要 panel 的左上角、宽高，必要时记录四角点。
@@ -188,48 +207,14 @@ powershell -ExecutionPolicy Bypass -File scripts\visio_rebuild_scaffold.ps1 `
 - 图形对象可单独选中和修改。
 - 没有整张参考图作为最终底图。
 - 配色、字体和线条风格统一。
+- 领域图标使用合适的 Visio 母版或小型矢量资产，不使用 Emoji、低质量剪贴画或大幅位图替代。
 - 复杂多面板图的内部元素不应明显移位、跨 panel 串区或互相重叠。
 - 有原文件备份。
 - 请求的 PNG/SVG/PDF/PPTX 从同一个保存后的 `.vsdx` 导出，并且文件非空。
 
-## Version History
+## 当前范围
 
-### v2.0.0 - General Visio modes and COM safety
-
-- 将入口从单一论文图片重建扩展为 Create、Edit、Rebuild-image、Inspect、Export 五种模式。
-- 默认只生成 `.vsdx`，预览和其他格式改为显式请求。
-- 脚手架支持目标不存在时从明确模板新建，并使用单个滚动备份。
-- 增加 Visio COM 输出抑制、保存后关闭、顶层 COM 释放和超时重试规则。
-- 增加 Python `EnsureDispatch` 后端指引，并明确 OpenCV/OCR 只用于图片几何初筛。
-- 吸收通用 Visio 技能中的流程图、架构图、时序图、Stencil 和图片反推组织方式。
-
-### v1.1.1 - Panel calibration and anti-overlap
-
-- 在 `SKILL.md` 中加入复杂多面板图的面板标定流程。
-- 在 `references/rebuild-guidelines.md` 中新增 panel-local 坐标、四角标定和防重叠检查准则。
-- 在 `visio_rebuild_scaffold.ps1` 中新增 `RectRel`、`TextRel`、`OvalRel`、`LineRel` 等局部坐标 helper。
-- 新增 `Assert-RelBox` 和 `Assert-RelPoint`，当局部元素越出父 panel 边界时提前报错。
-- 更新 `agents/openai.yaml` 和 README，说明 v1.1.1 的防移位、防重叠能力。
-
-### v1.1 - Multi-format outputs
-
-- 新增 `scripts/visio_export_formats.ps1`。
-- `visio_page_tools.ps1` 支持 `-ExportFormats png,svg,pdf,pptx`、`-OutputDir`、`-OutputBaseName`。
-- `visio_rebuild_scaffold.ps1` 支持重建后直接导出 PNG/SVG/PDF/PPTX。
-- `SKILL.md` 和 `references/rebuild-guidelines.md` 增加多格式导出策略和验收标准。
-
-### v1.0 - Initial usable version
-
-- 建立 Codex Skill 基础结构。
-- 明确核心规则：最终 `.vsdx` 应由 Visio 原生可编辑形状构成，不能用整张参考图嵌入冒充还原。
-- 提供 Visio COM 绘图脚手架和 `.vsdx` 检查工具。
-- 提供复杂多面板论文图的绘图流程设计。
-
-### Planned v2.1
-
-- 增加更多可复用 motif helper，例如 `DrawCube`、`DrawHeatmap`、`DrawGraph`、`DrawStackedSequence`、`DrawMiniChart`。
-- 增加参考图尺寸读取脚本。
-- 增加 shape inventory 导出脚本，用于分析已有 `.vsdx` 的文本、颜色、位置和分组。
+这是一个可直接使用的初版，已覆盖五种工作模式、原生形状重建、面板局部坐标、COM 资源释放、按需导出和包结构检查。后续新增能力应直接更新当前说明和脚本，不再维护容易失真的版本历史表。
 
 ## 开源许可证
 
