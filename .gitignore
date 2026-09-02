@@ -1,0 +1,13 @@
+# Visio outputs and rolling recovery files
+*.backup.vsdx
+*.bak
+
+# Explicitly requested exports and local build artifacts
+build/
+preview/
+exports/
+*.log
+
+# Local editor and operating-system metadata
+.DS_Store
+Thumbs.db
