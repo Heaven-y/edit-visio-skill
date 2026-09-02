@@ -2,7 +2,7 @@
 
 这是一个面向 Microsoft Visio 的通用自动化工具包，当前保持为初版。它支持创建、编辑、检查、显式导出和图片反推，并将结果维护为 **`.vsdx` 原生可编辑图形**。
 
-核心内容由 Markdown 说明、PowerShell/Python 脚本和可选矢量资产组成。任何能读取这些说明并执行本地脚本的 AI Agent 或自动化流程都可以复用；`agents/openai.yaml` 只是 Codex 的可选界面元数据，不是功能依赖。
+核心内容由 Markdown 说明、参考索引和 PowerShell 脚本组成。任何能读取这些说明并执行本地脚本的 AI Agent 或自动化流程都可以复用；`agents/openai.yaml` 只是 Codex 的可选界面元数据，不是功能依赖。
 
 ## 注意！
 图片重建适合结构图、流程图、架构图和多面板示意图。真实数据指标图仍应优先使用 Python/R 生成，再按需把版式元素整理到 Visio。
@@ -19,7 +19,8 @@
 - `Export`：只导出用户明确要求的 PNG、SVG、PDF 或 PPTX。
 
 默认只交付 `.vsdx`。预览和其他格式必须显式请求；临时 JSON、预览图和日志应放到构建目录。
-写入期间只保留一个滚动备份用于回滚；验收成功后清理备份和临时验证文件，失败时保留备份。
+写入期间最多创建一个临时滚动备份用于回滚；成功保存并验证后自动清理，失败时才保留并报告备份路径。
+脚手架可传入 `-KeepBackup` 保留成功运行后的备份；普通运行不留下 `.backup.vsdx`。
 
 实现参考了 [deermiya/visio-skill](https://github.com/deermiya/visio-skill) 的通用模式划分、时序图、Stencil 和图片反推思路；COM 会话、备份和输出策略按本地 Windows/Visio 环境重新实现。
 
@@ -28,13 +29,13 @@
 不要为了“有图标”而把低质量剪贴画、Emoji 或整张位图塞进 Visio。按下面的顺序选择：
 
 1. 普通流程、数据和连接关系使用 Visio 原生基本形状。
-2. 服务器、数据库、网络设备等标准对象优先使用本机 Visio Stencil 母版。
-3. 玉米、DNA、植物器官等领域符号在本机没有合适母版时，使用小型自制 SVG/EMF 矢量资产，保持轮廓、线宽和配色可控。
-4. 只有用户明确接受不可编辑细节时，才使用小幅位图；整张参考图始终不能作为最终页面。
+2. 服务器、数据库、网络设备、云服务和领域对象先查本机 Visio Stencil 母版。
+3. 本机没有合适母版时，使用可编辑的原生形状组合 fallback。
+4. 外部 SVG/EMF 只有在用户明确同意来源和许可证后才允许导入；整张参考图始终不能作为最终页面。
 
 图标应满足：轮廓清楚、缩小后仍可辨认、使用有限的填充色和统一线宽，不依赖渐变或照片质感。农业/生物图建议使用“茎、叶、果穗/种子”等少量语义部件表达对象，而不是用多个随意椭圆堆叠。详细选择、导入和许可规则见 [`references/icon-strategy.md`](references/icon-strategy.md)。
 
-`scripts/visio_stencil_catalog.ps1` 可以只读扫描本机 `.vssx/.vss` 文件并列出母版名称，避免凭文件名猜测图标库。
+`scripts/visio_stencil_catalog.ps1` 可以只读扫描本机 `.vssx/.vss` 文件并列出母版名称，避免凭文件名猜测图标库；完整结果见 [`references/visio-stencil-index.md`](references/visio-stencil-index.md)，常用入口见 [`references/icon-strategy.md`](references/icon-strategy.md)。
 
 ## 适用场景
 
@@ -79,29 +80,31 @@
 ├── references/
 │   ├── icon-strategy.md
 │   ├── python-com-backend.md
-│   └── rebuild-guidelines.md
-├── assets/
-│   └── icons/
-│       └── maize-ear.svg
+│   ├── rebuild-guidelines.md
+│   ├── stencil-reference.md
+│   └── visio-stencil-index.md
 └── scripts/
     ├── visio_export_formats.ps1
     ├── visio_page_tools.ps1
     ├── visio_rebuild_scaffold.ps1
-    └── visio_stencil_catalog.ps1
+    ├── visio_stencil_catalog.ps1
+    └── visio_stencil_helpers.ps1
 ```
 
 文件说明：
 
 - `SKILL.md`：通用入口，包含 Visio 模式、工作流、验收标准和安全规则。
 - `agents/openai.yaml`：可选的 Codex UI 元数据，不影响脚本在其他 Agent 中使用。
-- `references/icon-strategy.md`：内置母版、自制 SVG/EMF 和原生形状的选择规则。
-- `assets/icons/maize-ear.svg`：仓库自有的扁平矢量玉米图标，仅在需要时导入或按其结构改绘。
+- `references/icon-strategy.md`：内置母版、原生 fallback 和外部资产的选择规则。
+- `references/stencil-reference.md`：常用 Stencil 文件和经核对的本地化 Master 名称速查。
+- `references/visio-stencil-index.md`：从本机 Visio 2052 内容目录生成的 362 个 Stencil 完整索引，包含本地化 `Name`、稳定 `NameU` 和 ID。
 - `references/python-com-backend.md`：PowerShell COM 不稳定时的可选 Python `pywin32` 后端约定。
 - `references/rebuild-guidelines.md`：复杂科学图还原准则，包括面板拆解、绘图顺序、样式参数、导出策略和验证 rubric。
 - `scripts/visio_export_formats.ps1`：可复用导出函数，支持 PNG、SVG、PDF、PPTX。
 - `scripts/visio_page_tools.ps1`：辅助检查脚本，用于备份、导出、检查 `.vsdx` 包结构。
 - `scripts/visio_rebuild_scaffold.ps1`：Visio 原生绘图脚手架，用于新建或重建图形，并内置全局坐标和面板局部坐标 helper。
 - `scripts/visio_stencil_catalog.ps1`：只读扫描本机 Stencil 并输出母版目录。
+- `scripts/visio_stencil_helpers.ps1`：只读打开 Stencil、精确查找 Master、放置并校准图标、关闭 COM 文档的可复用函数。
 
 ## 环境要求
 

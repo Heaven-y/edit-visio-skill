@@ -1,60 +1,85 @@
-# 图标与 Stencil 选择规范
+# 图标与 Visio Stencil 策略
 
-这份规范用于决定一个语义图标应该使用 Visio 内置母版、仓库中的矢量资产，
-还是用原生基本形状绘制。目标是让图标在缩放、打印和后续编辑时仍然清楚，
-而不是单纯增加页面上的装饰。
+图标的目标是表达语义并保持可编辑，不是用装饰性图片填充页面。优先复用用户
+电脑上已经安装的 Visio 母版；仓库不复制 Microsoft 的 `.vss/.vssx` 文件。
 
 ## 选择顺序
 
-| 优先级 | 方案 | 适用对象 | 验收重点 |
-| --- | --- | --- | --- |
-| 1 | Visio 原生基本形状 | 箭头、节点、容器、简单数据流 | 几何清楚、可单独编辑 |
-| 2 | 本机 Visio Stencil 母版 | 服务器、数据库、网络设备、标准流程对象 | 母版语义匹配，颜色和线宽可统一 |
-| 3 | 小型 SVG/EMF 矢量资产 | 玉米、DNA、植物器官、实验材料等领域符号 | 轮廓清楚、无照片纹理、许可可追溯 |
-| 4 | 原生形状组合 fallback | Visio 无法稳定导入矢量资产时 | 保留语义部件，避免退化为整图位图 |
-| 5 | 小幅位图 | 仅用户明确接受不可编辑细节时 | 不得是整张参考图，不得遮挡可编辑文字 |
+1. **Visio 原生基本形状**：箭头、节点、容器、矩阵、简单数据流和普通流程图。
+2. **本机 Visio Stencil Master**：服务器、数据库、网络设备、云服务、标准人物或
+   领域对象。先查 [visio-stencil-index.md](visio-stencil-index.md)，不要猜文件名或
+   Master 名称。
+3. **原生形状组合 fallback**：母版不存在、语言版本不匹配或 COM 无法稳定打开时，
+   用可单独编辑的矩形、椭圆、线段和多边形表达最少必要语义。
+4. **外部 SVG/EMF**：只有用户明确要求、确认来源和许可后才导入；不得作为默认
+   图标方案，也不得把整张参考图导入页面。
 
-先运行目录查询脚本，确认本机是否真的有合适母版，不要根据文件名猜测：
+## 本机母版的可靠调用
+
+脚本应使用 `scripts/visio_stencil_helpers.ps1`，不要重复手写 COM 细节：
+
+```powershell
+. "$PSScriptRoot\visio_stencil_helpers.ps1"
+$stencil = Open-VisioStencil -Visio $visio -Path 'HOLIDAYS_M.VSSX'
+try {
+    $shape = Drop-VisioStencilMaster `
+        -Page $page `
+        -Stencil $stencil `
+        -MasterName '玉米' `
+        -PinX 8.0 -PinY 4.0 `
+        -Width 1.0 -Height 1.4
+    try { $shape.Text = '' } finally {
+        [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shape) | Out-Null
+    }
+} finally {
+    Close-VisioStencil $stencil
+}
+```
+
+助手的关键约定：
+
+- 通过 `Documents.OpenEx(path, 64)` 只读打开母版文件，不修改或保存 Stencil。
+- 优先用 `Masters.Item(name)` 精确查找；失败时再按 `Name` 和稳定的 `NameU` 遍历，
+  并在报错中列出候选名称。
+- 用 `Page.Drop(master, pinX, pinY)` 放置后再设置 `Width`、`Height`、`PinX`、`PinY`。
+  `PinX/PinY` 是页面英寸坐标，通常使用图标中心点。
+- 放置完成后释放 Shape、关闭并释放 Stencil 文档；不要让 COM 对象进入 PowerShell
+  管道，也不要关闭用户已经打开的其他 Visio 文档。
+- 中文 `2052` 和英文 `1033` 的显示名称不同。优先使用当前 Stencil 的本地化 `Name`，
+  或使用索引中的 `NameU` 作为跨语言候选；名称、空格和大小写都要以索引为准。
+
+## 速查入口
+
+常用网络、服务器、终端、农业和云服务母版见
+[stencil-reference.md](stencil-reference.md)；所有本机可读母版见
+[visio-stencil-index.md](visio-stencil-index.md)。两个文件都只记录名称和路径，不
+复制或重新分发 Microsoft Stencil 文件。
+
+每个 Stencil 通常包含一个名为 `动态连接线` 的母版；它不是图标。连接关系应使用
+`ConnectorToolDataObject` 或普通 `DrawLine`/连接线形状，避免把连接线母版误当节点。
+
+## 领域图标规则
+
+- 论文图中的玉米、DNA、植物器官等对象，先查本机 Stencil。当前环境已验证
+  `HOLIDAYS_M.VSSX` 的 `玉米 / Corn`，因此不应默认制作新的玉米 SVG。
+- Stencil 风格与图表其他部分差异过大时，保留母版的语义轮廓，只统一尺寸和周围
+  文字；不要把它拆成无法维护的路径。
+- 没有合适母版时，fallback 必须保留决定语义的轮廓和少量局部结构，并让每个部件
+  可单独选择、缩放和移动。
+- 外部资产若获批准，必须记录来源、许可证、导入格式和回退方案；导入后检查
+  `.vsdx` 的 `visio/media`，确保没有意外生成大幅位图。
+
+## 发现与验证
+
+先运行目录脚本，生成或更新完整索引：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\visio_stencil_catalog.ps1 `
-  -RootPath "C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052"
+  -RootPath 'C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052' `
+  -Format markdown `
+  -OutputPath references\visio-stencil-index.md
 ```
 
-脚本只读取 `.vssx/.vss` 压缩包，不启动 Visio，也不会生成旁文件；需要保存
-目录时才显式传入 `-OutputPath`。
-
-## 专业图标的最低要求
-
-- 使用单一轮廓语言：同一张图中图标线宽、端点和转角保持一致。
-- 限制填充色数量，优先使用实色和浅色层次；避免渐变、阴影和照片质感。
-- 图标在目标尺寸下仍能辨认，缩小后优先保留剪影和 1-3 个关键语义部件。
-- 图标旁的名称、编号和说明保持为独立 Visio 文本，不把文字烘焙进图片。
-- 图标只表达语义，不用来填充空白；同一语义重复出现时复用同一个母版或资产。
-
-## 农业与生物符号
-
-本机常见的 `PLANT_M.VSSX`、`GARDEN_M.VSSX` 等母版主要面向树木、灌木和
-观赏植物，通常没有适合论文示意图的玉米母版。玉米应采用简化但有辨识度的
-矢量轮廓，例如茎、两片叶、果穗和少量种子排列；不要用多个不规则椭圆拼成
-“玉米”，也不要使用 Emoji 或卡通剪贴画。DNA、染色体、蛋白质和组织等对象
-采用同样原则：保留决定语义的轮廓与局部结构，去除无法编辑的纹理。
-
-如果一个领域图标会在多张图中重复出现，可以在 `assets/icons/` 建立小型内部
-资产集。仓库目前提供一个自有的 `maize-ear.svg` 作为农业图标起点，采用
-简单轮廓、叶片和种子排列，后续可按论文配色调整。资产应注明来源和许可证；
-不要把整套 Microsoft 或第三方 Stencil 复制进仓库。Microsoft 母版优先在用户
-本机调用，仓库只保存必要的自制或明确允许再分发的矢量文件。
-
-## 导入与回退
-
-`Page.Import()` 只用于小型 SVG/EMF，并在保存后检查 `.vsdx` 包：
-
-1. 确认导入对象可单独选中、缩放和移动。
-2. 确认 `visio/media` 没有意外新增大幅 PNG/JPG。
-3. 如果导入产生位图、破坏线宽或触发 COM 不稳定，删除该对象，改用原生
-   形状 helper；不要为了保留外观而嵌入整张裁剪图。
-4. 将导入操作封装为可复用函数，并在没有资产时提供原生形状 fallback。
-
-导入矢量资产不能替代面板标定、分组和文字检查。图标完成后仍需按主入口的
-验收标准导出预览并检查布局。
+该脚本只读取 `.vssx/.vss` 文件，不启动 Visio；`.vssx` 从压缩包中的
+`visio/masters/masters.xml` 读取本地化名称、`NameU` 和 ID。旧式二进制 `.vss` 只记
+录路径，并提示需要 COM 枚举，不会伪造 Master 名称。

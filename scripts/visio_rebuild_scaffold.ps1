@@ -15,11 +15,13 @@ param(
     [string]$OutputBaseName,
 
     [string]$TemplatePath = 'C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\BASFLO_M.VSTX',
+    [switch]$KeepBackup,
     [switch]$Visible
 )
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'visio_export_formats.ps1')
+. (Join-Path $PSScriptRoot 'visio_stencil_helpers.ps1')
 
 function VX([double]$x) { $script:PageW * $x / $script:RefW }
 function VY([double]$y) { $script:PageH - ($script:PageH * $y / $script:RefH) }
@@ -168,8 +170,10 @@ function Draw-ReferenceFigure {
     TextTL 600 20 360 28 'Repeated Processing Stage' 13 $C.Blue $true | Out-Null
 }
 
-$backup = Join-Path (Split-Path -Parent $VsdxPath) (([IO.Path]::GetFileNameWithoutExtension($VsdxPath)) + ".backup.vsdx")
+$backup = $null
+$completed = $false
 if (Test-Path -LiteralPath $VsdxPath) {
+    $backup = Join-Path (Split-Path -Parent $VsdxPath) (([IO.Path]::GetFileNameWithoutExtension($VsdxPath)) + ".backup.vsdx")
     Copy-Item -LiteralPath $VsdxPath -Destination $backup -Force
     Write-Output "Backup: $backup"
 }
@@ -231,6 +235,7 @@ try {
     }
 
     Write-Output "Saved: $VsdxPath"
+    $completed = $true
 } finally {
     if ($doc -ne $null) {
         try { $doc.Saved = $true } catch {}
@@ -243,5 +248,9 @@ try {
     if ($visio -ne $null) {
         try { $visio.Quit() } catch {}
         try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($visio) | Out-Null } catch {}
+    }
+    if ($completed -and $backup -and -not $KeepBackup -and (Test-Path -LiteralPath $backup)) {
+        Remove-Item -LiteralPath $backup -Force
+        Write-Output "Removed temporary backup: $backup"
     }
 }
