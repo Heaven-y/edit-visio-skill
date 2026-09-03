@@ -23,7 +23,10 @@ function Read-VsdxPackage([string]$Path) {
             try { [xml]$xml = $reader.ReadToEnd() } finally { $reader.Dispose() }
             $shapeCount += @($xml.SelectNodes("//*[local-name()='Shape']")).Count
             foreach ($node in @($xml.SelectNodes("//*[local-name()='Text']"))) {
-                if ($node.InnerText) { $texts.Add([string]$node.InnerText) }
+                if ($node.InnerText) {
+                    $normalized = [regex]::Replace([string]$node.InnerText, '\s+', ' ').Trim()
+                    if ($normalized) { $texts.Add($normalized) }
+                }
             }
         }
         [pscustomobject]@{
