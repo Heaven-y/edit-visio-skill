@@ -24,12 +24,19 @@ function Close-VisioDocument([string]$path) {
     try {
         $visio = [Runtime.InteropServices.Marshal]::GetActiveObject('Visio.Application')
         for ($i = $visio.Documents.Count; $i -ge 1; $i--) {
-            $doc = $visio.Documents.Item($i)
-            if ([string]::Equals($doc.FullName, $path, [StringComparison]::OrdinalIgnoreCase)) {
-                $doc.Save() | Out-Null
-                $doc.Saved = $true
-                $doc.Close()
-                Write-Output "Closed open Visio document: $path"
+            $doc = $null
+            try {
+                $doc = $visio.Documents.Item($i)
+                if ([string]::Equals($doc.FullName, $path, [StringComparison]::OrdinalIgnoreCase)) {
+                    $doc.Save() | Out-Null
+                    $doc.Saved = $true
+                    $doc.Close()
+                    Write-Output "Closed open Visio document: $path"
+                }
+            } finally {
+                if ($doc -ne $null) {
+                    try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($doc) | Out-Null } catch {}
+                }
             }
         }
         if ($visio.Documents.Count -eq 0) {

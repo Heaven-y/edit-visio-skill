@@ -53,12 +53,31 @@ C:\Program Files\Microsoft Office\root\Office16\Visio Content\1033\
 | 本地化 Name | NameU | 语义 |
 | --- | --- | --- |
 | `玉米` | `Corn` | 玉米植株/果穗 |
-| `植物` | `Plant` | 植物 |
-| `云` | `Cloud` | 云 |
-| `太阳` | `Sun` | 太阳 |
-| `叶子` | `Leaf` | 叶片 |
 
-当前 Figure 3-1 使用的玉米图标应调用 `玉米`，不应再导入自制 SVG。
+当前 Figure 3-1 使用的玉米图标应调用 `Corn`，不应再导入自制 SVG。
+
+### `OFFACC_VISIO2013_M.VSSX`
+
+| 本地化 Name | NameU | 语义 |
+| --- | --- | --- |
+| `植物` | `Plant` | 通用植物 |
+| `小型植物` | `Small plant` | 小型植物 |
+| `大植物` | `Large plant` | 大型植物 |
+
+### `OFFACC_M.VSSX`
+
+| 本地化 Name | NameU | 语义 |
+| --- | --- | --- |
+| `叶子` | `Foliage` | 叶片/枝叶 |
+| `开花` | `Flowering` | 开花植物 |
+
+### `WEATHERSEASONS_M.VSSX`
+
+| 本地化 Name | NameU | 语义 |
+| --- | --- | --- |
+| `云` | `Cloud` | 云 |
+| `叶子` | `Foliage` | 叶片 |
+| `植物` | `Plant` | 植物 |
 
 ### `ANALYTICS_M.VSSX`
 

@@ -88,7 +88,8 @@
     ├── visio_page_tools.ps1
     ├── visio_rebuild_scaffold.ps1
     ├── visio_stencil_catalog.ps1
-    └── visio_stencil_helpers.ps1
+    ├── visio_stencil_helpers.ps1
+    └── visio_validate.ps1
 ```
 
 文件说明：
@@ -104,7 +105,8 @@
 - `scripts/visio_page_tools.ps1`：辅助检查脚本，用于备份、导出、检查 `.vsdx` 包结构。
 - `scripts/visio_rebuild_scaffold.ps1`：Visio 原生绘图脚手架，用于新建或重建图形，并内置全局坐标和面板局部坐标 helper。
 - `scripts/visio_stencil_catalog.ps1`：只读扫描本机 Stencil 并输出母版目录。
-- `scripts/visio_stencil_helpers.ps1`：只读打开 Stencil、精确查找 Master、放置并校准图标、关闭 COM 文档的可复用函数。
+- `scripts/visio_stencil_helpers.ps1`：只读打开 Stencil、按 Name/NameU 精确或关键词查找 Master、放置并校准图标、关闭 COM 文档的可复用函数。
+- `scripts/visio_validate.ps1`：统一检查 VSDX 包结构、原生 Shape、关键文字、COM 重开和进程清理。
 
 ## 环境要求
 
@@ -124,6 +126,7 @@
 - PDF 由 Visio 固定格式导出。
 - PPTX 默认由 PowerPoint COM 创建单页演示文稿，并插入 Visio 导出的 SVG 页面渲染。
 - 导出脚本默认隐藏 Visio 和 PowerPoint；只有显式传入 `-Visible` 才显示窗口。
+- 脚手架默认使用 Arial，可通过 `-FontName` 指定论文字体；绘图 helper 默认释放 Shape，只有显式使用 `-PassThru` 才返回 COM 对象。
 - 不安装 Visio 时，仍可做 `.vsdx` 包结构检查或有限 XML 修改，但不适合完整一比一重建。
 
 ## 安装方式
@@ -171,8 +174,17 @@ git clone https://github.com/Heaven-y/edit-visio-skill.git "$env:USERPROFILE\.co
 - `LineRel`
 - `Assert-RelBox`
 - `Assert-RelPoint`
+- `Connect-VisioShapes`
 
 这些 helper 会把局部坐标映射回全局参考坐标，并在局部元素越出 panel 边界时直接报错，避免复杂图后半部分出现整体移位或重叠。
+
+保存 VSDX 后可运行统一验收：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\visio_validate.ps1 `
+  -VsdxPath "C:\path\model.vsdx" `
+  -RequiredText "Independent G×E model runs","Prediction performance"
+```
 
 ## 多格式导出
 
@@ -217,7 +229,7 @@ powershell -ExecutionPolicy Bypass -File scripts\visio_rebuild_scaffold.ps1 `
 
 ## 当前范围
 
-这是一个可直接使用的初版，已覆盖五种工作模式、原生形状重建、面板局部坐标、COM 资源释放、按需导出和包结构检查。后续新增能力应直接更新当前说明和脚本，不再维护容易失真的版本历史表。
+这是一个可直接使用的初版，已覆盖五种工作模式、原生形状重建、面板局部坐标、COM 资源释放、动态连接、按需导出、Stencil 候选查询和统一验收。后续新增能力应直接更新当前说明和脚本，不再维护容易失真的版本历史表。
 
 ## 开源许可证
 

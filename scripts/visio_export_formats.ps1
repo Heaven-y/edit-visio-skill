@@ -66,7 +66,7 @@ function Export-VisioPdf {
 
     try {
         # 1 = PDF, 1 = print quality, 0 = all pages. Numeric constants avoid requiring Visio interop assemblies.
-        $Document.ExportAsFixedFormat(1, $OutPath, 1, 0)
+        [void]$Document.ExportAsFixedFormat(1, $OutPath, 1, 0)
     } catch {
         throw "PDF export failed: $($_.Exception.Message)"
     }
@@ -96,7 +96,7 @@ function Export-VisioPptx {
     $picture = $null
     $pageSheet = $null
     try {
-        $Page.Export($svgPath)
+        [void]$Page.Export($svgPath)
         $pageSheet = $Page.PageSheet
         $pageWidthPt = [double]$pageSheet.CellsU('PageWidth').ResultIU * 72.0
         $pageHeightPt = [double]$pageSheet.CellsU('PageHeight').ResultIU * 72.0
@@ -122,7 +122,7 @@ function Export-VisioPptx {
         if ($presentation -ne $null) {
             try { $presentation.Close() } catch {}
         }
-        foreach ($comObject in @($picture, $slide, $pageSheet)) {
+        foreach ($comObject in @($picture, $slide, $pageSheet, $presentation)) {
             if ($comObject -ne $null) {
                 try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($comObject) | Out-Null } catch {}
             }
@@ -158,8 +158,8 @@ function Export-VisioPageFormats {
     foreach ($format in $formatsToExport) {
         $outPath = Resolve-VisioExportPath -SourcePath $SourcePath -Format $format -OutputDir $OutputDir -OutputBaseName $OutputBaseName -PreviewPath $PreviewPath
         switch ($format) {
-            'png' { $Page.Export($outPath) }
-            'svg' { $Page.Export($outPath) }
+            'png' { [void]$Page.Export($outPath) }
+            'svg' { [void]$Page.Export($outPath) }
             'pdf' { Export-VisioPdf -Document $Document -OutPath $outPath }
             'pptx' { Export-VisioPptx -Page $Page -OutPath $outPath }
         }
@@ -196,6 +196,7 @@ function Export-VisioDocumentFormats {
             try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($page) | Out-Null } catch {}
         }
         if ($doc -ne $null) {
+            try { $doc.Saved = $true } catch {}
             try { $doc.Close() } catch {}
             try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($doc) | Out-Null } catch {}
         }

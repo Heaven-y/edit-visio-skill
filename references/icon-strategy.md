@@ -25,12 +25,10 @@ try {
     $shape = Drop-VisioStencilMaster `
         -Page $page `
         -Stencil $stencil `
-        -MasterName '玉米' `
+        -MasterName 'Corn' `
         -PinX 8.0 -PinY 4.0 `
         -Width 1.0 -Height 1.4
-    try { $shape.Text = '' } finally {
-        [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shape) | Out-Null
-    }
+    try { [void]($shape.Text = '') } finally { Release-VisioComObject $shape }
 } finally {
     Close-VisioStencil $stencil
 }
@@ -45,8 +43,8 @@ try {
   `PinX/PinY` 是页面英寸坐标，通常使用图标中心点。
 - 放置完成后释放 Shape、关闭并释放 Stencil 文档；不要让 COM 对象进入 PowerShell
   管道，也不要关闭用户已经打开的其他 Visio 文档。
-- 中文 `2052` 和英文 `1033` 的显示名称不同。优先使用当前 Stencil 的本地化 `Name`，
-  或使用索引中的 `NameU` 作为跨语言候选；名称、空格和大小写都要以索引为准。
+- 中文 `2052` 和英文 `1033` 的显示名称不同。跨语言脚本优先使用索引中的 `NameU`，
+  只有在需要面向用户显示时才使用当前 Stencil 的本地化 `Name`。
 
 ## 速查入口
 

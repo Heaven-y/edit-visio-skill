@@ -52,7 +52,9 @@ agent-assisted native redraw with calibrated panels.
 - Create one temporary rolling backup beside an existing target during a write.
   Remove it after a successful save and verification; keep it only when the run
   fails or the caller explicitly requests `-KeepBackup`/history.
-- Assign or suppress every COM return value. Drawing helpers must not leak Shape, Page, or Document objects into the PowerShell pipeline.
+- Assign or suppress every COM return value. The scaffold drawing helpers release
+  Shape objects by default; use `-PassThru` only when a caller needs to edit or
+  connect a returned Shape, and release that object in `finally`.
 - Create a dedicated `Visio.Application` instance from an explicit template path. Avoid `Documents.Add('')`, which can open a chooser or hang.
 - Save before closing; close only the document created by the script; release COM references; and quit only the dedicated application instance.
 - If PowerShell COM becomes unstable or a job is long-running, use the optional Python `pywin32` backend with `EnsureDispatch` in a dedicated process; keep COM references local and release them in reverse order. Read [references/python-com-backend.md](references/python-com-backend.md) before using it.
@@ -79,7 +81,9 @@ agent-assisted native redraw with calibrated panels.
 3. Prefer Visio automation for native edits.
    - Use COM automation on Windows when Visio is installed.
    - Use `DrawRectangle`, `DrawOval`, `DrawLine`, `Page.Import` only for small vector source assets, and shape cells such as `FillForegnd`, `LineColor`, `LineWeight`, `Char.Size`, `Char.Color`, `Rounding`.
-   - Before placing an icon, inspect available masters with `scripts/visio_stencil_catalog.ps1`; prefer a matching built-in Master, then a native-shape fallback. External assets require explicit user approval.
+   - Before placing an icon, inspect available masters with `scripts/visio_stencil_catalog.ps1`; prefer a matching built-in Master, then a native-shape fallback. Use `NameU` for cross-language calls and `Find-VisioStencilMaster` for candidates. External assets require explicit user approval.
+   - Use `Connect-VisioShapes` or Visio glue points for relationships that must
+     follow moved nodes; reserve `DrawLine` for static annotation lines.
    - Use explicit coordinates and IDs for fragile edits.
    - Keep grouped structure meaningful: major panels, submodules, repeated blocks, legends.
    - For nested modules, use helpers such as `RectRel`, `TextRel`, `LineRel`, and `OvalRel` so child shapes are constrained by their calibrated parent panel.
@@ -103,6 +107,8 @@ agent-assisted native redraw with calibrated panels.
    - Check that major panels do not overlap and that child shapes stay within their intended panel bounds.
    - Check every requested output file exists and is non-empty.
    - If Visio automation hangs, stop safely, close the document if possible, and report whether the file was actually modified.
+   - Run `scripts/visio_validate.ps1` for the final package, native-shape,
+     required-text, COM reopen, and process-cleanup checks.
 
 ## Implementation Pattern
 
@@ -115,6 +121,8 @@ For full rebuilds, generate a script that:
 - Draws native shapes in top-left reference coordinates converted to Visio coordinates.
 - Defines calibrated panel bounds for complex regions and uses panel-local coordinates for their internals.
 - Adds reusable helpers for rectangles, text boxes, ovals, lines, arrows, mini charts, graph nodes, and image-like stacks.
+- Uses `-FontName` to make the document font explicit instead of relying on a
+  machine-specific font index.
 - Saves the document and exports only explicitly requested formats.
 
 Start from `scripts/visio_rebuild_scaffold.ps1` when building a full reconstruction script. Copy it into the workspace and customize the `Draw-ReferenceFigure` function rather than editing the skill copy.
@@ -175,4 +183,14 @@ A Visio rebuild is acceptable only when:
 
 ## Useful Resource
 
-Use `scripts/visio_page_tools.ps1` for common inspection, temporary backup, preview export, multi-format export, and package checks. Use `scripts/visio_export_formats.ps1` when a custom task script needs reusable export helpers. Use `scripts/visio_rebuild_scaffold.ps1` as the starting point for native-shape drawing scripts; it includes both global top-left helpers and panel-local calibrated helpers. Dot-source `scripts/visio_stencil_helpers.ps1` when a custom script needs local Stencil Masters. Use `scripts/visio_stencil_catalog.ps1` to inspect local stencil masters without launching Visio. Read `references/rebuild-guidelines.md` when a task requires a full figure reconstruction or careful one-to-one scientific diagram matching, and read `references/icon-strategy.md` when a diagram contains semantic icons or imported vector assets.
+Use `scripts/visio_page_tools.ps1` for common inspection, temporary backup,
+preview export, multi-format export, and package checks. Use
+`scripts/visio_export_formats.ps1` for reusable export helpers and
+`scripts/visio_rebuild_scaffold.ps1` as the starting point for native-shape
+drawing scripts. Dot-source `scripts/visio_stencil_helpers.ps1` for local Master
+lookup and dynamic connections. Use `scripts/visio_stencil_catalog.ps1` to
+inspect local stencils without launching Visio, and run
+`scripts/visio_validate.ps1` after saving to combine package inspection,
+required-label checks, COM reopen, and process cleanup. Read
+`references/rebuild-guidelines.md` for dense figure reconstruction and
+`references/icon-strategy.md` when a diagram contains semantic icons.

@@ -15,6 +15,7 @@ param(
     [string]$OutputBaseName,
 
     [string]$TemplatePath = 'C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\BASFLO_M.VSTX',
+    [string]$FontName = 'Arial',
     [switch]$KeepBackup,
     [switch]$Visible
 )
@@ -43,7 +44,7 @@ $C = @{
 }
 
 function Set-Cell($shape, [string]$cell, [string]$formula) {
-    try { $shape.CellsU($cell).FormulaU = $formula } catch {}
+    try { [void]($shape.CellsU($cell).FormulaU = $formula) } catch {}
 }
 
 function Style-Shape($shape, [string]$fill, [string]$line, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = 0) {
@@ -66,8 +67,9 @@ function Style-Shape($shape, [string]$fill, [string]$line, [double]$linePt = 0.8
 }
 
 function Set-Text($shape, [string]$text, [double]$size = 10, [string]$color = $C.Black, [bool]$bold = $false, [bool]$italic = $false, [int]$align = 1) {
-    $shape.Text = $text
-    Set-Cell $shape 'Char.Font' '0'
+    [void]($shape.Text = $text)
+    $fontFormula = 'FONT("' + ($script:FontName -replace '"', '""') + '")'
+    Set-Cell $shape 'Char.Font' $fontFormula
     Set-Cell $shape 'Char.Size' "$size pt"
     Set-Cell $shape 'Char.Color' $color
     $style = 0
@@ -81,38 +83,42 @@ function Set-Text($shape, [string]$text, [double]$size = 10, [string]$color = $C
     }
 }
 
-function RectTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text = '', [string]$fill = 'none', [string]$line = $C.Black, [double]$size = 10, [bool]$bold = $false, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = 6) {
+function RectTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text = '', [string]$fill = 'none', [string]$line = $C.Black, [double]$size = 10, [bool]$bold = $false, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = 6, [switch]$PassThru) {
     $s = $script:Page.DrawRectangle((VX $x), (VY ($y + $h)), (VX ($x + $w)), (VY $y))
     Style-Shape $s $fill $line $linePt $dash $roundPx
     if ($text -ne '') { Set-Text $s $text $size $C.Black $bold }
-    return $s
+    if ($PassThru) { return $s }
+    Release-VisioComObject $s
 }
 
-function TextTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text, [double]$size = 10, [string]$color = $C.Black, [bool]$bold = $false, [bool]$italic = $false, [int]$align = 1) {
-    $s = RectTL $x $y $w $h '' 'none' 'none' $size $bold 0 1 0
+function TextTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text, [double]$size = 10, [string]$color = $C.Black, [bool]$bold = $false, [bool]$italic = $false, [int]$align = 1, [switch]$PassThru) {
+    $s = RectTL $x $y $w $h '' 'none' 'none' $size $bold 0 1 0 -PassThru
     Set-Text $s $text $size $color $bold $italic $align
-    return $s
+    if ($PassThru) { return $s }
+    Release-VisioComObject $s
 }
 
-function OvalTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text = '', [string]$fill = $C.White, [string]$line = $C.Black, [double]$size = 8, [bool]$bold = $false, [double]$linePt = 0.8) {
+function OvalTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text = '', [string]$fill = $C.White, [string]$line = $C.Black, [double]$size = 8, [bool]$bold = $false, [double]$linePt = 0.8, [switch]$PassThru) {
     $s = $script:Page.DrawOval((VX $x), (VY ($y + $h)), (VX ($x + $w)), (VY $y))
     Style-Shape $s $fill $line $linePt 1 0
     if ($text -ne '') { Set-Text $s $text $size $C.Black $bold }
-    return $s
+    if ($PassThru) { return $s }
+    Release-VisioComObject $s
 }
 
-function LineTL([double]$x1, [double]$y1, [double]$x2, [double]$y2, [string]$color = $C.Black, [double]$linePt = 0.8, [bool]$arrowEnd = $false, [bool]$arrowBegin = $false, [int]$dash = 1) {
+function LineTL([double]$x1, [double]$y1, [double]$x2, [double]$y2, [string]$color = $C.Black, [double]$linePt = 0.8, [bool]$arrowEnd = $false, [bool]$arrowBegin = $false, [int]$dash = 1, [switch]$PassThru) {
     $s = $script:Page.DrawLine((VX $x1), (VY $y1), (VX $x2), (VY $y2))
     Set-Cell $s 'LineColor' $color
     Set-Cell $s 'LineWeight' "$linePt pt"
     Set-Cell $s 'LinePattern' ([string]$dash)
     if ($arrowEnd) { Set-Cell $s 'EndArrow' '4' }
     if ($arrowBegin) { Set-Cell $s 'BeginArrow' '4' }
-    return $s
+    if ($PassThru) { return $s }
+    Release-VisioComObject $s
 }
 
-function DotTL([double]$cx, [double]$cy, [double]$r, [string]$fill, [string]$line = $C.White) {
-    return OvalTL ($cx - $r) ($cy - $r) (2 * $r) (2 * $r) '' $fill $line 6 $false 0.4
+function DotTL([double]$cx, [double]$cy, [double]$r, [string]$fill, [string]$line = $C.White, [switch]$PassThru) {
+    return OvalTL ($cx - $r) ($cy - $r) (2 * $r) (2 * $r) '' $fill $line 6 $false 0.4 -PassThru:$PassThru
 }
 
 function Assert-RelBox([double]$u, [double]$v, [double]$uw, [double]$vh, [string]$label = 'relative box') {
@@ -130,25 +136,50 @@ function Assert-RelPoint([double]$u, [double]$v, [string]$label = 'relative poin
 function RX([double]$x0, [double]$w0, [double]$u) { $x0 + $w0 * $u }
 function RY([double]$y0, [double]$h0, [double]$v) { $y0 + $h0 * $v }
 
-function RectRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u, [double]$v, [double]$uw, [double]$vh, [string]$text = '', [string]$fill = 'none', [string]$line = $C.Black, [double]$size = 10, [bool]$bold = $false, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = 6) {
+function RectRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u, [double]$v, [double]$uw, [double]$vh, [string]$text = '', [string]$fill = 'none', [string]$line = $C.Black, [double]$size = 10, [bool]$bold = $false, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = 6, [switch]$PassThru) {
     Assert-RelBox $u $v $uw $vh $text
-    return RectTL (RX $x0 $w0 $u) (RY $y0 $h0 $v) ($w0 * $uw) ($h0 * $vh) $text $fill $line $size $bold $linePt $dash $roundPx
+    return RectTL (RX $x0 $w0 $u) (RY $y0 $h0 $v) ($w0 * $uw) ($h0 * $vh) $text $fill $line $size $bold $linePt $dash $roundPx -PassThru:$PassThru
 }
 
-function TextRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u, [double]$v, [double]$uw, [double]$vh, [string]$text, [double]$size = 10, [string]$color = $C.Black, [bool]$bold = $false, [bool]$italic = $false, [int]$align = 1) {
+function TextRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u, [double]$v, [double]$uw, [double]$vh, [string]$text, [double]$size = 10, [string]$color = $C.Black, [bool]$bold = $false, [bool]$italic = $false, [int]$align = 1, [switch]$PassThru) {
     Assert-RelBox $u $v $uw $vh $text
-    return TextTL (RX $x0 $w0 $u) (RY $y0 $h0 $v) ($w0 * $uw) ($h0 * $vh) $text $size $color $bold $italic $align
+    return TextTL (RX $x0 $w0 $u) (RY $y0 $h0 $v) ($w0 * $uw) ($h0 * $vh) $text $size $color $bold $italic $align -PassThru:$PassThru
 }
 
-function OvalRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u, [double]$v, [double]$uw, [double]$vh, [string]$text = '', [string]$fill = $C.White, [string]$line = $C.Black, [double]$size = 8, [bool]$bold = $false, [double]$linePt = 0.8) {
+function OvalRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u, [double]$v, [double]$uw, [double]$vh, [string]$text = '', [string]$fill = $C.White, [string]$line = $C.Black, [double]$size = 8, [bool]$bold = $false, [double]$linePt = 0.8, [switch]$PassThru) {
     Assert-RelBox $u $v $uw $vh $text
-    return OvalTL (RX $x0 $w0 $u) (RY $y0 $h0 $v) ($w0 * $uw) ($h0 * $vh) $text $fill $line $size $bold $linePt
+    return OvalTL (RX $x0 $w0 $u) (RY $y0 $h0 $v) ($w0 * $uw) ($h0 * $vh) $text $fill $line $size $bold $linePt -PassThru:$PassThru
 }
 
-function LineRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u1, [double]$v1, [double]$u2, [double]$v2, [string]$color = $C.Black, [double]$linePt = 0.8, [bool]$arrowEnd = $false, [bool]$arrowBegin = $false, [int]$dash = 1) {
+function LineRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u1, [double]$v1, [double]$u2, [double]$v2, [string]$color = $C.Black, [double]$linePt = 0.8, [bool]$arrowEnd = $false, [bool]$arrowBegin = $false, [int]$dash = 1, [switch]$PassThru) {
     Assert-RelPoint $u1 $v1 'line start'
     Assert-RelPoint $u2 $v2 'line end'
-    return LineTL (RX $x0 $w0 $u1) (RY $y0 $h0 $v1) (RX $x0 $w0 $u2) (RY $y0 $h0 $v2) $color $linePt $arrowEnd $arrowBegin $dash
+    return LineTL (RX $x0 $w0 $u1) (RY $y0 $h0 $v1) (RX $x0 $w0 $u2) (RY $y0 $h0 $v2) $color $linePt $arrowEnd $arrowBegin $dash -PassThru:$PassThru
+}
+
+function Connect-VisioShapes {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$From,
+
+        [Parameter(Mandatory = $true)]
+        [object]$To,
+
+        [ValidateRange(0, 4)]
+        [int]$Direction = 0,
+
+        [switch]$PassThru
+    )
+
+    $connector = $null
+    try {
+        # Shape.AutoConnect creates a dynamic connector that follows moved shapes.
+        $connector = $From.AutoConnect($To, $Direction)
+        if ($PassThru) { return $connector }
+    } finally {
+        if (-not $PassThru) { Release-VisioComObject $connector }
+    }
 }
 
 function Draw-ReferenceFigure {
@@ -181,6 +212,7 @@ if (Test-Path -LiteralPath $VsdxPath) {
 $visio = $null
 $doc = $null
 $page = $null
+$pageSheet = $null
 try {
     $visio = New-Object -ComObject Visio.Application
     $visio.Visible = [bool]$Visible
@@ -191,10 +223,8 @@ try {
         if (-not (Test-Path -LiteralPath $targetDir)) {
             New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
         }
-        if (-not (Test-Path -LiteralPath $TemplatePath)) {
-            throw "Visio template not found: $TemplatePath"
-        }
-        $doc = $visio.Documents.Add($TemplatePath)
+        $resolvedTemplate = Resolve-VisioContentPath -Path $TemplatePath
+        $doc = $visio.Documents.Add($resolvedTemplate)
         $doc.SaveAs($VsdxPath) | Out-Null
     }
     $page = $doc.Pages.Item(1)
@@ -203,11 +233,19 @@ try {
     $script:PageH = $PageH
     $script:RefW = $RefW
     $script:RefH = $RefH
+    $script:FontName = if ([string]::IsNullOrWhiteSpace($FontName)) { 'Arial' } else { $FontName }
 
-    $script:Page.PageSheet.CellsU('PageWidth').FormulaU = "$PageW in"
-    $script:Page.PageSheet.CellsU('PageHeight').FormulaU = "$PageH in"
+    $pageSheet = $page.PageSheet
+    [void]($pageSheet.CellsU('PageWidth').FormulaU = "$PageW in")
+    [void]($pageSheet.CellsU('PageHeight').FormulaU = "$PageH in")
     while ($script:Page.Shapes.Count -gt 0) {
-        $script:Page.Shapes.Item(1).Delete() | Out-Null
+        $oldShape = $null
+        try {
+            $oldShape = $script:Page.Shapes.Item(1)
+            [void]$oldShape.Delete()
+        } finally {
+            Release-VisioComObject $oldShape
+        }
     }
 
     Draw-ReferenceFigure
@@ -241,6 +279,9 @@ try {
         try { $doc.Saved = $true } catch {}
         try { $doc.Close() } catch {}
         try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($doc) | Out-Null } catch {}
+    }
+    if ($pageSheet -ne $null) {
+        try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($pageSheet) | Out-Null } catch {}
     }
     if ($page -ne $null) {
         try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($page) | Out-Null } catch {}
