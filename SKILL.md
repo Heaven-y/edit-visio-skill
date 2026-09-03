@@ -34,7 +34,9 @@ usable Master exists, use an editable native-shape fallback. Import an external
 SVG/EMF only after the user explicitly accepts the asset and its license; do not
 use Emoji, generic clip art, or a large raster crop. Read
 [references/icon-strategy.md](references/icon-strategy.md) before choosing or
-importing an icon. For image reconstruction, automatic contour/OCR extraction
+importing an icon. For scientific figures, consult
+[references/scientific-color-palettes.md](references/scientific-color-palettes.md)
+for publication-quality, colorblind-friendly color schemes. For image reconstruction, automatic contour/OCR extraction
 is only a first pass; dense scientific or chart-heavy images require an
 agent-assisted native redraw with calibrated panels.
 
@@ -52,10 +54,12 @@ agent-assisted native redraw with calibrated panels.
 - Create one temporary rolling backup beside an existing target during a write.
   Remove it after a successful save and verification; keep it only when the run
   fails or the caller explicitly requests `-KeepBackup`/history.
+- **Generate rebuild scripts in `$env:TEMP` or a temporary directory, not beside the target file.** Delete the script after successful execution unless debugging is needed.
 - Assign or suppress every COM return value. The scaffold drawing helpers release
   Shape objects by default; use `-PassThru` only when a caller needs to edit or
   connect a returned Shape, and release that object in `finally`.
 - Create a dedicated `Visio.Application` instance from an explicit template path. Avoid `Documents.Add('')`, which can open a chooser or hang.
+- **Check for running Visio processes before opening a locked file.** Use `tasklist | grep -i visio` or `Get-Process -Name VISIO -ErrorAction SilentlyContinue`, and `Stop-Process -Name VISIO -Force` if the target file is locked.
 - Save before closing; close only the document created by the script; release COM references; and quit only the dedicated application instance.
 - If PowerShell COM becomes unstable or a job is long-running, use the optional Python `pywin32` backend with `EnsureDispatch` in a dedicated process; keep COM references local and release them in reverse order. Read [references/python-com-backend.md](references/python-com-backend.md) before using it.
 - After a timeout, inspect the target timestamp and lock state before retrying. Never launch another Visio instance while the previous one may still be active.
@@ -162,11 +166,13 @@ powershell -ExecutionPolicy Bypass -File scripts\visio_rebuild_scaffold.ps1 `
 ## Safety Checklist
 
 - Back up before writing outside the workspace.
+- **Check for and close any running Visio process if the target file is locked.** Use `Get-Process -Name VISIO -ErrorAction SilentlyContinue | Stop-Process -Force` before retrying.
 - Close any open Visio document that locks the target file before direct package edits.
 - Never delete or revert unrelated user files.
 - If a previous attempt embedded the reference image, restore from backup or remove the image shape before continuing.
 - Tell the user clearly whether the final file is native editable shapes or a flat embedded image.
 - Tell the user when PPTX export is a rendered slide rather than native PowerPoint shapes.
+- **PowerShell string interpolation gotcha:** Use `"${PageW} in"` not `"$PageW in"` when the variable is followed by text that could be part of the variable name. Better yet, assign to a local variable first: `$widthFormula = "$PageW in"` then use `$widthFormula`.
 
 ## Acceptance Criteria
 
