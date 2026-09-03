@@ -1,20 +1,165 @@
 ---
 name: visio-image-rebuilder
-description: Create, modify, inspect, export, or rebuild Microsoft Visio diagrams as native editable .vsdx files. Use for flowcharts, architecture, UML sequence diagrams, network or stencil diagrams, process maps, scientific figures, image-to-Visio reconstruction, layout/style changes, and Visio COM automation on Windows.
+version: 2.0.0
+description: Scientific figure reconstruction with precise layout, semantic color, and quality gates. Use for flowcharts, architecture, UML sequence diagrams, network diagrams, process maps, scientific figures, and image-to-Visio reconstruction with native editable .vsdx output.
 ---
 
-# Visio Automation and Image Rebuilder
+# Visio Image Rebuilder v2.0
 
-This is a portable instruction-and-script bundle for Microsoft Visio. The core
-workflow is not tied to Codex: any AI agent or local automation runner that can
-read this file and execute the bundled scripts can reuse it. The optional
-`agents/openai.yaml` file only supplies Codex UI metadata.
+**Scientific figure reconstruction with precision layout and quality gates.**
 
-## Core Rule
+This skill specializes in converting reference images (PNG, JPG, PDF) into fully editable Visio `.vsdx` files with native shapes, text, and connectors—never embedded images.
 
-Recreate the reference as editable Visio content. Do not satisfy a rebuild request by inserting the whole reference image into the page. Embedding the reference image is only allowed as a temporary locked tracing layer if it is removed or hidden before delivery and the final `.vsdx` remains native shapes, text, connectors, and groups.
+---
 
-Treat `.vsdx` as the source of truth. Export PNG, SVG, PDF, or PPTX only after the Visio page has been rebuilt or restyled and checked for native editability.
+## Core Principle
+
+**Recreate the reference as native, editable Visio content.**
+
+Never satisfy a rebuild request by embedding the reference image. The deliverable must be fully editable `.vsdx` where every element—text, shapes, connectors—can be modified independently.
+
+---
+
+## The Six Contracts (New in v2.0)
+
+Before any rebuild, declare these six contracts:
+
+### 1. Canvas Contract
+```powershell
+$RefW = 1500; $RefH = 750  # Reference dimensions (px)
+$PageW = 16; $PageH = 9    # Visio page (inches)
+function VX($px) { ($px / $RefW) * $PageW }
+function VY($px) { $PageH - ($px / $RefH) * $PageH }
+```
+
+### 2. Layout Contract
+```powershell
+$Regions = @{
+    LeftPanel   = @{ RefX=20; RefY=50; RefW=480; RefH=700 }
+    CenterPanel = @{ RefX=540; RefY=50; RefW=400; RefH=700 }
+    RightPanel  = @{ RefX=980; RefY=50; RefW=500; RefH=700 }
+}
+```
+
+### 3. Color Contract (Scientific Semantics)
+```powershell
+$Colors = @{
+    DNA_Purple     = "RGB(102,51,204)"   # DNA double helix
+    SNP_Blue       = "RGB(51,102,204)"   # SNP encoding
+    Gene_Orange    = "RGB(204,153,51)"   # Gene annotation
+    Protein_Green  = "RGB(51,153,102)"   # Protein structure
+    Cell_Red       = "RGB(204,51,51)"    # Cell/tissue
+    Data_Teal      = "RGB(0,153,153)"    # Data matrices
+    Model_Purple   = "RGB(153,51,204)"   # ML models
+    Result_Gold    = "RGB(204,153,0)"    # Results/predictions
+    Neutral_Gray   = "RGB(100,100,100)"  # Neutral elements
+}
+```
+
+### 4. Icon Contract
+- **Priority**: Visio builtin stencil → Scientific library → Custom native shapes
+- **Catalog check**: Run `scripts/visio_stencil_catalog.ps1` first
+- **Common stencils**: `MEDICAL_M.VSSX` (DNA, cells), `BIOLOGI1_M.VSSX` (organisms)
+- **No emoji or clip art**
+
+### 5. Content Inventory
+- Count total shapes expected: ~400 for complex figures
+- List text labels, connectors, special elements
+- Estimate phase breakdown: Framework (60) → Content (250) → Details (100)
+
+### 6. Quality Contract
+- ✅ No embedded reference image in final `.vsdx`
+- ✅ All text editable (not rasterized)
+- ✅ All shapes native Visio primitives or stencil masters
+- ✅ Preview PNG matches reference layout
+- ✅ File size reasonable (< 2 MB)
+
+---
+
+## Progressive Build Strategy (v2.0)
+
+**Never draw 400+ shapes in one script.** Use three-phase progressive build:
+
+### Phase 1: Framework (~60 shapes, 30s)
+- Major region borders
+- Panel titles
+- Main connection arrows
+- **Checkpoint**: Save → Export preview → Verify layout
+
+### Phase 2: Core Content (~250 shapes, 2min)
+- Feature visualizations
+- Matrix internals
+- Icons and symbols
+- **Checkpoint**: Save → Export preview → Verify content
+
+### Phase 3: Details (~100 shapes, 1min)
+- Model visualizations
+- Annotations and labels
+- Final polish
+- **Checkpoint**: Full validation → Quality audit
+
+---
+
+## Seven Quality Gates (v2.0)
+
+Every rebuild must pass:
+
+1. **INPUT_VALIDATION**: Reference image exists, target path valid
+2. **LAYOUT_PLANNING**: Coordinate system calibrated, regions defined
+3. **PROGRESSIVE_BUILD**: Three phases complete without COM errors
+4. **ALIGNMENT_AUDIT**: Panels aligned, no overlaps
+5. **COLOR_AUDIT**: Scientific semantics applied, colorblind-safe
+6. **INTEGRITY_VERIFICATION**: Native shapes only, no embedded media
+7. **DELIVERY**: All requested formats generated, file size acceptable
+
+**Fail fast:** Stop at first gate failure, report issue, don't proceed.
+
+---
+
+## COM Best Practices (v2.0)
+
+### Pre-computed Coordinates
+```powershell
+# BAD: Nested loops with COM calls
+for ($i = 0; $i -lt 100; $i++) {
+    for ($j = 0; $j -lt 50; $j++) {
+        $shape = $page.DrawRectangle($i*10, $j*5, $i*10+8, $j*5+3)
+    }
+}
+
+# GOOD: Pre-compute coordinates, batch draw
+$coords = @()
+for ($i = 0; $i -lt 100; $i++) {
+    for ($j = 0; $j -lt 50; $j++) {
+        $coords += @{ X1=$i*10; Y1=$j*5; X2=$i*10+8; Y2=$j*5+3 }
+    }
+}
+foreach ($c in $coords) {
+    $null = $page.DrawRectangle($c.X1, $c.Y1, $c.X2, $c.Y2)
+}
+```
+
+### Proper COM Release
+```powershell
+try {
+    $visio = New-Object -ComObject Visio.Application
+    # ... work ...
+} finally {
+    if ($doc) { $doc.Close($true) }
+    if ($visio) { $visio.Quit() }
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($visio) | Out-Null
+    [System.GC]::Collect()
+    [System.GC]::WaitForPendingFinalizers()
+}
+```
+
+### Output Rules
+- Default output: editable `.vsdx` only
+- Generate rebuild scripts in `$env:TEMP`, delete after success
+- No preview PNG unless explicitly requested
+- Clean up temporary files after completion
+
+---
 
 ## Operating Modes
 
@@ -28,175 +173,99 @@ Choose the smallest mode that satisfies the request:
 | Inspect | Check pages, shape count, text, media, locks, or editability | Report only |
 | Export | Render an existing verified `.vsdx` | Only explicitly requested formats |
 
-Use basic shapes for ordinary diagrams. When a semantic icon is needed, inspect
-the local Visio Stencil catalog and prefer a matching built-in Master. If no
-usable Master exists, use an editable native-shape fallback. Import an external
-SVG/EMF only after the user explicitly accepts the asset and its license; do not
-use Emoji, generic clip art, or a large raster crop. Read
-[references/icon-strategy.md](references/icon-strategy.md) before choosing or
-importing an icon. For scientific figures, consult
-[references/scientific-color-palettes.md](references/scientific-color-palettes.md)
-for publication-quality, colorblind-friendly color schemes. For image reconstruction, automatic contour/OCR extraction
-is only a first pass; dense scientific or chart-heavy images require an
-agent-assisted native redraw with calibrated panels.
-
-## Request and Output Rules
-
-- Preserve the user's requested output boundary. A `.vsdx`-only request must not create SVG, PDF, PPTX, PNG, JSON, or other sidecars unless needed for an explicitly reported verification step.
-- Ask for the output filename only when it cannot be inferred safely. Otherwise use the source stem and keep generated artifacts in the requested directory.
-- Keep temporary previews and intermediate JSON under a build or preview directory when possible, not beside the final source file.
-- Never use the whole reference image as the final page. A temporary tracing layer must be removed or hidden before delivery.
-
-## Default Output and COM Hygiene
-
-- A rebuild creates only the formats requested by the caller. The default output is the editable `.vsdx`; SVG, PDF, PPTX, and PNG are opt-in.
-- A PNG preview is a verification artifact. Generate it only with an explicit preview switch or path, and do not treat it as an implicit deliverable.
-- Create one temporary rolling backup beside an existing target during a write.
-  Remove it after a successful save and verification; keep it only when the run
-  fails or the caller explicitly requests `-KeepBackup`/history.
-- **Generate rebuild scripts in `$env:TEMP` or a temporary directory, not beside the target file.** Delete the script after successful execution unless debugging is needed.
-- Assign or suppress every COM return value. The scaffold drawing helpers release
-  Shape objects by default; use `-PassThru` only when a caller needs to edit or
-  connect a returned Shape, and release that object in `finally`.
-- Create a dedicated `Visio.Application` instance from an explicit template path. Avoid `Documents.Add('')`, which can open a chooser or hang.
-- **Check for running Visio processes before opening a locked file.** Use `tasklist | grep -i visio` or `Get-Process -Name VISIO -ErrorAction SilentlyContinue`, and `Stop-Process -Name VISIO -Force` if the target file is locked.
-- Save before closing; close only the document created by the script; release COM references; and quit only the dedicated application instance.
-- If PowerShell COM becomes unstable or a job is long-running, use the optional Python `pywin32` backend with `EnsureDispatch` in a dedicated process; keep COM references local and release them in reverse order. Read [references/python-com-backend.md](references/python-com-backend.md) before using it.
-- After a timeout, inspect the target timestamp and lock state before retrying. Never launch another Visio instance while the previous one may still be active.
+---
 
 ## Workflow
 
-1. Inspect inputs.
-   - Confirm paths for the target `.vsdx`, reference image, requested output formats, and output directory.
-   - Export the current Visio page to PNG before editing only when visual comparison is requested.
-   - Inspect the `.vsdx` package for pages, media entries, and shape counts.
-   - Back up the target file before any write using the rolling-backup policy above.
-   - If Visio is already open, close only the target document or ask before terminating a stuck process.
+1. **Inspect inputs** - Confirm paths, inspect package, backup target file
+2. **Decode reference** - Identify layout, colors, icons, inventory shapes
+3. **Declare Six Contracts** - Canvas, Layout, Color, Icon, Inventory, Quality
+4. **Progressive Build** - Three phases with checkpoints after each
+5. **Verify Quality** - Run validation script, check shape count
+6. **Clean up** - Remove temporary files, keep only final `.vsdx`
 
-2. Decode the reference image.
-   - Identify page orientation, panel boundaries, module colors, captions, text hierarchy, arrows, dashed lines, and repeated motifs.
-   - Build an object inventory: containers, titles, process boxes, icons, charts, graphs, equations, connectors, captions.
-   - Calibrate the canvas first, then calibrate each major panel or subpanel with explicit top-left bounds or four corner points.
-   - Draw panel internals in panel-local normalized coordinates whenever the figure has dense multi-panel content.
-   - Decide whether the task is a full rebuild, color/style transfer, local edit, or export-only job.
-   - For dense scientific figures, first create a coarse panel map, then draw panel internals. Do not start with small decorative details.
-   - OpenCV contour or OCR extraction may supply a first-pass geometry inventory, but it does not replace semantic annotation for dense scientific figures, charts, or image-like motifs.
-
-3. Prefer Visio automation for native edits.
-   - Use COM automation on Windows when Visio is installed.
-   - Use `DrawRectangle`, `DrawOval`, `DrawLine`, `Page.Import` only for small vector source assets, and shape cells such as `FillForegnd`, `LineColor`, `LineWeight`, `Char.Size`, `Char.Color`, `Rounding`.
-   - Before placing an icon, inspect available masters with `scripts/visio_stencil_catalog.ps1`; prefer a matching built-in Master, then a native-shape fallback. Use `NameU` for cross-language calls and `Find-VisioStencilMaster` for candidates. External assets require explicit user approval.
-   - Use `Connect-VisioShapes` or Visio glue points for relationships that must
-     follow moved nodes; reserve `DrawLine` for static annotation lines.
-   - Use explicit coordinates and IDs for fragile edits.
-   - Keep grouped structure meaningful: major panels, submodules, repeated blocks, legends.
-   - For nested modules, use helpers such as `RectRel`, `TextRel`, `LineRel`, and `OvalRel` so child shapes are constrained by their calibrated parent panel.
-
-4. Use package XML edits only for narrow, deterministic changes.
-   - XML patching is appropriate for recoloring existing shapes, replacing font tables, or changing known cell values.
-   - Preserve Visio XML ordering: shape-level `Cell` nodes should be before `Section`, `Text`, or child `Shapes`.
-   - Avoid rebuilding complex geometry by raw XML unless COM automation is unavailable.
-
-5. Export only requested formats from the verified Visio source.
-   - Use `scripts/visio_page_tools.ps1` for export-only jobs.
-   - Use `scripts/visio_rebuild_scaffold.ps1` with `-ExportFormats` for rebuilds that should immediately create deliverables.
-   - Omit `-ExportFormats` and preview arguments for a source-only rebuild.
-   - Prefer SVG for vector web/manuscript handoff, PDF for review/print, and PPTX for presentation decks.
-   - For PPTX, use PowerPoint COM when available; the generated slide contains the Visio page render, usually inserted from SVG.
-
-6. Verify without overtrusting a single signal.
-   - Export at least one preview after editing when possible.
-   - Inspect the `.vsdx` package to confirm that no full-size reference PNG/JPG was left in `visio/media`.
-   - Check shape count and representative text labels.
-   - Check that major panels do not overlap and that child shapes stay within their intended panel bounds.
-   - Check every requested output file exists and is non-empty.
-   - If Visio automation hangs, stop safely, close the document if possible, and report whether the file was actually modified.
-   - Run `scripts/visio_validate.ps1` for the final package, native-shape,
-     required-text, COM reopen, and process-cleanup checks.
+---
 
 ## Implementation Pattern
 
-For full rebuilds, generate a script that:
-
-- Opens the target `.vsdx` with Visio COM.
-- Saves a temporary rolling backup before editing; removes it after a successful run unless history is requested.
-- Clears or duplicates the page depending on user preference.
-- Sets page size to match the reference aspect ratio.
-- Draws native shapes in top-left reference coordinates converted to Visio coordinates.
-- Defines calibrated panel bounds for complex regions and uses panel-local coordinates for their internals.
-- Adds reusable helpers for rectangles, text boxes, ovals, lines, arrows, mini charts, graph nodes, and image-like stacks.
-- Uses `-FontName` to make the document font explicit instead of relying on a
-  machine-specific font index.
-- Saves the document and exports only explicitly requested formats.
-
-Start from `scripts/visio_rebuild_scaffold.ps1` when building a full reconstruction script. Copy it into the workspace and customize the `Draw-ReferenceFigure` function rather than editing the skill copy.
-
-For style transfer, generate a script that:
-
-- Reads existing shape IDs, text, approximate geometry, fill, and line colors.
-- Maps known modules to target palettes by text and group context.
-- Applies fills, borders, text colors, line patterns, and font changes to existing shapes.
-- Avoids repositioning unless the user asks for layout changes.
-- Exports only after the `.vsdx` has been saved and inspected.
-
-For export-only requests, run:
-
+### Full Rebuild Template
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\visio_page_tools.ps1 `
-  -VsdxPath "C:\path\figure.vsdx" `
-  -ExportFormats svg,pdf,pptx `
-  -OutputDir "C:\path\exports" `
-  -InspectPackage
+param([string]$VsdxPath, [int]$Phase = 1)
+
+# 1. Declare Six Contracts
+$RefW = 1500; $RefH = 750
+$PageW = 16; $PageH = 9
+function VX($px) { ($px / $RefW) * $PageW }
+function VY($px) { $PageH - ($px / $RefH) * $PageH }
+
+$Regions = @{
+    LeftPanel = @{ RefX=20; RefY=50; RefW=480; RefH=700 }
+}
+
+$Colors = @{
+    DNA_Purple = "RGB(102,51,204)"
+}
+
+# 2. Open Visio
+try {
+    $visio = New-Object -ComObject Visio.Application
+    $doc = $visio.Documents.Open($VsdxPath)
+    $page = $doc.Pages.Item(1)
+    
+    # Set page size
+    $page.PageSheet.CellsSRC(1,1,0).FormulaU = "${PageW} in"
+    $page.PageSheet.CellsSRC(1,1,1).FormulaU = "${PageH} in"
+    
+    # 3. Draw based on phase
+    if ($Phase -eq 1) {
+        # Framework: ~60 shapes
+    } elseif ($Phase -eq 2) {
+        # Content: ~250 shapes
+    } elseif ($Phase -eq 3) {
+        # Details: ~100 shapes
+    }
+    
+    # 4. Save
+    $doc.Save()
+    Write-Host "Phase $Phase complete"
+    
+} finally {
+    if ($doc) { $doc.Close($true) }
+    if ($visio) { $visio.Quit() }
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($visio) | Out-Null
+    [System.GC]::Collect()
+}
 ```
 
-For rebuild plus multi-format export, run:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\visio_rebuild_scaffold.ps1 `
-  -VsdxPath "C:\path\figure.vsdx" `
-  -PageW 16 `
-  -PageH 9 `
-  -RefW 1600 `
-  -RefH 900 `
-  -PreviewPath "C:\path\exports\figure.png" `
-  -ExportFormats svg,pdf,pptx `
-  -OutputDir "C:\path\exports"
-```
+---
 
 ## Safety Checklist
 
-- Back up before writing outside the workspace.
-- **Check for and close any running Visio process if the target file is locked.** Use `Get-Process -Name VISIO -ErrorAction SilentlyContinue | Stop-Process -Force` before retrying.
-- Close any open Visio document that locks the target file before direct package edits.
-- Never delete or revert unrelated user files.
-- If a previous attempt embedded the reference image, restore from backup or remove the image shape before continuing.
-- Tell the user clearly whether the final file is native editable shapes or a flat embedded image.
-- Tell the user when PPTX export is a rendered slide rather than native PowerPoint shapes.
-- **PowerShell string interpolation gotcha:** Use `"${PageW} in"` not `"$PageW in"` when the variable is followed by text that could be part of the variable name. Better yet, assign to a local variable first: `$widthFormula = "$PageW in"` then use `$widthFormula`.
+- Back up before writing
+- Close any open Visio document that locks the target file
+- Never delete unrelated user files
+- Tell the user clearly whether the final file is native editable shapes
+
+---
 
 ## Acceptance Criteria
 
 A Visio rebuild is acceptable only when:
 
-- Main panel positions, flow direction, captions, and module hierarchy match the reference at first glance.
-- Major panels are aligned to calibrated bounds, with no obvious submodule drift, collision, or cross-panel overlap.
-- Text remains editable and uses a consistent academic font, usually Times New Roman.
-- Repeated motifs are represented with reusable native shapes rather than pasted raster crops.
-- Domain icons use a matching Visio Master or an editable native fallback. An external licensed vector is acceptable only with explicit user approval; no Emoji or low-quality clip art is used.
-- The final `.vsdx` package has no full-page raster reference image in `visio/media`.
-- Only requested export files were produced from the saved `.vsdx` and are non-empty; a source-only rebuild needs no export files.
-- A preview export or package inspection was performed, or the final response explicitly states why verification was skipped.
+- Main panel positions, flow direction, captions match the reference
+- Major panels aligned to calibrated bounds, no overlaps
+- Text remains editable, consistent academic font
+- Domain icons use Visio Master or editable native fallback
+- Final `.vsdx` has no full-page raster reference image
+- Only requested export files produced and non-empty
 
-## Useful Resource
+---
 
-Use `scripts/visio_page_tools.ps1` for common inspection, temporary backup,
-preview export, multi-format export, and package checks. Use
-`scripts/visio_export_formats.ps1` for reusable export helpers and
-`scripts/visio_rebuild_scaffold.ps1` as the starting point for native-shape
-drawing scripts. Dot-source `scripts/visio_stencil_helpers.ps1` for local Master
-lookup and dynamic connections. Use `scripts/visio_stencil_catalog.ps1` to
-inspect local stencils without launching Visio, and run
-`scripts/visio_validate.ps1` after saving to combine package inspection,
-required-label checks, COM reopen, and process cleanup. Read
-`references/rebuild-guidelines.md` for dense figure reconstruction and
-`references/icon-strategy.md` when a diagram contains semantic icons.
+## Useful Resources
+
+- `scripts/visio_page_tools.ps1` - Inspection, backup, export
+- `scripts/visio_rebuild_scaffold.ps1` - Native-shape drawing template
+- `scripts/visio_stencil_catalog.ps1` - Stencil inspection
+- `scripts/visio_validate.ps1` - Package inspection + validation
+- `references/icon-strategy.md` - Icon selection
+- `references/scientific-color-palettes.md` - Color schemes
