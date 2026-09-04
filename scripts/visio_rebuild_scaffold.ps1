@@ -3,9 +3,16 @@ param(
     [string]$VsdxPath,
 
     [double]$PageW = 16.0,
-    [double]$PageH = 12.0,
-    [double]$RefW = 1448.0,
-    [double]$RefH = 1086.0,
+    [double]$PageH = 0.0,
+    [double]$RefW = 0.0,
+    [double]$RefH = 0.0,
+
+    [ValidateSet(1, 2, 3)]
+    [int]$Phase = 3,
+
+    [string]$ReferenceImagePath,
+    [string[]]$RequiredText,
+    [string[]]$RequiredColor,
 
     [string]$PreviewPath,
 
@@ -17,6 +24,8 @@ param(
     [string]$TemplatePath = 'C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\BASFLO_M.VSTX',
     [string]$FontName = 'Arial',
     [switch]$KeepBackup,
+    [switch]$SkipPreview,
+    [switch]$SkipQualityGates,
     [switch]$Visible
 )
 
@@ -27,6 +36,20 @@ $ErrorActionPreference = 'Stop'
 function VX([double]$x) { $script:PageW * $x / $script:RefW }
 function VY([double]$y) { $script:PageH - ($script:PageH * $y / $script:RefH) }
 function RGBF([int]$r, [int]$g, [int]$b) { "RGB($r,$g,$b)" }
+
+function Get-ReferenceImageDimensions([string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw "INPUT_VALIDATION failed: reference image not found: $Path"
+    }
+    Add-Type -AssemblyName System.Drawing
+    $image = $null
+    try {
+        $image = [System.Drawing.Image]::FromFile((Resolve-Path -LiteralPath $Path).Path)
+        return [pscustomobject]@{ Width = [double]$image.Width; Height = [double]$image.Height }
+    } finally {
+        if ($image) { $image.Dispose() }
+    }
+}
 
 $C = @{
     Blue = RGBF 31 95 184
@@ -183,22 +206,53 @@ function Connect-VisioShapes {
 }
 
 function Draw-ReferenceFigure {
+    param([ValidateSet(1, 2, 3)][int]$Phase = $script:BuildPhase)
     # Replace this with the task-specific drawing code.
     # Keep the order: panels -> main flow -> text boxes -> repeated motifs -> annotations.
     # For complex panels, calibrate the panel bounds and draw internals with RectRel/TextRel/LineRel.
-    RectTL 20 60 180 220 'Input Sequence' $C.BlueSoft $C.Blue 11 $true 1.0 1 8 | Out-Null
-    $panelX = 260.0
-    $panelY = 60.0
-    $panelW = 220.0
-    $panelH = 220.0
-    RectTL $panelX $panelY $panelW $panelH 'Block 1' $C.White $C.Blue 10 $true 1.0 1 8 | Out-Null
-    RectRel $panelX $panelY $panelW $panelH 0.14 0.25 0.72 0.16 'Module A' $C.PurpleSoft $C.Purple 11 $true 0.8 1 5 | Out-Null
-    LineTL 200 170 260 170 $C.Black 1.0 $true | Out-Null
-    LineTL 480 170 570 170 $C.Black 1.0 $true | Out-Null
-    RectTL 570 90 250 160 'Processing' $C.GreenSoft $C.Green 11 $true 1.0 1 8 | Out-Null
-    LineTL 820 170 880 170 $C.Black 1.0 $true | Out-Null
-    RectTL 880 90 240 160 'Output' $C.OrangeSoft $C.Orange 11 $true 1.0 1 8 | Out-Null
-    TextTL 600 20 360 28 'Repeated Processing Stage' 13 $C.Blue $true | Out-Null
+    if ($Phase -ge 1) {
+        RectTL 20 60 180 220 'Input Sequence' $C.BlueSoft $C.Blue 11 $true 1.0 1 8 | Out-Null
+        $panelX = 260.0; $panelY = 60.0; $panelW = 220.0; $panelH = 220.0
+        RectTL $panelX $panelY $panelW $panelH 'Block 1' $C.White $C.Blue 10 $true 1.0 1 8 | Out-Null
+        LineTL 200 170 260 170 $C.Black 1.0 $true | Out-Null
+        LineTL 480 170 570 170 $C.Black 1.0 $true | Out-Null
+        RectTL 570 90 250 160 'Processing' $C.GreenSoft $C.Green 11 $true 1.0 1 8 | Out-Null
+        LineTL 820 170 880 170 $C.Black 1.0 $true | Out-Null
+        RectTL 880 90 240 160 'Output' $C.OrangeSoft $C.Orange 11 $true 1.0 1 8 | Out-Null
+    }
+    if ($Phase -ge 2) {
+        RectRel $panelX $panelY $panelW $panelH 0.14 0.25 0.72 0.16 'Module A' $C.PurpleSoft $C.Purple 11 $true 0.8 1 5 | Out-Null
+    }
+    if ($Phase -ge 3) {
+        TextTL 600 20 360 28 'Repeated Processing Stage' 13 $C.Blue $true | Out-Null
+    }
+}
+
+function Invoke-ReferenceFigure([int]$phase) {
+    $script:BuildPhase = $phase
+    $definition = Get-Command Draw-ReferenceFigure -CommandType Function
+    if ($definition.Parameters -and $definition.Parameters.ContainsKey('Phase')) {
+        Draw-ReferenceFigure -Phase $phase
+    } else {
+        # Backward compatible with existing task scripts; they can read $script:BuildPhase.
+        Draw-ReferenceFigure
+    }
+}
+
+function Invoke-QualityGates {
+    param([int]$phase)
+    $qualityScript = Join-Path $PSScriptRoot 'visio_quality_gates.ps1'
+    $qualityArgs = @{
+        VsdxPath = $VsdxPath
+        Phase = $phase
+    }
+    if ($ReferenceImagePath) { $qualityArgs.ReferenceImagePath = $ReferenceImagePath }
+    if ($script:EffectivePreviewPath) { $qualityArgs.PreviewPath = $script:EffectivePreviewPath }
+    if (@($RequiredText).Count -gt 0) { $qualityArgs.RequiredText = $RequiredText }
+    if (@($RequiredColor).Count -gt 0) { $qualityArgs.RequiredColor = $RequiredColor }
+    # Invoke in-process after the drawing COM session has been released. This avoids
+    # spawning a second PowerShell/COM host and keeps error handling deterministic.
+    & $qualityScript @qualityArgs
 }
 
 $backup = $null
@@ -213,7 +267,32 @@ $visio = $null
 $doc = $null
 $page = $null
 $pageSheet = $null
+$temporaryPreview = $false
+$script:EffectivePreviewPath = $PreviewPath
+if (-not $script:EffectivePreviewPath -and -not $SkipPreview) {
+    $previewName = ([IO.Path]::GetFileNameWithoutExtension($VsdxPath)) + '-' + [guid]::NewGuid().ToString('N') + '.png'
+    $script:EffectivePreviewPath = Join-Path ([IO.Path]::GetTempPath()) $previewName
+    $temporaryPreview = $true
+}
+$qualityPassed = [bool]$SkipQualityGates
 try {
+    if ($ReferenceImagePath) {
+        $imageSize = Get-ReferenceImageDimensions $ReferenceImagePath
+        if ($RefW -le 0) { $RefW = $imageSize.Width }
+        if ($RefH -le 0) { $RefH = $imageSize.Height }
+        if ($PageH -le 0) { $PageH = $PageW * $RefH / $RefW }
+        Write-Output ("Canvas calibrated from reference image: {0}x{1}px" -f $RefW, $RefH)
+    } else {
+        if ($RefW -le 0) { $RefW = 1448.0 }
+        if ($RefH -le 0) { $RefH = 1086.0 }
+        if ($PageH -le 0) { $PageH = 12.0 }
+    }
+    if ($PageW -le 0 -or $PageH -le 0 -or $RefW -le 0 -or $RefH -le 0) {
+        throw 'INPUT_VALIDATION failed: page and reference dimensions must be positive.'
+    }
+    if ($ReferenceImagePath -and -not (Test-Path -LiteralPath $ReferenceImagePath -PathType Leaf)) {
+        throw "INPUT_VALIDATION failed: reference image not found: $ReferenceImagePath"
+    }
     $visio = New-Object -ComObject Visio.Application
     $visio.Visible = [bool]$Visible
     if (Test-Path -LiteralPath $VsdxPath) {
@@ -233,6 +312,7 @@ try {
     $script:PageH = $PageH
     $script:RefW = $RefW
     $script:RefH = $RefH
+    $script:BuildPhase = $Phase
     $script:FontName = if ([string]::IsNullOrWhiteSpace($FontName)) { 'Arial' } else { $FontName }
 
     $pageSheet = $page.PageSheet
@@ -248,12 +328,12 @@ try {
         }
     }
 
-    Draw-ReferenceFigure
+    Invoke-ReferenceFigure $Phase
 
     $doc.Save() | Out-Null
 
     $formatsToExport = New-Object System.Collections.Generic.List[string]
-    if ($PreviewPath -and -not $formatsToExport.Contains('png')) {
+    if ($script:EffectivePreviewPath -and -not $formatsToExport.Contains('png')) {
         $formatsToExport.Add('png') | Out-Null
     }
     foreach ($format in @($ExportFormats)) {
@@ -269,7 +349,7 @@ try {
             -Formats @($formatsToExport) `
             -OutputDir $OutputDir `
             -OutputBaseName $OutputBaseName `
-            -PreviewPath $PreviewPath
+            -PreviewPath $script:EffectivePreviewPath
     }
 
     Write-Output "Saved: $VsdxPath"
@@ -290,8 +370,26 @@ try {
         try { $visio.Quit() } catch {}
         try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($visio) | Out-Null } catch {}
     }
-    if ($completed -and $backup -and -not $KeepBackup -and (Test-Path -LiteralPath $backup)) {
-        Remove-Item -LiteralPath $backup -Force
-        Write-Output "Removed temporary backup: $backup"
+}
+
+if ($completed -and -not $SkipQualityGates) {
+    try {
+        Invoke-QualityGates $Phase
+        $qualityPassed = $true
+    } finally {
+        if ($temporaryPreview -and $script:EffectivePreviewPath -and (Test-Path -LiteralPath $script:EffectivePreviewPath)) {
+            [IO.File]::Delete($script:EffectivePreviewPath)
+            Write-Output "Removed temporary preview: $script:EffectivePreviewPath"
+        }
     }
+}
+
+if ($completed -and $qualityPassed -and $backup -and -not $KeepBackup -and (Test-Path -LiteralPath $backup)) {
+    Remove-Item -LiteralPath $backup -Force
+    Write-Output "Removed temporary backup: $backup"
+}
+
+if ($temporaryPreview -and $script:EffectivePreviewPath -and (Test-Path -LiteralPath $script:EffectivePreviewPath)) {
+    [IO.File]::Delete($script:EffectivePreviewPath)
+    Write-Output "Removed temporary preview: $script:EffectivePreviewPath"
 }

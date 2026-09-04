@@ -18,9 +18,12 @@
 - `Inspect`：检查页面、形状数量、关键文字、媒体条目、文件锁和可编辑性。
 - `Export`：只导出用户明确要求的 PNG、SVG、PDF 或 PPTX。
 
-默认只交付 `.vsdx`。预览和其他格式必须显式请求；临时 JSON、预览图和日志应放到构建目录。
+默认只交付 `.vsdx`；为质量门禁生成的预览图仅写入系统临时目录并在成功后删除。
+其他格式必须显式请求；临时 JSON、预览图和日志应放到构建目录或系统临时目录。
 写入期间最多创建一个临时滚动备份用于回滚；成功保存并验证后自动清理，失败时才保留并报告备份路径。
 脚手架可传入 `-KeepBackup` 保留成功运行后的备份；普通运行不留下 `.backup.vsdx`。
+脚手架支持 `-Phase 1|2|3` 的累积构建，并在保存后调用 `scripts/visio_quality_gates.ps1`；
+只有显式传入 `-SkipQualityGates` 才会跳过门禁。
 
 实现参考了 [deermiya/visio-skill](https://github.com/deermiya/visio-skill) 的通用模式划分、时序图、Stencil 和图片反推思路；COM 会话、备份和输出策略按本地 Windows/Visio 环境重新实现。
 
@@ -89,7 +92,8 @@
     ├── visio_rebuild_scaffold.ps1
     ├── visio_stencil_catalog.ps1
     ├── visio_stencil_helpers.ps1
-    └── visio_validate.ps1
+    ├── visio_validate.ps1
+    └── visio_quality_gates.ps1
 ```
 
 文件说明：
@@ -107,6 +111,7 @@
 - `scripts/visio_stencil_catalog.ps1`：只读扫描本机 Stencil 并输出母版目录。
 - `scripts/visio_stencil_helpers.ps1`：只读打开 Stencil、按 Name/NameU 精确或关键词查找 Master、放置并校准图标、关闭 COM 文档的可复用函数。
 - `scripts/visio_validate.ps1`：统一检查 VSDX 包结构、原生 Shape、关键文字、COM 重开和进程清理。
+- `scripts/visio_quality_gates.ps1`：统一执行输入、文件大小、媒体、文字、颜色、预览、页面边界、COM 重开和进程清理门禁。
 
 ## 环境要求
 
@@ -128,6 +133,9 @@
 - 导出脚本默认隐藏 Visio 和 PowerPoint；只有显式传入 `-Visible` 才显示窗口。
 - 脚手架默认使用 Arial，可通过 `-FontName` 指定论文字体；绘图 helper 默认释放 Shape，只有显式使用 `-PassThru` 才返回 COM 对象。
 - 不安装 Visio 时，仍可做 `.vsdx` 包结构检查或有限 XML 修改，但不适合完整一比一重建。
+
+关闭已经打开的目标文档时，`scripts/visio_page_tools.ps1 -CloseOpenDocument` 默认丢弃未保存界面修改，
+不会主动写入文件；只有显式添加 `-SaveOpenDocument` 才会先保存。
 
 ## 安装方式
 
@@ -204,10 +212,11 @@ powershell -ExecutionPolicy Bypass -File scripts\visio_page_tools.ps1 `
 powershell -ExecutionPolicy Bypass -File scripts\visio_rebuild_scaffold.ps1 `
   -VsdxPath "C:\path\model.vsdx" `
   -PageW 16 `
-  -PageH 9 `
-  -RefW 1600 `
-  -RefH 900 `
-  -PreviewPath "C:\path\exports\model.png" `
+  -ReferenceImagePath "C:\path\reference.png" `
+  # RefW/RefH/PageH are derived from the reference image when omitted.
+  # By default a temporary PNG preview is generated for quality gates and
+  # deleted after success. Use -PreviewPath only when you explicitly want
+  # to retain a preview; use -SkipPreview to disable preview generation.
   -ExportFormats svg,pdf,pptx `
   -OutputDir "C:\path\exports"
 ```
@@ -229,7 +238,7 @@ powershell -ExecutionPolicy Bypass -File scripts\visio_rebuild_scaffold.ps1 `
 
 ## 当前范围
 
-这是一个可直接使用的初版，已覆盖五种工作模式、原生形状重建、面板局部坐标、COM 资源释放、动态连接、按需导出、Stencil 候选查询和统一验收。后续新增能力应直接更新当前说明和脚本，不再维护容易失真的版本历史表。
+这是一个可直接使用的通用初版，已覆盖五种工作模式、原生形状重建、面板局部坐标、COM 资源释放、动态连接、按需导出、Stencil 候选查询、累积阶段构建和统一验收。后续新增能力应直接更新当前说明和脚本，不再维护容易失真的版本历史表。
 
 ## 开源许可证
 

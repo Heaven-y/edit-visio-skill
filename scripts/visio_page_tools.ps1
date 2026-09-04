@@ -14,24 +14,32 @@ param(
     [switch]$ExportPreview,
     [switch]$InspectPackage,
     [switch]$CloseOpenDocument,
+    [switch]$SaveOpenDocument,
     [switch]$Visible
 )
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'visio_export_formats.ps1')
 
-function Close-VisioDocument([string]$path) {
+function Close-VisioDocument([string]$path, [switch]$Save) {
     try {
+        $targetPath = [IO.Path]::GetFullPath($path)
         $visio = [Runtime.InteropServices.Marshal]::GetActiveObject('Visio.Application')
         for ($i = $visio.Documents.Count; $i -ge 1; $i--) {
             $doc = $null
             try {
                 $doc = $visio.Documents.Item($i)
-                if ([string]::Equals($doc.FullName, $path, [StringComparison]::OrdinalIgnoreCase)) {
-                    $doc.Save() | Out-Null
-                    $doc.Saved = $true
+                if ([string]::Equals([IO.Path]::GetFullPath([string]$doc.FullName), $targetPath, [StringComparison]::OrdinalIgnoreCase)) {
+                    if ($Save) {
+                        $doc.Save() | Out-Null
+                    } else {
+                        # Mark as saved without writing: close the target quietly and discard
+                        # unsaved UI edits instead of triggering a Save prompt.
+                        $doc.Saved = $true
+                    }
                     $doc.Close()
-                    Write-Output "Closed open Visio document: $path"
+                    $mode = if ($Save) { 'saved' } else { 'discarded unsaved edits' }
+                    Write-Output "Closed open Visio document ($mode): $targetPath"
                 }
             } finally {
                 if ($doc -ne $null) {
@@ -88,7 +96,10 @@ function Inspect-VsdxPackage([string]$path) {
     }
 }
 
-if ($CloseOpenDocument) { Close-VisioDocument $VsdxPath }
+if ($CloseOpenDocument) {
+    if ($SaveOpenDocument) { Close-VisioDocument $VsdxPath -Save }
+    else { Close-VisioDocument $VsdxPath }
+}
 if ($Backup) { Backup-Vsdx $VsdxPath }
 if ($InspectPackage) { Inspect-VsdxPackage $VsdxPath }
 

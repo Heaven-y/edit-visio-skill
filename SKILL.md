@@ -1,10 +1,9 @@
 ---
 name: visio-image-rebuilder
-version: 2.0.0
 description: Scientific figure reconstruction with precise layout, semantic color, and quality gates. Use for flowcharts, architecture, UML sequence diagrams, network diagrams, process maps, scientific figures, and image-to-Visio reconstruction with native editable .vsdx output.
 ---
 
-# Visio Image Rebuilder v2.0
+# Visio Image Rebuilder
 
 **Scientific figure reconstruction with precision layout and quality gates.**
 
@@ -20,14 +19,16 @@ Never satisfy a rebuild request by embedding the reference image. The deliverabl
 
 ---
 
-## The Six Contracts (New in v2.0)
+## The Six Contracts
 
 Before any rebuild, declare these six contracts:
 
 ### 1. Canvas Contract
 ```powershell
-$RefW = 1500; $RefH = 750  # Reference dimensions (px)
-$PageW = 16; $PageH = 9    # Visio page (inches)
+# Prefer reading the reference image dimensions automatically.
+$image = Get-ReferenceImageDimensions $ReferenceImagePath
+$RefW = $image.Width; $RefH = $image.Height
+$PageW = 16; $PageH = $PageW * $RefH / $RefW
 function VX($px) { ($px / $RefW) * $PageW }
 function VY($px) { $PageH - ($px / $RefH) * $PageH }
 ```
@@ -76,7 +77,7 @@ $Colors = @{
 
 ---
 
-## Progressive Build Strategy (v2.0)
+## Progressive Build Strategy
 
 **Never draw 400+ shapes in one script.** Use three-phase progressive build:
 
@@ -100,7 +101,7 @@ $Colors = @{
 
 ---
 
-## Seven Quality Gates (v2.0)
+## Seven Quality Gates
 
 Every rebuild must pass:
 
@@ -145,7 +146,11 @@ try {
     $visio = New-Object -ComObject Visio.Application
     # ... work ...
 } finally {
-    if ($doc) { $doc.Close($true) }
+    if ($doc) {
+        try { $doc.Save() } catch {}
+        try { $doc.Saved = $true } catch {}
+        try { $doc.Close() } catch {}
+    }
     if ($visio) { $visio.Quit() }
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($visio) | Out-Null
     [System.GC]::Collect()
@@ -156,8 +161,15 @@ try {
 ### Output Rules
 - Default output: editable `.vsdx` only
 - Generate rebuild scripts in `$env:TEMP`, delete after success
-- No preview PNG unless explicitly requested
+- Generate a temporary preview PNG by default for quality gates, then delete it
+  after success. Use `-PreviewPath` to retain one explicitly or `-SkipPreview`
+  to disable preview generation.
 - Clean up temporary files after completion
+- `scripts/visio_rebuild_scaffold.ps1` accepts `-Phase 1|2|3`, `-ReferenceImagePath`,
+  `-RequiredText`, and `-RequiredColor`, then runs `visio_quality_gates.ps1` after
+  a successful save unless `-SkipQualityGates` is explicitly supplied.
+- `scripts/visio_page_tools.ps1 -CloseOpenDocument` discards unsaved edits quietly
+  by default; use `-SaveOpenDocument` only when saving that open document is explicitly authorized.
 
 ---
 
@@ -190,11 +202,13 @@ Choose the smallest mode that satisfies the request:
 
 ### Full Rebuild Template
 ```powershell
-param([string]$VsdxPath, [int]$Phase = 1)
+param([string]$VsdxPath, [int]$Phase = 3)
 
-# 1. Declare Six Contracts
-$RefW = 1500; $RefH = 750
-$PageW = 16; $PageH = 9
+# 1. Declare Six Contracts. If a reference image is supplied, derive the
+# pixel canvas and page aspect ratio from that image instead of guessing.
+$image = Get-ReferenceImageDimensions $ReferenceImagePath
+$RefW = $image.Width; $RefH = $image.Height
+$PageW = 16; $PageH = $PageW * $RefH / $RefW
 function VX($px) { ($px / $RefW) * $PageW }
 function VY($px) { $PageH - ($px / $RefH) * $PageH }
 
@@ -225,12 +239,14 @@ try {
         # Details: ~100 shapes
     }
     
-    # 4. Save
+    # 4. Save and close without a second implicit save prompt.
     $doc.Save()
+    $doc.Saved = $true
+    $doc.Close()
     Write-Host "Phase $Phase complete"
     
 } finally {
-    if ($doc) { $doc.Close($true) }
+    if ($doc) { try { $doc.Saved = $true } catch {}; try { $doc.Close() } catch {} }
     if ($visio) { $visio.Quit() }
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($visio) | Out-Null
     [System.GC]::Collect()
@@ -267,5 +283,7 @@ A Visio rebuild is acceptable only when:
 - `scripts/visio_rebuild_scaffold.ps1` - Native-shape drawing template
 - `scripts/visio_stencil_catalog.ps1` - Stencil inspection
 - `scripts/visio_validate.ps1` - Package inspection + validation
+- `scripts/visio_quality_gates.ps1` - Input, integrity, size, text, color, page-bound,
+  preview, COM reopen, and process-cleanup gates
 - `references/icon-strategy.md` - Icon selection
 - `references/scientific-color-palettes.md` - Color schemes
