@@ -1,15 +1,4 @@
-function Release-VisioComObject {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $false)]
-        [AllowNull()]
-        [object]$ComObject
-    )
-
-    if ($ComObject -ne $null) {
-        try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($ComObject) | Out-Null } catch {}
-    }
-}
+. (Join-Path $PSScriptRoot 'visio_runtime.ps1')
 
 function Get-VisioContentRoots {
     [CmdletBinding()]
@@ -79,12 +68,14 @@ function Open-VisioStencil {
     )
 
     $resolved = Resolve-VisioStencilPath -Path $Path -RootPath $RootPath
+    $documents = $null
     try {
-        # 64 = visOpenRO | visOpenDocked. Never open a stencil for editing.
-        return $Visio.Documents.OpenEx($resolved, 64)
+        # 2 = visOpenRO; 64 = visOpenHidden. Never edit a stencil.
+        $documents = $Visio.Documents
+        return $documents.OpenEx($resolved, 66)
     } catch {
         throw "Failed to open Visio stencil '$resolved': $($_.Exception.Message)"
-    }
+    } finally { Release-VisioComObject $documents }
 }
 
 function Get-VisioStencilMaster {
@@ -100,11 +91,12 @@ function Get-VisioStencilMaster {
     $masters = $null
     try {
         try {
-            # Item(string) is the fast path and supports the localized display name.
-            return $Stencil.Masters.Item($Name)
+            # ItemU uses the stable, language-independent master name.
+            $masters = $Stencil.Masters
+            return $masters.ItemU($Name)
         } catch {}
 
-        $masters = $Stencil.Masters
+        if (-not $masters) { $masters = $Stencil.Masters }
         $matches = @()
         for ($i = 1; $i -le $masters.Count; $i++) {
             $master = $null
@@ -210,16 +202,25 @@ function Drop-VisioStencilMaster {
     )
 
     $master = $null
+    $shape = $null
+    $shapeReturned = $false
     try {
         $master = Get-VisioStencilMaster -Stencil $Stencil -Name $MasterName
         $shape = $Page.Drop($master, $PinX, $PinY)
-        if ($Width -gt 0) { $shape.CellsU('Width').ResultIU = $Width }
-        if ($Height -gt 0) { $shape.CellsU('Height').ResultIU = $Height }
-        $shape.CellsU('PinX').ResultIU = $PinX
-        $shape.CellsU('PinY').ResultIU = $PinY
+        $values = @{ PinX = $PinX; PinY = $PinY }
+        if ($Width -gt 0) { $values.Width = $Width }
+        if ($Height -gt 0) { $values.Height = $Height }
+        foreach ($name in $values.Keys) {
+            Set-VisioCell $shape $name ($values[$name].ToString([Globalization.CultureInfo]::InvariantCulture) + ' in')
+        }
+        $shapeReturned = $true
         return $shape
+    } catch {
+        if ($shape) { try { [void]$shape.Delete() } catch {} }
+        throw
     } finally {
         Release-VisioComObject $master
+        if (-not $shapeReturned) { Release-VisioComObject $shape }
     }
 }
 

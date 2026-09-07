@@ -1,173 +1,73 @@
-# Visio Template Library for Scientific Figures
+# Visio Design Recipes
 
-## Overview
+These are layout choices, not bundled VSDX templates. Use the user's requested
+notation, meaning and existing document style. An installed Visio template can be
+passed through `-TemplatePath` when creating a new document.
 
-Pre-built Visio templates for common scientific figure types, optimized for publication quality and editability.
+## Workflow and Swimlanes
 
-## Available Templates
+Use start/end nodes, process boxes and decision diamonds with labeled branches.
+For ownership across teams, arrange steps inside lanes. Prefer installed flowchart
+or cross-functional templates when lane/container behavior matters; a rectangle
+that looks like a lane does not automatically manage its contained shapes.
+Glue connections so they survive moving nodes. Check loops, branch labels and
+reading order, including routes that cross lanes.
 
-### Genomics and Multi-Omics
+## Network and Deployment
 
-#### G×E Integration Model (based on fig3-1)
-**File**: `templates/genomics/gxe_integration_model.vsdx`
+Group devices and services by site, network or trust boundary. Search installed
+stencils for routers, servers, databases and the requested cloud services. Keep
+connection direction, protocol and redundancy explicit where provided by the user.
+Do not infer a deployment topology from product logos alone.
 
-**Use case**: Genome-by-environment interaction modeling, multi-omics integration pipeline
+## Organization and Hierarchy
 
-**Components**:
-- SNP encoding methods (-1/0/1, 0/1/2, one-hot)
-- DNA shape representation with built-in DNA icon
-- Functional annotation tracks with semantic shapes
-- Gene functional annotation with structured gene models
-- Environmental time series panels
-- Model comparison blocks (statistical, kernel-based, deep learning)
-- Trait prediction outputs with plant icons (corn/wheat)
-- Prediction performance scatter plots
+Use one consistent node style and alignment per level. Distinguish reporting lines
+from dotted advisory relationships. Prefer organization-chart masters when their
+layout or shape-data features are needed. Keep role/name text editable; grouping
+for appearance is not the same as creating an organization-chart data model.
 
-**Color scheme**: Multi-omics palette (blue for genotype, purple for DNA shape, teal for annotation, gold for genes)
+## UML and Sequence
 
-**Icons used**:
-- DNA (MEDICAL_M.VSSX::DNA)
-- Corn (HOLIDAYS_M.VSSX::Corn) for plant traits
+Use installed UML stencils when the task requires that notation. Sequence diagrams
+need participant headers, vertical lifelines, ordered messages and activation bars;
+class diagrams need compartments and correct association/inheritance endpoints.
+Do not substitute a generic arrow if it changes UML meaning. Simple native geometry
+is sufficient when only the visual notation, not specialized behavior, is requested.
 
----
+## Tables and Comparison Matrices
 
-### Flowcharts and Pipelines
+Keep stable row/column tracks, headers and legends. Use actual supplied values for
+quantitative cells, and preserve missing values instead of inventing measurements.
+Name repeated groups so future edits can target a row, column or category.
 
-#### Analysis Pipeline
-**File**: `templates/workflow/analysis_pipeline.vsdx`
+## Scientific and Technical Schematics
 
-**Use case**: Bioinformatics pipeline, data processing workflow
+Arrange inputs, transformations and outputs according to the supplied mechanism or
+reference. Domain symbols such as molecules, laboratory equipment or plant organs
+must preserve meaning; consult the stencil references and verify silhouettes.
+Use [scientific palettes](scientific-color-palettes.md) only as optional starting
+points for new diagrams, never to recolor an existing reference automatically.
+Actual statistical plots should come from the user's data and plotting workflow.
 
-**Components**:
-- Input data nodes
-- Processing step boxes with rounded corners
-- Decision diamonds
-- Output result nodes
-- Connector arrows with labels
+## Execution and Coordinates
 
-**Color scheme**: Process flow palette (input=teal, process=blue, decision=orange, output=green)
+- `-Mode Create` refuses an existing target. It preserves template contents.
+- `-Mode Rebuild -PageIndex N` clears only the selected page before drawing.
+- `-Mode Edit -PageIndex N` preserves objects and page size; the callback changes
+  only explicitly identified shapes, text or connections.
+- With an image, use measured `RefW/RefH`; page height follows its aspect ratio.
+- Without an image, pass `PageW/PageH` in inches, or `RefW/RefH` for a separate
+  coordinate grid. For Edit with no dimensions, helpers use the existing page's
+  inch dimensions, with the origin at the top left. Direct Visio COM uses bottom left.
 
----
+Define `Draw-VisioPage([int]$Phase)` in the task's drawing script and support
+`param([switch]$LoadDrawing)`. `Draw-ReferenceFigure` is accepted for older scripts.
+Use the shared scaffold; do not duplicate its COM session or staging lifecycle.
+Custom callbacks may create additional pages, but must not mutate unrelated pages
+or shared masters/styles during a local edit.
 
-### Comparison Matrices
-
-#### Method Comparison Table
-**File**: `templates/comparison/method_matrix.vsdx`
-
-**Use case**: Comparing algorithms, methods, or experimental conditions
-
-**Components**:
-- Checkerboard matrix cells
-- Column headers with semantic colors
-- Row labels
-- Legend panel
-
-**Color scheme**: Neutral gray borders with categorical fills
-
----
-
-## Creating a New Template
-
-### 1. Design Principles
-
-- **Editable text**: All labels use Times New Roman or Arial
-- **Semantic icons**: Use Visio Masters from built-in stencils, not embedded images
-- **Grouped structure**: Group related shapes (e.g., all parts of a gene model)
-- **Color consistency**: Follow scientific-color-palettes.md
-- **No embedded rasters**: Templates should contain only native shapes and stencil masters
-
-### 2. Template Metadata
-
-Each template should include:
-- **Page properties**: Set to standard publication dimensions (e.g., 16×9 for wide figures, 8.5×11 for vertical)
-- **Shape data**: Add custom properties to key shapes for easy identification
-- **Grouped elements**: Pre-group multi-shape components
-- **Named shapes**: Assign meaningful names to major shapes for programmatic access
-
-### 3. Coordinate System
-
-Use reference coordinate calibration:
-```powershell
-$PageW = 16.0  # inches
-$PageH = 9.0
-$RefW = 1448.0  # reference pixel width
-$RefH = 810.0   # reference pixel height
-
-function VX([double]$x) { $PageW * $x / $RefW }
-function VY([double]$y) { $PageH - ($PageH * $y / $RefH) }
-```
-
-### 4. Saving Templates
-
-- Save as `.vsdx` (not `.vst` or `.vstx`) for broader compatibility
-- Include a `README.txt` inside the template directory with usage instructions
-- Test reopening in Visio to verify all icons load correctly
-
----
-
-## Template Usage Examples
-
-### Python script to load and customize a template:
-
-```python
-import win32com.client
-
-visio = win32com.client.Dispatch("Visio.Application")
-doc = visio.Documents.Open("templates/genomics/gxe_integration_model.vsdx")
-page = doc.Pages.Item(1)
-
-# Find and modify a specific shape
-for shape in page.Shapes:
-    if shape.Name == "ModelTitle":
-        shape.Text = "My Custom Model"
-
-doc.SaveAs("figures/my_figure.vsdx")
-doc.Close()
-visio.Quit()
-```
-
-### PowerShell script example:
-
-```powershell
-$visio = New-Object -ComObject Visio.Application
-$doc = $visio.Documents.Open("templates/genomics/gxe_integration_model.vsdx")
-$page = $doc.Pages.Item(1)
-
-# Modify shapes
-foreach ($shape in $page.Shapes) {
-    if ($shape.Name -eq "TraitLabel1") {
-        $shape.Text = "Grain Yield (GY)"
-    }
-}
-
-$doc.SaveAs("figures/my_figure.vsdx")
-$doc.Close()
-$visio.Quit()
-```
-
----
-
-## Contributing New Templates
-
-When adding a new template:
-
-1. Create the `.vsdx` file following the design principles above
-2. Document it in this file with use case, components, color scheme, and icons used
-3. Add example usage code if the template has complex structure
-4. Commit with a descriptive message: `feat(templates): add [type] template for [use case]`
-
----
-
-## Template Checklist
-
-Before committing a template, verify:
-
-- [ ] No embedded raster images in `visio/media/`
-- [ ] All text uses standard fonts (Times New Roman, Arial)
-- [ ] Icons are from built-in Visio stencils with documented NameU
-- [ ] Colors follow scientific-color-palettes.md
-- [ ] Page size is set to standard dimensions
-- [ ] File size < 200 KB (pure shape templates should be small)
-- [ ] Template opens successfully in Visio 2016+ without errors
-- [ ] All major shapes have meaningful names
-- [ ] Related shapes are pre-grouped
+Verify the selected page's text, geometry, connectors and rendered appearance.
+Package inspection reports every page, while page-specific gates use `-PageIndex`.
+Repeat those gates and visual review for every changed page. Keep only requested
+deliverables and accurately report any approved non-native assets.

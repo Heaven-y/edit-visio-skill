@@ -8,97 +8,78 @@ param(
 
     [string]$OutputDir,
     [string]$OutputBaseName,
-    [int]$PageIndex = 1,
+    [ValidateRange(1, 2147483647)][int]$PageIndex = 1,
 
     [switch]$Backup,
     [switch]$ExportPreview,
     [switch]$InspectPackage,
     [switch]$CloseOpenDocument,
     [switch]$SaveOpenDocument,
+    [switch]$DiscardOpenDocument,
     [switch]$Visible
 )
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'visio_export_formats.ps1')
+. (Join-Path $PSScriptRoot 'visio_package.ps1')
 
-function Close-VisioDocument([string]$path, [switch]$Save) {
+function Close-VisioDocument([string]$path, [switch]$Save, [switch]$Discard) {
+    if ($Save -and $Discard) { throw 'Choose save OR discard, not both.' }
+    Assert-VisioComHost
+    $targetPath = [IO.Path]::GetFullPath($path)
+    $visio = $null; $documents = $null
     try {
-        $targetPath = [IO.Path]::GetFullPath($path)
-        $visio = [Runtime.InteropServices.Marshal]::GetActiveObject('Visio.Application')
-        for ($i = $visio.Documents.Count; $i -ge 1; $i--) {
-            $doc = $null
+        try { $visio = Get-ActiveVisioApplication }
+        catch { Write-Output 'No active Visio application.'; return }
+        $documents = $visio.Documents
+        for ($i = $documents.Count; $i -ge 1; $i--) {
+            $doc = $documents.Item($i)
             try {
-                $doc = $visio.Documents.Item($i)
-                if ([string]::Equals([IO.Path]::GetFullPath([string]$doc.FullName), $targetPath, [StringComparison]::OrdinalIgnoreCase)) {
-                    if ($Save) {
-                        $doc.Save() | Out-Null
-                    } else {
-                        # Mark as saved without writing: close the target quietly and discard
-                        # unsaved UI edits instead of triggering a Save prompt.
-                        $doc.Saved = $true
-                    }
-                    $doc.Close()
-                    $mode = if ($Save) { 'saved' } else { 'discarded unsaved edits' }
-                    Write-Output "Closed open Visio document ($mode): $targetPath"
+                if (-not [string]::Equals([string]$doc.FullName, $targetPath, [StringComparison]::OrdinalIgnoreCase)) { continue }
+                if (-not $doc.Saved -and -not $Save -and -not $Discard) {
+                    throw 'Target has unsaved edits. Explicitly choose -SaveOpenDocument or -DiscardOpenDocument.'
                 }
-            } finally {
-                if ($doc -ne $null) {
-                    try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($doc) | Out-Null } catch {}
-                }
-            }
+                if ($Save) { $doc.Save() }
+                if ($Discard) { $doc.Saved = $true }
+                $doc.Close()
+                Write-Output "Closed target document: $targetPath"
+                return
+            } finally { Release-VisioComObject $doc }
         }
-        if ($visio.Documents.Count -eq 0) {
-            $visio.Quit()
-            Write-Output 'Closed empty Visio instance.'
-        }
-        try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($visio) | Out-Null } catch {}
-    } catch {
-        Write-Output "No controllable Visio instance found: $($_.Exception.Message)"
+        Write-Output 'Target was not found in the active Visio application.'
+    } finally {
+        Release-VisioComObject $documents
+        # The active UI belongs to the user, even if no documents remain.
+        Release-VisioComObject $visio
     }
 }
 
 function Backup-Vsdx([string]$path) {
-    $dir = Split-Path -Parent $path
-    $stem = [IO.Path]::GetFileNameWithoutExtension($path)
-    $backupPath = Join-Path $dir "$stem.backup.vsdx"
-    Copy-Item -LiteralPath $path -Destination $backupPath -Force
+    $fullPath = (Resolve-Path -LiteralPath $path).Path
+    $stem = [IO.Path]::GetFileNameWithoutExtension($fullPath)
+    $backupPath = Join-Path (Split-Path -Parent $fullPath) ($stem + '.backup-' + [guid]::NewGuid().ToString('N') + '.vsdx')
+    Copy-Item -LiteralPath $fullPath -Destination $backupPath
     Write-Output "Backup: $backupPath"
 }
 
 function Inspect-VsdxPackage([string]$path) {
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $zip = [IO.Compression.ZipFile]::OpenRead($path)
-    try {
-        $media = @($zip.Entries | Where-Object { $_.FullName -like 'visio/media/*' } | Sort-Object FullName)
-        $page = $zip.GetEntry('visio/pages/page1.xml')
-        $shapeCount = 'unknown'
-        if ($page) {
-            $reader = [IO.StreamReader]::new($page.Open())
-            $xmlText = $reader.ReadToEnd()
-            $reader.Close()
-            [xml]$xml = $xmlText
-            $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
-            $ns.AddNamespace('v', 'http://schemas.microsoft.com/office/visio/2012/main')
-            $shapeCount = $xml.SelectNodes('//v:Shape', $ns).Count
-        }
-        Write-Output "Shape count: $shapeCount"
-        if ($media.Count -eq 0) {
-            Write-Output 'Media entries: none'
-        } else {
-            foreach ($m in $media) {
-                Write-Output ("Media: {0} ({1} bytes)" -f $m.FullName, $m.Length)
-            }
-        }
-        $largeMedia = @($media | Where-Object { $_.Length -gt 1000000 -or $_.FullName -match '\.(png|jpg|jpeg)$' })
-        Write-Output "Large or raster media entries: $($largeMedia.Count)"
-    } finally {
-        $zip.Dispose()
+    $package = Read-VsdxPackage $path
+    Write-Output "Pages: $($package.PageCount); total shapes: $($package.ShapeCount)"
+    foreach ($page in $package.Pages) {
+        Write-Output ("Page {0}: {1}; shapes={2}; foreign={3}; part={4}" -f
+            $page.Index, $page.NameU, $page.ShapeCount, $page.ForeignCount, $page.PartName)
     }
+    foreach ($media in $package.Media) {
+        Write-Output ("Media: {0} ({1} bytes)" -f $media.FullName, $media.Length)
+    }
+    Write-Output "Media entries: $($package.Media.Count)"
 }
 
+if (($SaveOpenDocument -or $DiscardOpenDocument) -and -not $CloseOpenDocument) {
+    throw 'Save/discard requires -CloseOpenDocument.'
+}
 if ($CloseOpenDocument) {
-    if ($SaveOpenDocument) { Close-VisioDocument $VsdxPath -Save }
-    else { Close-VisioDocument $VsdxPath }
+    Close-VisioDocument $VsdxPath -Save:$SaveOpenDocument -Discard:$DiscardOpenDocument
 }
 if ($Backup) { Backup-Vsdx $VsdxPath }
 if ($InspectPackage) { Inspect-VsdxPackage $VsdxPath }

@@ -1,6 +1,8 @@
 # Scientific Figure Color Palettes
 
-Academic and publication-quality color schemes for scientific diagrams, optimized for accessibility and print reproduction.
+Optional palette examples for new scientific diagrams. They are not universal biological
+color standards and have not all been validated for color-vision deficiencies. When rebuilding
+an image, use its actual colors unless the user requests recoloring.
 
 ## General Principles
 
@@ -46,7 +48,7 @@ $DataType = @{
 
 ## Multi-Omics Integration
 
-For figures showing integration across omics layers (like the G×E example):
+For figures comparing or integrating omics layers, according to the specified relationships:
 
 ```powershell
 $MultiOmics = @{
@@ -120,7 +122,7 @@ $Neutral = @{
 4. **Text on colored backgrounds:** 
    - White text for dark backgrounds (luminance < 50%)
    - Black text for light backgrounds and tinted panels
-5. **Matrices and heatmaps:** Use one primary color at varied opacity/lightness; checkerboard alternates primary with white
+5. **Matrices and heatmaps:** Reproduce the supplied values or reference pattern. Do not replace a nonuniform matrix with arbitrary repeating stripes.
 
 ## Testing
 

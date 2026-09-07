@@ -2,7 +2,15 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$VsdxPath,
 
-    [double]$PageW = 16.0,
+    [Parameter(Mandatory=$true)]
+    [string]$DrawingScript,
+
+    [ValidateSet('Create', 'Rebuild', 'Edit')]
+    [string]$Mode = 'Rebuild',
+    [ValidateRange(1, 2147483647)]
+    [int]$PageIndex = 1,
+
+    [double]$PageW = 0.0,
     [double]$PageH = 0.0,
     [double]$RefW = 0.0,
     [double]$RefH = 0.0,
@@ -21,11 +29,12 @@ param(
     [string]$OutputDir,
     [string]$OutputBaseName,
 
-    [string]$TemplatePath = 'C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\BASFLO_M.VSTX',
+    [string]$TemplatePath = '',
     [string]$FontName = 'Arial',
     [switch]$KeepBackup,
     [switch]$SkipPreview,
     [switch]$SkipQualityGates,
+    [switch]$AllowMedia,
     [switch]$Visible
 )
 
@@ -36,20 +45,6 @@ $ErrorActionPreference = 'Stop'
 function VX([double]$x) { $script:PageW * $x / $script:RefW }
 function VY([double]$y) { $script:PageH - ($script:PageH * $y / $script:RefH) }
 function RGBF([int]$r, [int]$g, [int]$b) { "RGB($r,$g,$b)" }
-
-function Get-ReferenceImageDimensions([string]$Path) {
-    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
-        throw "INPUT_VALIDATION failed: reference image not found: $Path"
-    }
-    Add-Type -AssemblyName System.Drawing
-    $image = $null
-    try {
-        $image = [System.Drawing.Image]::FromFile((Resolve-Path -LiteralPath $Path).Path)
-        return [pscustomobject]@{ Width = [double]$image.Width; Height = [double]$image.Height }
-    } finally {
-        if ($image) { $image.Dispose() }
-    }
-}
 
 $C = @{
     Blue = RGBF 31 95 184
@@ -67,7 +62,7 @@ $C = @{
 }
 
 function Set-Cell($shape, [string]$cell, [string]$formula) {
-    try { [void]($shape.CellsU($cell).FormulaU = $formula) } catch {}
+    Set-VisioCell $shape $cell $formula
 }
 
 function Style-Shape($shape, [string]$fill, [string]$line, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = 0) {
@@ -84,7 +79,9 @@ function Style-Shape($shape, [string]$fill, [string]$line, [double]$linePt = 0.8
         Set-Cell $shape 'LineColor' $line
         Set-Cell $shape 'LineWeight' "$linePt pt"
     }
-    if ($roundPx -gt 0) {
+    if ($roundPx -lt 0) {
+        Set-Cell $shape 'Rounding' '0.06 in'
+    } elseif ($roundPx -gt 0) {
         Set-Cell $shape 'Rounding' ((VX $roundPx).ToString([Globalization.CultureInfo]::InvariantCulture) + ' in')
     }
 }
@@ -101,43 +98,51 @@ function Set-Text($shape, [string]$text, [double]$size = 10, [string]$color = $C
     Set-Cell $shape 'Char.Style' ([string]$style)
     Set-Cell $shape 'Para.HorzAlign' ([string]$align)
     Set-Cell $shape 'VerticalAlign' '1'
-    foreach ($m in 'TxtMarginLeft','TxtMarginRight','TxtMarginTop','TxtMarginBottom') {
+    foreach ($m in 'LeftMargin','RightMargin','TopMargin','BottomMargin') {
         Set-Cell $shape $m '1 pt'
     }
 }
 
-function RectTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text = '', [string]$fill = 'none', [string]$line = $C.Black, [double]$size = 10, [bool]$bold = $false, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = 6, [switch]$PassThru) {
+function RectTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text = '', [string]$fill = 'none', [string]$line = $C.Black, [double]$size = 10, [bool]$bold = $false, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = -1, [switch]$PassThru) {
     $s = $script:Page.DrawRectangle((VX $x), (VY ($y + $h)), (VX ($x + $w)), (VY $y))
-    Style-Shape $s $fill $line $linePt $dash $roundPx
-    if ($text -ne '') { Set-Text $s $text $size $C.Black $bold }
-    if ($PassThru) { return $s }
-    Release-VisioComObject $s
+    $returned = $false
+    try {
+        Style-Shape $s $fill $line $linePt $dash $roundPx
+        if ($text -ne '') { Set-Text $s $text $size $C.Black $bold }
+        if ($PassThru) { $returned = $true; return $s }
+    } finally { if (-not $returned) { Release-VisioComObject $s } }
 }
 
 function TextTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text, [double]$size = 10, [string]$color = $C.Black, [bool]$bold = $false, [bool]$italic = $false, [int]$align = 1, [switch]$PassThru) {
     $s = RectTL $x $y $w $h '' 'none' 'none' $size $bold 0 1 0 -PassThru
-    Set-Text $s $text $size $color $bold $italic $align
-    if ($PassThru) { return $s }
-    Release-VisioComObject $s
+    $returned = $false
+    try {
+        Set-Text $s $text $size $color $bold $italic $align
+        if ($PassThru) { $returned = $true; return $s }
+    } finally { if (-not $returned) { Release-VisioComObject $s } }
 }
 
 function OvalTL([double]$x, [double]$y, [double]$w, [double]$h, [string]$text = '', [string]$fill = $C.White, [string]$line = $C.Black, [double]$size = 8, [bool]$bold = $false, [double]$linePt = 0.8, [switch]$PassThru) {
     $s = $script:Page.DrawOval((VX $x), (VY ($y + $h)), (VX ($x + $w)), (VY $y))
-    Style-Shape $s $fill $line $linePt 1 0
-    if ($text -ne '') { Set-Text $s $text $size $C.Black $bold }
-    if ($PassThru) { return $s }
-    Release-VisioComObject $s
+    $returned = $false
+    try {
+        Style-Shape $s $fill $line $linePt 1 0
+        if ($text -ne '') { Set-Text $s $text $size $C.Black $bold }
+        if ($PassThru) { $returned = $true; return $s }
+    } finally { if (-not $returned) { Release-VisioComObject $s } }
 }
 
 function LineTL([double]$x1, [double]$y1, [double]$x2, [double]$y2, [string]$color = $C.Black, [double]$linePt = 0.8, [bool]$arrowEnd = $false, [bool]$arrowBegin = $false, [int]$dash = 1, [switch]$PassThru) {
     $s = $script:Page.DrawLine((VX $x1), (VY $y1), (VX $x2), (VY $y2))
-    Set-Cell $s 'LineColor' $color
-    Set-Cell $s 'LineWeight' "$linePt pt"
-    Set-Cell $s 'LinePattern' ([string]$dash)
-    if ($arrowEnd) { Set-Cell $s 'EndArrow' '4' }
-    if ($arrowBegin) { Set-Cell $s 'BeginArrow' '4' }
-    if ($PassThru) { return $s }
-    Release-VisioComObject $s
+    $returned = $false
+    try {
+        Set-Cell $s 'LineColor' $color
+        Set-Cell $s 'LineWeight' "$linePt pt"
+        Set-Cell $s 'LinePattern' ([string]$dash)
+        if ($arrowEnd) { Set-Cell $s 'EndArrow' '4' }
+        if ($arrowBegin) { Set-Cell $s 'BeginArrow' '4' }
+        if ($PassThru) { $returned = $true; return $s }
+    } finally { if (-not $returned) { Release-VisioComObject $s } }
 }
 
 function DotTL([double]$cx, [double]$cy, [double]$r, [string]$fill, [string]$line = $C.White, [switch]$PassThru) {
@@ -159,7 +164,7 @@ function Assert-RelPoint([double]$u, [double]$v, [string]$label = 'relative poin
 function RX([double]$x0, [double]$w0, [double]$u) { $x0 + $w0 * $u }
 function RY([double]$y0, [double]$h0, [double]$v) { $y0 + $h0 * $v }
 
-function RectRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u, [double]$v, [double]$uw, [double]$vh, [string]$text = '', [string]$fill = 'none', [string]$line = $C.Black, [double]$size = 10, [bool]$bold = $false, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = 6, [switch]$PassThru) {
+function RectRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u, [double]$v, [double]$uw, [double]$vh, [string]$text = '', [string]$fill = 'none', [string]$line = $C.Black, [double]$size = 10, [bool]$bold = $false, [double]$linePt = 0.8, [int]$dash = 1, [double]$roundPx = -1, [switch]$PassThru) {
     Assert-RelBox $u $v $uw $vh $text
     return RectTL (RX $x0 $w0 $u) (RY $y0 $h0 $v) ($w0 * $uw) ($h0 * $vh) $text $fill $line $size $bold $linePt $dash $roundPx -PassThru:$PassThru
 }
@@ -180,216 +185,184 @@ function LineRel([double]$x0, [double]$y0, [double]$w0, [double]$h0, [double]$u1
     return LineTL (RX $x0 $w0 $u1) (RY $y0 $h0 $v1) (RX $x0 $w0 $u2) (RY $y0 $h0 $v2) $color $linePt $arrowEnd $arrowBegin $dash -PassThru:$PassThru
 }
 
-function Connect-VisioShapes {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
-        [object]$From,
 
-        [Parameter(Mandatory = $true)]
-        [object]$To,
-
-        [ValidateRange(0, 4)]
-        [int]$Direction = 0,
-
-        [switch]$PassThru
-    )
-
-    $connector = $null
-    try {
-        # Shape.AutoConnect creates a dynamic connector that follows moved shapes.
-        $connector = $From.AutoConnect($To, $Direction)
-        if ($PassThru) { return $connector }
-    } finally {
-        if (-not $PassThru) { Release-VisioComObject $connector }
+$VsdxPath = [IO.Path]::GetFullPath($VsdxPath)
+if ([IO.Path]::GetExtension($VsdxPath) -ne '.vsdx') { throw 'Target must be a .vsdx file.' }
+if (-not (Test-Path -LiteralPath $DrawingScript -PathType Leaf)) { throw "Drawing script not found: $DrawingScript" }
+$DrawingScript = (Resolve-Path -LiteralPath $DrawingScript).Path
+$formats = @(Normalize-VisioExportFormats $ExportFormats)
+$targetExists = Test-Path -LiteralPath $VsdxPath -PathType Leaf
+if ($Mode -eq 'Create' -and $targetExists) { throw 'Create mode refuses to overwrite an existing VSDX. Use Edit or Rebuild explicitly.' }
+if ($Mode -eq 'Edit' -and -not $targetExists) { throw 'Edit mode requires an existing VSDX.' }
+if ($TemplatePath -and $targetExists) { throw 'TemplatePath applies only when creating a document.' }
+foreach ($dimension in @($PageW, $PageH, $RefW, $RefH)) {
+    if ($dimension -lt 0 -or [double]::IsNaN($dimension) -or [double]::IsInfinity($dimension)) {
+        throw 'Canvas dimensions must be finite and non-negative (0 selects the default).'
     }
 }
-
-function Draw-ReferenceFigure {
-    param([ValidateSet(1, 2, 3)][int]$Phase = $script:BuildPhase)
-    # Replace this with the task-specific drawing code.
-    # Keep the order: panels -> main flow -> text boxes -> repeated motifs -> annotations.
-    # For complex panels, calibrate the panel bounds and draw internals with RectRel/TextRel/LineRel.
-    if ($Phase -ge 1) {
-        RectTL 20 60 180 220 'Input Sequence' $C.BlueSoft $C.Blue 11 $true 1.0 1 8 | Out-Null
-        $panelX = 260.0; $panelY = 60.0; $panelW = 220.0; $panelH = 220.0
-        RectTL $panelX $panelY $panelW $panelH 'Block 1' $C.White $C.Blue 10 $true 1.0 1 8 | Out-Null
-        LineTL 200 170 260 170 $C.Black 1.0 $true | Out-Null
-        LineTL 480 170 570 170 $C.Black 1.0 $true | Out-Null
-        RectTL 570 90 250 160 'Processing' $C.GreenSoft $C.Green 11 $true 1.0 1 8 | Out-Null
-        LineTL 820 170 880 170 $C.Black 1.0 $true | Out-Null
-        RectTL 880 90 240 160 'Output' $C.OrangeSoft $C.Orange 11 $true 1.0 1 8 | Out-Null
+if ($ReferenceImagePath) {
+    $imageSize = Get-ReferenceImageDimensions $ReferenceImagePath
+    if (($RefW -gt 0 -and $RefW -ne $imageSize.Width) -or ($RefH -gt 0 -and $RefH -ne $imageSize.Height)) {
+        throw 'Reference dimensions must match the image. Rescale drawing coordinates, not the measured canvas.'
     }
-    if ($Phase -ge 2) {
-        RectRel $panelX $panelY $panelW $panelH 0.14 0.25 0.72 0.16 'Module A' $C.PurpleSoft $C.Purple 11 $true 0.8 1 5 | Out-Null
-    }
-    if ($Phase -ge 3) {
-        TextTL 600 20 360 28 'Repeated Processing Stage' 13 $C.Blue $true | Out-Null
+    $RefW = $imageSize.Width; $RefH = $imageSize.Height
+}
+if (($RefW -gt 0) -xor ($RefH -gt 0)) { throw 'Supply both RefW and RefH, or neither.' }
+if ($Mode -ne 'Edit' -and $RefW -eq 0 -and ($PageW -eq 0 -or $PageH -eq 0)) {
+    throw 'Without a reference, supply RefW/RefH or PageW/PageH for a new/rebuilt page.'
+}
+$effectivePreview = $PreviewPath
+if (-not $effectivePreview -and $formats -contains 'png') {
+    $effectivePreview = Resolve-VisioExportPath $VsdxPath 'png' $OutputDir $OutputBaseName
+}
+if ($effectivePreview -and [IO.Path]::GetExtension($effectivePreview) -ne '.png') {
+    throw 'PreviewPath must use the .png extension.'
+}
+if ($ReferenceImagePath -and $effectivePreview -and
+    [string]::Equals([IO.Path]::GetFullPath($ReferenceImagePath), [IO.Path]::GetFullPath($effectivePreview), [StringComparison]::OrdinalIgnoreCase)) {
+    throw 'Preview/export would overwrite the reference image. Supply a different PreviewPath or output base name.'
+}
+$outputPaths = @{}
+foreach ($format in $formats) {
+    $outputPaths[$format] = Resolve-VisioExportPath $VsdxPath $format $OutputDir $OutputBaseName -PreviewPath $effectivePreview
+}
+if ($effectivePreview) { $outputPaths['png'] = [IO.Path]::GetFullPath($effectivePreview) }
+foreach ($outPath in $outputPaths.Values) {
+    if (Test-Path -LiteralPath $outPath -PathType Container) { throw "Output path is a directory: $outPath" }
+    [void][IO.Directory]::CreateDirectory((Split-Path -Parent $outPath))
+    if (Test-Path -LiteralPath $outPath -PathType Leaf) {
+        $outputStream = [IO.File]::Open($outPath, 'Open', 'ReadWrite', 'None')
+        $outputStream.Dispose()
     }
 }
-
-function Invoke-ReferenceFigure([int]$phase) {
-    $script:BuildPhase = $phase
-    $definition = Get-Command Draw-ReferenceFigure -CommandType Function
-    if ($definition.Parameters -and $definition.Parameters.ContainsKey('Phase')) {
-        Draw-ReferenceFigure -Phase $phase
-    } else {
-        # Backward compatible with existing task scripts; they can read $script:BuildPhase.
-        Draw-ReferenceFigure
-    }
-}
-
-function Invoke-QualityGates {
-    param([int]$phase)
-    $qualityScript = Join-Path $PSScriptRoot 'visio_quality_gates.ps1'
-    $qualityArgs = @{
-        VsdxPath = $VsdxPath
-        Phase = $phase
-    }
-    if ($ReferenceImagePath) { $qualityArgs.ReferenceImagePath = $ReferenceImagePath }
-    if ($script:EffectivePreviewPath) { $qualityArgs.PreviewPath = $script:EffectivePreviewPath }
-    if (@($RequiredText).Count -gt 0) { $qualityArgs.RequiredText = $RequiredText }
-    if (@($RequiredColor).Count -gt 0) { $qualityArgs.RequiredColor = $RequiredColor }
-    # Invoke in-process after the drawing COM session has been released. This avoids
-    # spawning a second PowerShell/COM host and keeps error handling deterministic.
-    & $qualityScript @qualityArgs
-}
-
-$backup = $null
-$completed = $false
-if (Test-Path -LiteralPath $VsdxPath) {
-    $backup = Join-Path (Split-Path -Parent $VsdxPath) (([IO.Path]::GetFileNameWithoutExtension($VsdxPath)) + ".backup.vsdx")
-    Copy-Item -LiteralPath $VsdxPath -Destination $backup -Force
-    Write-Output "Backup: $backup"
-}
-
-$visio = $null
-$doc = $null
-$page = $null
-$pageSheet = $null
-$temporaryPreview = $false
-$script:EffectivePreviewPath = $PreviewPath
-if (-not $script:EffectivePreviewPath -and -not $SkipPreview) {
-    $previewName = ([IO.Path]::GetFileNameWithoutExtension($VsdxPath)) + '-' + [guid]::NewGuid().ToString('N') + '.png'
-    $script:EffectivePreviewPath = Join-Path ([IO.Path]::GetTempPath()) $previewName
-    $temporaryPreview = $true
-}
-$qualityPassed = [bool]$SkipQualityGates
+$targetDir = Split-Path -Parent $VsdxPath
+[void][IO.Directory]::CreateDirectory($targetDir)
+$buildDir = Join-Path $targetDir ('.visio-build-' + [guid]::NewGuid().ToString('N'))
+[void][IO.Directory]::CreateDirectory($buildDir)
+$stagePath = Join-Path $buildDir 'drawing.vsdx'
+$stagePreview = if ($effectivePreview -or -not $SkipPreview) { Join-Path $buildDir 'preview.png' } else { $null }
+$visio = $null; $doc = $null; $page = $null; $pageSheet = $null; $pages = $null; $documents = $null
 try {
-    if ($ReferenceImagePath) {
-        $imageSize = Get-ReferenceImageDimensions $ReferenceImagePath
-        if ($RefW -le 0) { $RefW = $imageSize.Width }
-        if ($RefH -le 0) { $RefH = $imageSize.Height }
-        if ($PageH -le 0) { $PageH = $PageW * $RefH / $RefW }
-        Write-Output ("Canvas calibrated from reference image: {0}x{1}px" -f $RefW, $RefH)
-    } else {
-        if ($RefW -le 0) { $RefW = 1448.0 }
-        if ($RefH -le 0) { $RefH = 1086.0 }
-        if ($PageH -le 0) { $PageH = 12.0 }
-    }
-    if ($PageW -le 0 -or $PageH -le 0 -or $RefW -le 0 -or $RefH -le 0) {
-        throw 'INPUT_VALIDATION failed: page and reference dimensions must be positive.'
-    }
-    if ($ReferenceImagePath -and -not (Test-Path -LiteralPath $ReferenceImagePath -PathType Leaf)) {
-        throw "INPUT_VALIDATION failed: reference image not found: $ReferenceImagePath"
-    }
-    $visio = New-Object -ComObject Visio.Application
-    $visio.Visible = [bool]$Visible
-    if (Test-Path -LiteralPath $VsdxPath) {
-        $doc = $visio.Documents.Open($VsdxPath)
-    } else {
-        $targetDir = Split-Path -Parent $VsdxPath
-        if (-not (Test-Path -LiteralPath $targetDir)) {
-            New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
-        }
-        $resolvedTemplate = Resolve-VisioContentPath -Path $TemplatePath
-        $doc = $visio.Documents.Add($resolvedTemplate)
-        $doc.SaveAs($VsdxPath) | Out-Null
-    }
-    $page = $doc.Pages.Item(1)
-    $script:Page = $page
-    $script:PageW = $PageW
-    $script:PageH = $PageH
-    $script:RefW = $RefW
-    $script:RefH = $RefH
-    $script:BuildPhase = $Phase
-    $script:FontName = if ([string]::IsNullOrWhiteSpace($FontName)) { 'Arial' } else { $FontName }
-
-    $pageSheet = $page.PageSheet
-    [void]($pageSheet.CellsU('PageWidth').FormulaU = "$PageW in")
-    [void]($pageSheet.CellsU('PageHeight').FormulaU = "$PageH in")
-    while ($script:Page.Shapes.Count -gt 0) {
-        $oldShape = $null
-        try {
-            $oldShape = $script:Page.Shapes.Item(1)
-            [void]$oldShape.Delete()
-        } finally {
-            Release-VisioComObject $oldShape
-        }
-    }
-
-    Invoke-ReferenceFigure $Phase
-
-    $doc.Save() | Out-Null
-
-    $formatsToExport = New-Object System.Collections.Generic.List[string]
-    if ($script:EffectivePreviewPath -and -not $formatsToExport.Contains('png')) {
-        $formatsToExport.Add('png') | Out-Null
-    }
-    foreach ($format in @($ExportFormats)) {
-        if ($format -and -not $formatsToExport.Contains($format.ToLowerInvariant())) {
-            $formatsToExport.Add($format.ToLowerInvariant()) | Out-Null
-        }
-    }
-    if ($formatsToExport.Count -gt 0) {
-        Export-VisioPageFormats `
-            -Document $doc `
-            -Page $script:Page `
-            -SourcePath $VsdxPath `
-            -Formats @($formatsToExport) `
-            -OutputDir $OutputDir `
-            -OutputBaseName $OutputBaseName `
-            -PreviewPath $script:EffectivePreviewPath
-    }
-
-    Write-Output "Saved: $VsdxPath"
-    $completed = $true
-} finally {
-    if ($doc -ne $null) {
-        try { $doc.Saved = $true } catch {}
-        try { $doc.Close() } catch {}
-        try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($doc) | Out-Null } catch {}
-    }
-    if ($pageSheet -ne $null) {
-        try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($pageSheet) | Out-Null } catch {}
-    }
-    if ($page -ne $null) {
-        try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($page) | Out-Null } catch {}
-    }
-    if ($visio -ne $null) {
-        try { $visio.Quit() } catch {}
-        try { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($visio) | Out-Null } catch {}
-    }
-}
-
-if ($completed -and -not $SkipQualityGates) {
     try {
-        Invoke-QualityGates $Phase
-        $qualityPassed = $true
+        # Check the target lock before creating an automation application.
+        if ($targetExists) {
+            $stream = [IO.File]::Open($VsdxPath, 'Open', 'Read', 'None')
+            try {
+                $stageStream = [IO.File]::Create($stagePath)
+                try { $stream.CopyTo($stageStream) } finally { $stageStream.Dispose() }
+            } finally { $stream.Dispose() }
+            $originalHash = (Get-FileHash -LiteralPath $stagePath -Algorithm SHA256).Hash
+        }
+        $visio = New-VisioApplication -Visible:$Visible
+        $script:Visio = $visio
+        $documents = $visio.Documents
+        if (Test-Path -LiteralPath $stagePath) { $doc = $documents.OpenEx($stagePath, 64) }
+        else {
+            $template = if ($TemplatePath) { Resolve-VisioContentPath $TemplatePath } else { '' }
+            $doc = $documents.Add($template)
+        }
+        $pages = $doc.Pages
+        if ($PageIndex -gt $pages.Count) { throw "PageIndex $PageIndex exceeds page count $($pages.Count)." }
+        $page = $pages.Item($PageIndex)
+        $script:Page = $page
+        $existingSize = Get-VisioPageSize $page
+        if ($Mode -eq 'Edit') {
+            if ($PageW -eq 0) { $PageW = $existingSize.Width }
+            if ($PageH -eq 0) { $PageH = $existingSize.Height }
+        } else {
+            if ($PageW -eq 0) { $PageW = 16.0 }
+            if ($PageH -eq 0) { $PageH = $PageW * $RefH / $RefW }
+        }
+        if ($RefW -eq 0) { $RefW = $PageW; $RefH = $PageH }
+        if ($PageW -le 0 -or $PageH -le 0) { throw 'Page dimensions must be positive.' }
+        if ([math]::Abs(($PageW / $PageH) / ($RefW / $RefH) - 1) -gt 0.015) {
+            throw 'Page aspect ratio does not match the drawing canvas. Edit mode preserves page size unless explicitly overridden.'
+        }
+        $pageSheet = $page.PageSheet
+        if ($Mode -ne 'Edit' -or $PageW -ne $existingSize.Width -or $PageH -ne $existingSize.Height) {
+            Set-VisioCell $pageSheet 'PageWidth' ($PageW.ToString([Globalization.CultureInfo]::InvariantCulture) + ' in')
+            Set-VisioCell $pageSheet 'PageHeight' ($PageH.ToString([Globalization.CultureInfo]::InvariantCulture) + ' in')
+        }
+        if ($Mode -eq 'Rebuild') {
+            $shapes = $page.Shapes
+            try {
+                while ($shapes.Count -gt 0) {
+                    $oldShape = $shapes.Item(1)
+                    try { $oldShape.Delete() } finally { Release-VisioComObject $oldShape }
+                }
+            } finally { Release-VisioComObject $shapes }
+        }
+        $script:BuildPhase = $Phase
+        & {
+            . $DrawingScript -LoadDrawing
+            if (Get-Command Draw-VisioPage -CommandType Function -ErrorAction SilentlyContinue) {
+                Draw-VisioPage -Phase $BuildPhase
+            } elseif (Get-Command Draw-ReferenceFigure -CommandType Function -ErrorAction SilentlyContinue) {
+                Draw-ReferenceFigure -Phase $BuildPhase
+            } else { throw 'DrawingScript must define Draw-VisioPage (or legacy Draw-ReferenceFigure).' }
+        } | ForEach-Object {
+            if ([Runtime.InteropServices.Marshal]::IsComObject($_)) {
+                throw 'Drawing callback emitted a COM object. Assign -PassThru results to a variable and release them; do not send COM objects to the output pipeline.'
+            }
+            Write-Output $_
+        }
+        [void]$doc.SaveAs($stagePath)
+        if ($stagePreview) {
+            Export-VisioPageFormats $doc $page $stagePath @('png') -PreviewPath $stagePreview
+        }
+        Write-Output ("Drawing callback completed: mode={0}, page={1}, phase={2}, coordinates={3}x{4}" -f $Mode, $PageIndex, $Phase, $RefW, $RefH)
     } finally {
-        if ($temporaryPreview -and $script:EffectivePreviewPath -and (Test-Path -LiteralPath $script:EffectivePreviewPath)) {
-            [IO.File]::Delete($script:EffectivePreviewPath)
-            Write-Output "Removed temporary preview: $script:EffectivePreviewPath"
+        try {
+            Release-VisioComObject $pageSheet
+            Release-VisioComObject $page
+            Release-VisioComObject $pages
+            if ($doc) {
+                try { $doc.Saved = $true; $doc.Close() }
+                finally { Release-VisioComObject $doc }
+            }
+        } finally {
+            try { Release-VisioComObject $documents }
+            finally { Stop-VisioApplication $visio }
         }
     }
-}
-
-if ($completed -and $qualityPassed -and $backup -and -not $KeepBackup -and (Test-Path -LiteralPath $backup)) {
-    Remove-Item -LiteralPath $backup -Force
-    Write-Output "Removed temporary backup: $backup"
-}
-
-if ($temporaryPreview -and $script:EffectivePreviewPath -and (Test-Path -LiteralPath $script:EffectivePreviewPath)) {
-    [IO.File]::Delete($script:EffectivePreviewPath)
-    Write-Output "Removed temporary preview: $script:EffectivePreviewPath"
+    if (-not $SkipQualityGates) {
+        $qualityArgs = @{ VsdxPath = $stagePath; PageIndex = $PageIndex; Phase = $Phase; StrictProcess = $true; AllowMedia = $AllowMedia }
+        if ($ReferenceImagePath) { $qualityArgs.ReferenceImagePath = $ReferenceImagePath }
+        if ($stagePreview) { $qualityArgs.PreviewPath = $stagePreview }
+        if ($RequiredText) { $qualityArgs.RequiredText = $RequiredText }
+        if ($RequiredColor) { $qualityArgs.RequiredColor = $RequiredColor }
+        & (Join-Path $PSScriptRoot 'visio_quality_gates.ps1') @qualityArgs
+    } else { Write-Warning 'Quality gates explicitly skipped; visual review is still required.' }
+    $remainingFormats = @($formats | Where-Object { $_ -ne 'png' })
+    if ($remainingFormats.Count -gt 0) {
+        Export-VisioDocumentFormats -VsdxPath $stagePath -Formats $remainingFormats `
+            -OutputDir $buildDir -OutputBaseName 'export' -PageIndex $PageIndex
+    }
+    if ($targetExists) {
+        if ((Get-FileHash -LiteralPath $VsdxPath -Algorithm SHA256).Hash -ne $originalHash) {
+            throw 'Target changed during the build; refusing to overwrite concurrent edits.'
+        }
+        $backup = if ($KeepBackup) {
+            Join-Path $targetDir (([IO.Path]::GetFileNameWithoutExtension($VsdxPath)) + '.backup-' + [guid]::NewGuid().ToString('N') + '.vsdx')
+        } else { [NullString]::Value }
+        [IO.File]::Replace($stagePath, $VsdxPath, $backup)
+        if ($KeepBackup) { Write-Output "Retained backup: $backup" }
+    } else { [IO.File]::Move($stagePath, $VsdxPath) }
+    if ($effectivePreview) {
+        $effectivePreview = [IO.Path]::GetFullPath($effectivePreview)
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $effectivePreview))
+        Copy-Item -LiteralPath $stagePreview -Destination $effectivePreview -Force
+        Write-Output "PNG: $effectivePreview"
+    }
+    foreach ($format in $remainingFormats) {
+        $outPath = $outputPaths[$format]
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $outPath))
+        Copy-Item -LiteralPath (Join-Path $buildDir "export.$format") -Destination $outPath -Force
+        Write-Output "Export: $outPath"
+    }
+    Write-Output "Saved: $VsdxPath"
+    Write-Output 'VISUAL_REVIEW: REQUIRED (automated checks do not establish reference fidelity)'
+} finally {
+    # This directory was created by this invocation, under the verified target directory.
+    if ([IO.Directory]::Exists($buildDir)) { [IO.Directory]::Delete($buildDir, $true) }
 }

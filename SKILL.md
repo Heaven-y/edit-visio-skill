@@ -1,289 +1,145 @@
 ---
 name: visio-image-rebuilder
-description: Scientific figure reconstruction with precise layout, semantic color, and quality gates. Use for flowcharts, architecture, UML sequence diagrams, network diagrams, process maps, scientific figures, and image-to-Visio reconstruction with native editable .vsdx output.
+description: Create, edit, inspect and explicitly export Microsoft Visio diagrams, or rebuild reference images as native editable VSDX shapes, text and connectors. Requires Windows and Visio for drawing and rendering.
 ---
 
-# Visio Image Rebuilder
+# Visio
 
-**Scientific figure reconstruction with precision layout and quality gates.**
+Use the existing installation and shared scripts. The Markdown guidance and
+PowerShell backend are agent-independent; optional UI metadata is not a dependency.
+The COM backend requires Windows, PowerShell 7 (`pwsh`) and licensed Visio.
+Check the host before drawing. Windows PowerShell 5.1 is rejected before COM
+activation because document opening can hang in that host. Report a missing
+PowerShell 7 installation and its proposed source before installing anything.
+Package inspection and stencil catalog scanning do not launch COM.
 
-This skill specializes in converting reference images (PNG, JPG, PDF) into fully editable Visio `.vsdx` files with native shapes, text, and connectors—never embedded images.
+## Choose the Mode
 
----
+- Create: a new diagram from a description, using native shapes and connectors.
+- Edit: change only the requested pages or objects in an existing VSDX.
+- Rebuild-image: reconstruct a reference as editable geometry, never as an embedded page image.
+- Inspect: read and report; no automatic document or configuration changes.
+- Export: produce only the formats the user requested from the saved VSDX.
 
-## Core Principle
+For rebuilds, read [rebuild-guidelines.md](references/rebuild-guidelines.md).
+For domain icons, read [icon-strategy.md](references/icon-strategy.md), then search
+[stencil-reference.md](references/stencil-reference.md) or the full
+[stencil index](references/visio-stencil-index.md) for relevant candidates.
+For new diagrams, [design recipes](references/template-library.md) are examples,
+not bundled template files or a required layout.
 
-**Recreate the reference as native, editable Visio content.**
+## Input and Canvas
 
-Never satisfy a rebuild request by embedding the reference image. The deliverable must be fully editable `.vsdx` where every element—text, shapes, connectors—can be modified independently.
+Resolve the reference, target, overwrite permission and requested deliverables.
+Ask only when a missing choice changes meaning or output, such as unreadable text.
+Keep source images and unrelated files unchanged.
 
----
+Read the actual reference dimensions with `Get-ReferenceImageDimensions` in
+`scripts/visio_runtime.ps1`. Do not copy pixel dimensions from an example.
+Derive page height as `PageW * RefH / RefW`; page width is a physical-scale choice.
+The scaffold rejects conflicting dimensions. Without an image, Create/Rebuild
+accept `PageW/PageH` in inches or `RefW/RefH` for a separate coordinate grid.
+Edit preserves the existing page dimensions; with no reference/grid override,
+drawing helpers use those inch dimensions with a top-left origin. Direct COM uses
+bottom-left page coordinates. For PDF references, render the selected page
+first and use its measured raster dimensions.
 
-## The Six Contracts
+Analyze panel bounds, whitespace, text sizes, colors, arrow topology and repeated
+objects from that reference. Calibrate panel-local coordinates for dense content.
+Treat charts in a concept diagram as schematic; never invent quantitative results.
 
-Before any rebuild, declare these six contracts:
+## Native Content and Icons
 
-### 1. Canvas Contract
+Use basic shapes for boxes, grids, axes and connectors. Search installed stencils
+for domain objects; verify both file/NameU availability and a rendered sample.
+A matching name does not prove a matching silhouette or biological meaning.
+Inspect master style controls before recoloring children: child shapes can be
+alternative filled/outline styles, not separate semantic parts.
+
+Use smooth native curves and grouped editable parts when no appropriate master
+exists. Do not force an unrelated stencil or create external SVG by default.
+External assets require a user-approved source and license. Never redistribute
+Microsoft stencil files. Group and name related modules, preserving editable text.
+For movable workflow relationships, use glued connectors, not disconnected lines.
+
+## Execution and Safety
+
+Use `scripts/visio_rebuild_scaffold.ps1` with an explicit operation:
+
+- `-Mode Create`: refuse an existing target; keep supplied template contents.
+- `-Mode Rebuild -PageIndex N`: clear only the selected page before drawing.
+- `-Mode Edit -PageIndex N`: preserve objects and dimensions; change only the
+  requested shapes in the callback. Inspect stable shape names/IDs first and avoid
+  global style/master changes that would affect other pages.
+
+`PageIndex` is one-based and defaults to 1. `Rebuild` remains the default mode for
+older callers; always specify Edit for local changes. The script accepts a
+`-DrawingScript` containing `Draw-VisioPage -Phase` (legacy `Draw-ReferenceFigure`
+is also supported); the drawing
+file must support `-LoadDrawing` to load definitions without starting a second run.
+The callback receives `$script:Page`, `$script:Visio`, measured `RefW/RefH`,
+`PageW/PageH`, and `BuildPhase`. Reuse the supplied drawing helpers where suitable.
+Assign `-PassThru` results to variables and release them in `finally`; the scaffold
+rejects COM objects emitted by the callback to prevent object-output floods.
+Rectangle helpers default to a small physical corner radius; explicit `roundPx`
+values use the drawing coordinate grid, with 0 selecting square corners.
+
 ```powershell
-# Prefer reading the reference image dimensions automatically.
-$image = Get-ReferenceImageDimensions $ReferenceImagePath
-$RefW = $image.Width; $RefH = $image.Height
-$PageW = 16; $PageH = $PageW * $RefH / $RefW
-function VX($px) { ($px / $RefW) * $PageW }
-function VY($px) { $PageH - ($px / $RefH) * $PageH }
+& "$skillRoot/scripts/visio_rebuild_scaffold.ps1" `
+    -Mode Rebuild -VsdxPath $target -ReferenceImagePath $reference -DrawingScript $drawing
 ```
 
-### 2. Layout Contract
-```powershell
-$Regions = @{
-    LeftPanel   = @{ RefX=20; RefY=50; RefW=480; RefH=700 }
-    CenterPanel = @{ RefX=540; RefY=50; RefW=400; RefH=700 }
-    RightPanel  = @{ RefX=980; RefY=50; RefW=500; RefH=700 }
-}
-```
+For complex rebuilds, phases 1/2/3 can represent framework/content/details.
+Each invocation redraws the complete state up to that phase, not a persisted
+incremental edit. The callback must implement this contract; a phase argument
+alone is not evidence of completeness. Simple diagrams do not need three runs.
 
-### 3. Color Contract (Scientific Semantics)
-```powershell
-$Colors = @{
-    DNA_Purple     = "RGB(102,51,204)"   # DNA double helix
-    SNP_Blue       = "RGB(51,102,204)"   # SNP encoding
-    Gene_Orange    = "RGB(204,153,51)"   # Gene annotation
-    Protein_Green  = "RGB(51,153,102)"   # Protein structure
-    Cell_Red       = "RGB(204,51,51)"    # Cell/tissue
-    Data_Teal      = "RGB(0,153,153)"    # Data matrices
-    Model_Purple   = "RGB(153,51,204)"   # ML models
-    Result_Gold    = "RGB(204,153,0)"    # Results/predictions
-    Neutral_Gray   = "RGB(100,100,100)"  # Neutral elements
-}
-```
+The scaffold draws to a staging file, closes its COM session, runs checks and
+atomically replaces the target only on success. A failed build leaves the original
+unchanged. It removes its staging directory on every exit. `-KeepBackup` explicitly
+retains the previous target at a unique path; there is no default backup sidecar.
+Create/Rebuild never imply permission to overwrite a user file; obtain that choice
+before running. Shared callbacks must implement their stated page/object scope.
 
-### 4. Icon Contract
-- **Priority**: Visio builtin stencil → Scientific library → Custom native shapes
-- **Catalog check**: Run `scripts/visio_stencil_catalog.ps1` first
-- **Common stencils**: `MEDICAL_M.VSSX` (DNA, cells), `BIOLOGI1_M.VSSX` (organisms)
-- **No emoji or clip art**
+Use `New-VisioApplication` / `Stop-VisioApplication` for isolated sessions.
+Never attach a rebuild to the user's active UI, kill all VISIO processes, save in
+a failure handler, or quit a user-owned application. Close only owned documents,
+discard only owned unsaved automation state, and release every acquired COM
+reference once. Helpers must not emit COM objects unless explicitly requested.
 
-### 5. Content Inventory
-- Count total shapes expected: ~400 for complex figures
-- List text labels, connectors, special elements
-- Estimate phase breakdown: Framework (60) → Content (250) → Details (100)
+A locked target requires the user to close it or explicitly approve saving or
+discarding its unsaved edits. Overwrite permission is not permission to discard UI
+edits. Missing licensed software must be reported; installation requires an
+approved source and authorization, not an unattended Office deployment.
 
-### 6. Quality Contract
-- ✅ No embedded reference image in final `.vsdx`
-- ✅ All text editable (not rasterized)
-- ✅ All shapes native Visio primitives or stencil masters
-- ✅ Preview PNG matches reference layout
-- ✅ File size reasonable (< 2 MB)
+## Outputs and Verification
 
----
+Default deliverable: VSDX only. Render a temporary PNG for verification.
+For visual review by an agent, explicitly set `-PreviewPath` inside a task-owned
+temporary directory, inspect it, then delete it. Without that option the scaffold
+removes its internal preview after automated checks. A user-requested PNG/export
+is retained and must not overwrite the source image.
 
-## Progressive Build Strategy
+Use `visio_quality_gates.ps1` for package integrity, native-content/media checks,
+required text/color tokens, page/reference and preview/page ratios, read-only COM
+reopen, geometry bounds and owned-process cleanup. `visio_validate.ps1` delegates
+to the same implementation. Text, color, ratio and bounds checks apply to
+`-PageIndex`; repeat them for every changed page. Package inspection reports all
+pages, using relationships and foreground/background ordering, not page filenames.
+Optional size limits must be task-specific.
 
-**Never draw 400+ shapes in one script.** Use three-phase progressive build:
+Native-only is the default. If a user explicitly approves retaining or importing
+media (for example an existing logo), pass `-AllowMedia` and report mixed content;
+it does not prove full native editability. Never delete existing assets just to make
+a strict gate pass. For read-only inspection use `visio_page_tools.ps1 -InspectPackage`.
 
-### Phase 1: Framework (~60 shapes, 30s)
-- Major region borders
-- Panel titles
-- Main connection arrows
-- **Checkpoint**: Save → Export preview → Verify layout
+PASS means only the named automated check passed. Skipped tests say SKIPPED.
+Phase completeness, overlap, text fit, icon semantics and visual fidelity require
+rendered comparison. Inspect the whole page and dense crops; fix mismatches before
+delivery. Check reference labels and flow relationships, not only one icon.
 
-### Phase 2: Core Content (~250 shapes, 2min)
-- Feature visualizations
-- Matrix internals
-- Icons and symbols
-- **Checkpoint**: Save → Export preview → Verify content
-
-### Phase 3: Details (~100 shapes, 1min)
-- Model visualizations
-- Annotations and labels
-- Final polish
-- **Checkpoint**: Full validation → Quality audit
-
----
-
-## Seven Quality Gates
-
-Every rebuild must pass:
-
-1. **INPUT_VALIDATION**: Reference image exists, target path valid
-2. **LAYOUT_PLANNING**: Coordinate system calibrated, regions defined
-3. **PROGRESSIVE_BUILD**: Three phases complete without COM errors
-4. **ALIGNMENT_AUDIT**: Panels aligned, no overlaps
-5. **COLOR_AUDIT**: Scientific semantics applied, colorblind-safe
-6. **INTEGRITY_VERIFICATION**: Native shapes only, no embedded media
-7. **DELIVERY**: All requested formats generated, file size acceptable
-
-**Fail fast:** Stop at first gate failure, report issue, don't proceed.
-
----
-
-## COM Best Practices (v2.0)
-
-### Pre-computed Coordinates
-```powershell
-# BAD: Nested loops with COM calls
-for ($i = 0; $i -lt 100; $i++) {
-    for ($j = 0; $j -lt 50; $j++) {
-        $shape = $page.DrawRectangle($i*10, $j*5, $i*10+8, $j*5+3)
-    }
-}
-
-# GOOD: Pre-compute coordinates, batch draw
-$coords = @()
-for ($i = 0; $i -lt 100; $i++) {
-    for ($j = 0; $j -lt 50; $j++) {
-        $coords += @{ X1=$i*10; Y1=$j*5; X2=$i*10+8; Y2=$j*5+3 }
-    }
-}
-foreach ($c in $coords) {
-    $null = $page.DrawRectangle($c.X1, $c.Y1, $c.X2, $c.Y2)
-}
-```
-
-### Proper COM Release
-```powershell
-try {
-    $visio = New-Object -ComObject Visio.Application
-    # ... work ...
-} finally {
-    if ($doc) {
-        try { $doc.Save() } catch {}
-        try { $doc.Saved = $true } catch {}
-        try { $doc.Close() } catch {}
-    }
-    if ($visio) { $visio.Quit() }
-    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($visio) | Out-Null
-    [System.GC]::Collect()
-    [System.GC]::WaitForPendingFinalizers()
-}
-```
-
-### Output Rules
-- Default output: editable `.vsdx` only
-- Generate rebuild scripts in `$env:TEMP`, delete after success
-- Generate a temporary preview PNG by default for quality gates, then delete it
-  after success. Use `-PreviewPath` to retain one explicitly or `-SkipPreview`
-  to disable preview generation.
-- Clean up temporary files after completion
-- `scripts/visio_rebuild_scaffold.ps1` accepts `-Phase 1|2|3`, `-ReferenceImagePath`,
-  `-RequiredText`, and `-RequiredColor`, then runs `visio_quality_gates.ps1` after
-  a successful save unless `-SkipQualityGates` is explicitly supplied.
-- `scripts/visio_page_tools.ps1 -CloseOpenDocument` discards unsaved edits quietly
-  by default; use `-SaveOpenDocument` only when saving that open document is explicitly authorized.
-
----
-
-## Operating Modes
-
-Choose the smallest mode that satisfies the request:
-
-| Mode | Use | Default result |
-| --- | --- | --- |
-| Create | Draw a new flowchart, architecture, process map, UML sequence, network, or scientific schematic | `.vsdx` |
-| Edit | Change an existing document's text, layout, palette, styles, grouping, or connectors | Updated `.vsdx` (temporary backup on failure) |
-| Rebuild-image | Convert PNG/JPG/screenshot/scan into native Visio shapes | `.vsdx`; preview only when requested |
-| Inspect | Check pages, shape count, text, media, locks, or editability | Report only |
-| Export | Render an existing verified `.vsdx` | Only explicitly requested formats |
-
----
-
-## Workflow
-
-1. **Inspect inputs** - Confirm paths, inspect package, backup target file
-2. **Decode reference** - Identify layout, colors, icons, inventory shapes
-3. **Declare Six Contracts** - Canvas, Layout, Color, Icon, Inventory, Quality
-4. **Progressive Build** - Three phases with checkpoints after each
-5. **Verify Quality** - Run validation script, check shape count
-6. **Clean up** - Remove temporary files, keep only final `.vsdx`
-
----
-
-## Implementation Pattern
-
-### Full Rebuild Template
-```powershell
-param([string]$VsdxPath, [int]$Phase = 3)
-
-# 1. Declare Six Contracts. If a reference image is supplied, derive the
-# pixel canvas and page aspect ratio from that image instead of guessing.
-$image = Get-ReferenceImageDimensions $ReferenceImagePath
-$RefW = $image.Width; $RefH = $image.Height
-$PageW = 16; $PageH = $PageW * $RefH / $RefW
-function VX($px) { ($px / $RefW) * $PageW }
-function VY($px) { $PageH - ($px / $RefH) * $PageH }
-
-$Regions = @{
-    LeftPanel = @{ RefX=20; RefY=50; RefW=480; RefH=700 }
-}
-
-$Colors = @{
-    DNA_Purple = "RGB(102,51,204)"
-}
-
-# 2. Open Visio
-try {
-    $visio = New-Object -ComObject Visio.Application
-    $doc = $visio.Documents.Open($VsdxPath)
-    $page = $doc.Pages.Item(1)
-    
-    # Set page size
-    $page.PageSheet.CellsSRC(1,1,0).FormulaU = "${PageW} in"
-    $page.PageSheet.CellsSRC(1,1,1).FormulaU = "${PageH} in"
-    
-    # 3. Draw based on phase
-    if ($Phase -eq 1) {
-        # Framework: ~60 shapes
-    } elseif ($Phase -eq 2) {
-        # Content: ~250 shapes
-    } elseif ($Phase -eq 3) {
-        # Details: ~100 shapes
-    }
-    
-    # 4. Save and close without a second implicit save prompt.
-    $doc.Save()
-    $doc.Saved = $true
-    $doc.Close()
-    Write-Host "Phase $Phase complete"
-    
-} finally {
-    if ($doc) { try { $doc.Saved = $true } catch {}; try { $doc.Close() } catch {} }
-    if ($visio) { $visio.Quit() }
-    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($visio) | Out-Null
-    [System.GC]::Collect()
-}
-```
-
----
-
-## Safety Checklist
-
-- Back up before writing
-- Close any open Visio document that locks the target file
-- Never delete unrelated user files
-- Tell the user clearly whether the final file is native editable shapes
-
----
-
-## Acceptance Criteria
-
-A Visio rebuild is acceptable only when:
-
-- Main panel positions, flow direction, captions match the reference
-- Major panels aligned to calibrated bounds, no overlaps
-- Text remains editable, consistent academic font
-- Domain icons use Visio Master or editable native fallback
-- Final `.vsdx` has no full-page raster reference image
-- Only requested export files produced and non-empty
-
----
-
-## Useful Resources
-
-- `scripts/visio_page_tools.ps1` - Inspection, backup, export
-- `scripts/visio_rebuild_scaffold.ps1` - Native-shape drawing template
-- `scripts/visio_stencil_catalog.ps1` - Stencil inspection
-- `scripts/visio_validate.ps1` - Package inspection + validation
-- `scripts/visio_quality_gates.ps1` - Input, integrity, size, text, color, page-bound,
-  preview, COM reopen, and process-cleanup gates
-- `references/icon-strategy.md` - Icon selection
-- `references/scientific-color-palettes.md` - Color schemes
+Only explicitly requested PNG/SVG/PDF/PPTX files are exported. PNG/SVG/PPTX export
+the selected page; PDF exports all foreground pages with their backgrounds. PPTX is a slide containing the
+rendered SVG, not decomposed editable PowerPoint shapes.
+Report the final VSDX, verified editability, visual approximations and any skipped
+checks. Do not claim a remote update without a verified push.

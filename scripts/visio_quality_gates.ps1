@@ -7,55 +7,24 @@ param(
     [string[]]$RequiredText,
     [string[]]$RequiredColor,
 
+    [ValidateRange(1, 2147483647)]
+    [int]$PageIndex = 1,
+    [switch]$AllowMedia,
+
     [ValidateSet(1, 2, 3)]
     [int]$Phase = 3,
 
-    [long]$MaxBytes = 2097152,
+    [long]$MaxBytes = 0,
     [switch]$SkipCom,
+    # Compatibility switch: owned-process cleanup is always verified now.
     [switch]$StrictProcess
 )
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'visio_stencil_helpers.ps1')
-
-function Read-VsdxQualityPackage([string]$Path) {
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $zip = [IO.Compression.ZipFile]::OpenRead($Path)
-    try {
-        $pages = @($zip.Entries | Where-Object { $_.FullName -match '^visio/pages/page\d+\.xml$' })
-        $media = @($zip.Entries | Where-Object { $_.FullName -like 'visio/media/*' })
-        $shapeCount = 0
-        $texts = New-Object System.Collections.Generic.List[string]
-        $colors = New-Object System.Collections.Generic.List[string]
-        foreach ($entry in $pages) {
-            $reader = [IO.StreamReader]::new($entry.Open())
-            try { [xml]$xml = $reader.ReadToEnd() } finally { $reader.Dispose() }
-            $shapeCount += @($xml.SelectNodes("//*[local-name()='Shape']")).Count
-            foreach ($node in @($xml.SelectNodes("//*[local-name()='Text']"))) {
-                $value = [regex]::Replace([string]$node.InnerText, '\s+', ' ').Trim()
-                if ($value) { $texts.Add($value) }
-            }
-            foreach ($cell in @($xml.SelectNodes("//*[local-name()='Cell']"))) {
-                $name = [string]$cell.N
-                if ($name -in @('FillForegnd', 'LineColor', 'Char.Color')) {
-                    $formula = [string]$cell.FormulaU
-                    if (-not $formula) { $formula = [string]$cell.Formula }
-                    if (-not $formula) { $formula = [string]$cell.V }
-                    if ($formula) { $colors.Add($formula) }
-                }
-            }
-        }
-        [pscustomobject]@{
-            PageCount = $pages.Count
-            ShapeCount = $shapeCount
-            Media = $media
-            Text = @($texts.ToArray())
-            Colors = @($colors.ToArray())
-        }
-    } finally {
-        $zip.Dispose()
-    }
-}
+. (Join-Path $PSScriptRoot 'visio_package.ps1')
+$RequiredText = @($RequiredText | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$RequiredColor = @($RequiredColor | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 
 function Test-RequiredValues([string[]]$Values, [string[]]$Required, [string]$Label) {
     foreach ($item in @($Required)) {
@@ -65,12 +34,33 @@ function Test-RequiredValues([string[]]$Values, [string[]]$Required, [string]$La
             $normalizedItem = '#{0:X2}{1:X2}{2:X2}' -f [int]$Matches[1], [int]$Matches[2], [int]$Matches[3]
         }
         $found = @($Values | Where-Object {
+                $candidate = [string]$_
+                if ($candidate -match '^RGB\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$') {
+                    $candidate = '#{0:X2}{1:X2}{2:X2}' -f [int]$Matches[1], [int]$Matches[2], [int]$Matches[3]
+                }
                 $_.IndexOf($item, [StringComparison]::OrdinalIgnoreCase) -ge 0 -or
-                $_.IndexOf($normalizedItem, [StringComparison]::OrdinalIgnoreCase) -ge 0
+                $candidate.IndexOf($normalizedItem, [StringComparison]::OrdinalIgnoreCase) -ge 0
             }).Count -gt 0
         if (-not $found) { throw "$Label not found: $item" }
         Write-Output "  $Label found: $item"
     }
+}
+
+function Assert-AspectRatio([double]$ActualWidth, [double]$ActualHeight,
+    [double]$ExpectedWidth, [double]$ExpectedHeight, [string]$Label,
+    [double]$Tolerance = 0.015) {
+    if ($ActualWidth -le 0 -or $ActualHeight -le 0 -or
+        $ExpectedWidth -le 0 -or $ExpectedHeight -le 0) {
+        throw "ASPECT_RATIO failed: invalid dimensions for $Label."
+    }
+    $actualRatio = $ActualWidth / $ActualHeight
+    $expectedRatio = $ExpectedWidth / $ExpectedHeight
+    $relativeError = [math]::Abs($actualRatio - $expectedRatio) / $expectedRatio
+    if ($relativeError -gt $Tolerance) {
+        throw ("ASPECT_RATIO failed for {0}: actual {1:F6}, expected {2:F6}, error {3:P2}." -f
+            $Label, $actualRatio, $expectedRatio, $relativeError)
+    }
+    Write-Output ("  Aspect ratio {0}: {1:F6} (expected {2:F6})" -f $Label, $actualRatio, $expectedRatio)
 }
 
 if (-not (Test-Path -LiteralPath $VsdxPath -PathType Leaf)) {
@@ -80,37 +70,47 @@ $fullPath = (Resolve-Path -LiteralPath $VsdxPath).Path
 if ($ReferenceImagePath -and -not (Test-Path -LiteralPath $ReferenceImagePath -PathType Leaf)) {
     throw "INPUT_VALIDATION failed: reference image not found: $ReferenceImagePath"
 }
+$referenceSize = $null
+if ($ReferenceImagePath) {
+    $referenceSize = Get-ReferenceImageDimensions $ReferenceImagePath
+    if ($referenceSize.Width -le 0 -or $referenceSize.Height -le 0) {
+        throw 'INPUT_VALIDATION failed: reference image has invalid dimensions.'
+    }
+}
 
 $file = Get-Item -LiteralPath $fullPath
 if ($file.Length -le 0) { throw 'DELIVERY failed: VSDX is empty.' }
-if ($file.Length -gt $MaxBytes) {
+if ($MaxBytes -gt 0 -and $file.Length -gt $MaxBytes) {
     throw "DELIVERY failed: VSDX is $($file.Length) bytes; maximum is $MaxBytes bytes."
 }
 Write-Output 'INPUT_VALIDATION: PASS'
 Write-Output ("  VSDX: {0} ({1} bytes)" -f $fullPath, $file.Length)
 if ($ReferenceImagePath) { Write-Output "  Reference: $((Resolve-Path -LiteralPath $ReferenceImagePath).Path)" }
 
-$package = Read-VsdxQualityPackage $fullPath
+$package = Read-VsdxPackage $fullPath
 if ($package.PageCount -lt 1) { throw 'INTEGRITY_VERIFICATION failed: no Visio page XML.' }
-if ($package.ShapeCount -lt 1) { throw 'INTEGRITY_VERIFICATION failed: no native shapes.' }
-$raster = @($package.Media | Where-Object {
-        $_.FullName -match '\.(png|jpg|jpeg|gif|bmp)$' -or $_.Length -gt 1000000
-    })
-if ($raster.Count -gt 0) {
-    throw 'INTEGRITY_VERIFICATION failed: raster or large media remains in the VSDX.'
+if ($PageIndex -gt $package.PageCount) { throw "PageIndex $PageIndex exceeds page count $($package.PageCount)." }
+$selectedPage = $package.Pages[$PageIndex - 1]
+if ($selectedPage.ShapeCount -lt 1) { throw 'INTEGRITY_VERIFICATION failed: selected page has no shapes.' }
+if (-not $AllowMedia -and ($package.Media.Count -gt 0 -or $package.ForeignCount -gt 0)) {
+    throw 'INTEGRITY_VERIFICATION failed: non-native media remains in the VSDX.'
 }
 Write-Output 'INTEGRITY_VERIFICATION: PASS'
-Write-Output ("  Pages: {0}; native shapes: {1}; media: {2}" -f $package.PageCount, $package.ShapeCount, $package.Media.Count)
+Write-Output ("  Pages: {0}; shapes: {1}; media: {2}; foreign shapes (pages/masters): {3}" -f
+    $package.PageCount, $package.ShapeCount, $package.Media.Count, $package.ForeignCount)
+Write-Output ("  Selected page: {0} ({1}, {2})" -f $PageIndex, $selectedPage.NameU, $selectedPage.PartName)
+if ($AllowMedia) { Write-Output 'NATIVE_CONTENT: SKIPPED (media explicitly allowed; full native editability is not established)' }
+else { Write-Output 'NATIVE_CONTENT: PASS' }
 
-Write-Output ("PROGRESSIVE_BUILD: PASS (requested phase {0}; drawing callback must honor `$script:BuildPhase or -Phase)" -f $Phase)
-Test-RequiredValues $package.Text $RequiredText 'Required text'
+Write-Output ("PHASE_SCOPE: INFO (requested phase {0}; package alone cannot verify callback completeness)" -f $Phase)
+Test-RequiredValues $selectedPage.Text $RequiredText 'Required text'
 if (@($RequiredText).Count -eq 0) { Write-Output '  Required text: not supplied (informational)' }
 
 if (@($RequiredColor).Count -gt 0) {
-    Test-RequiredValues $package.Colors $RequiredColor 'Required color token'
+    Test-RequiredValues $selectedPage.Colors $RequiredColor 'Required color token'
     Write-Output 'COLOR_AUDIT: PASS'
 } else {
-    Write-Output 'COLOR_AUDIT: PASS (no explicit color tokens supplied; visual review remains required)'
+    Write-Output 'COLOR_AUDIT: SKIPPED (no explicit color tokens supplied)'
 }
 
 $previewFile = $null
@@ -120,78 +120,73 @@ if ($PreviewPath) {
     }
     $previewFile = Get-Item -LiteralPath $PreviewPath
     if ($previewFile.Length -le 0) { throw 'DELIVERY failed: preview is empty.' }
+    $previewSize = Get-ReferenceImageDimensions $PreviewPath
+    if ($referenceSize) {
+        Assert-AspectRatio $previewSize.Width $previewSize.Height $referenceSize.Width $referenceSize.Height 'preview/reference'
+    }
     Write-Output ("  Preview: {0} ({1} bytes)" -f $previewFile.FullName, $previewFile.Length)
 } else {
     Write-Output '  Preview: not requested'
 }
 
+
 if (-not $SkipCom) {
-    $beforeIds = @((Get-Process -Name VISIO -ErrorAction SilentlyContinue).Id)
-    $visio = $null; $doc = $null; $page = $null
+    $visio = $null; $documents = $null; $doc = $null; $pages = $null; $page = $null; $shapes = $null
     $outOfBounds = New-Object System.Collections.Generic.List[string]
     try {
-        $visio = New-Object -ComObject Visio.Application
-        $visio.Visible = $false
-        $doc = $visio.Documents.Open($fullPath)
-        $page = $doc.Pages.Item(1)
-        $pageW = [double]$page.PageSheet.CellsU('PageWidth').ResultIU
-        $pageH = [double]$page.PageSheet.CellsU('PageHeight').ResultIU
-        if ($pageW -le 0 -or $pageH -le 0) { throw 'LAYOUT_PLANNING failed: invalid page dimensions.' }
-        for ($i = 1; $i -le $page.Shapes.Count; $i++) {
-            $shape = $null
-            try {
-                $shape = $page.Shapes.Item($i)
-                $x = [double]$shape.CellsU('PinX').ResultIU
-                $y = [double]$shape.CellsU('PinY').ResultIU
-                $w = [math]::Abs([double]$shape.CellsU('Width').ResultIU)
-                $h = [math]::Abs([double]$shape.CellsU('Height').ResultIU)
-                # Connector lines and zero-height/zero-width annotation shapes can
-                # legitimately use endpoints on the page border. Only flag a shape
-                # when its visible bounding box is materially outside the page.
-                $tol = 0.15
-                if ($w -gt 0.001 -and $h -gt 0.001 -and
-                    (($x - $w / 2) -lt -$tol -or ($x + $w / 2) -gt ($pageW + $tol) -or
-                     ($y - $h / 2) -lt -$tol -or ($y + $h / 2) -gt ($pageH + $tol))) {
-                    $outOfBounds.Add([string]$shape.NameU)
-                }
-            } catch {
-                # Some legacy/group shapes do not expose all cells; package and COM reopen
-                # checks still cover them, so do not turn an unreadable optional cell into a leak.
-            } finally {
-                Release-VisioComObject $shape
-            }
+        $visio = New-VisioApplication
+        $documents = $visio.Documents
+        $doc = $documents.OpenEx($fullPath, 66)
+        $pages = $doc.Pages
+        $page = $pages.Item($PageIndex)
+        if ([string]$page.ID -ne $selectedPage.ID) {
+            throw 'Package page order does not match Visio. Inspect page IDs before validating this selection.'
         }
-        Write-Output ("COM reopen: pages={0}, shapes={1}" -f $doc.Pages.Count, $page.Shapes.Count)
+        $size = Get-VisioPageSize $page
+        $pageW = $size.Width; $pageH = $size.Height
+        if ($pageW -le 0 -or $pageH -le 0) { throw 'Invalid page dimensions.' }
+        if ($referenceSize) {
+            Assert-AspectRatio $pageW $pageH $referenceSize.Width $referenceSize.Height 'page/reference'
+        }
+        if ($previewFile) {
+            Assert-AspectRatio $previewSize.Width $previewSize.Height $pageW $pageH 'preview/page'
+        }
+        $shapes = $page.Shapes
+        for ($i = 1; $i -le $shapes.Count; $i++) {
+            $shape = $shapes.Item($i)
+            try {
+                [double]$left = 0; [double]$bottom = 0; [double]$right = 0; [double]$top = 0
+                # Drawing-coordinate geometry bounds include rotation, groups and lines.
+                $shape.BoundingBox(8196, [ref]$left, [ref]$bottom, [ref]$right, [ref]$top)
+                $tol = 0.02
+                if ($left -lt -$tol -or $bottom -lt -$tol -or $right -gt ($pageW + $tol) -or $top -gt ($pageH + $tol)) {
+                    $outOfBounds.Add("page $PageIndex / $($shape.NameU)")
+                }
+            } finally { Release-VisioComObject $shape }
+        }
+        Write-Output ("COM reopen: page={0}, top-level shapes={1}, size={2:F4}x{3:F4}in" -f $PageIndex, $shapes.Count, $pageW, $pageH)
     } finally {
-        if ($doc -ne $null) { try { $doc.Saved = $true } catch {}; try { $doc.Close() } catch {} }
-        Release-VisioComObject $page
-        Release-VisioComObject $doc
-        if ($visio -ne $null) { try { $visio.Quit() } catch {}; Release-VisioComObject $visio }
+        try {
+            Release-VisioComObject $shapes
+            Release-VisioComObject $page
+            Release-VisioComObject $pages
+            if ($doc) {
+                try { $doc.Saved = $true; $doc.Close() }
+                finally { Release-VisioComObject $doc }
+            }
+        } finally {
+            try { Release-VisioComObject $documents }
+            finally { Stop-VisioApplication $visio }
+        }
     }
     if ($outOfBounds.Count -gt 0) {
-        throw ('ALIGNMENT_AUDIT failed: shapes outside page bounds: ' + ($outOfBounds -join ', '))
+        throw ('PAGE_BOUNDS failed: ' + ($outOfBounds -join ', '))
     }
-    Write-Output 'LAYOUT_PLANNING: PASS'
-    Write-Output 'ALIGNMENT_AUDIT: PASS'
-
-    $remaining = @()
-    for ($attempt = 0; $attempt -lt 20; $attempt++) {
-        $remaining = @((Get-Process -Name VISIO -ErrorAction SilentlyContinue) |
-            Where-Object { $beforeIds -notcontains $_.Id })
-        if ($remaining.Count -eq 0) { break }
-        Start-Sleep -Milliseconds 100
-    }
-    if ($remaining.Count -gt 0) {
-        $message = 'New Visio process(es) remain after quality gates: ' + (($remaining.Id) -join ', ')
-        if ($StrictProcess) { throw $message }
-        Write-Warning $message
-    } else {
-        Write-Output 'COM process cleanup: PASS'
-    }
+    Write-Output 'COM_REOPEN: PASS'
+    Write-Output 'PAGE_BOUNDS: PASS (not an overlap or text-fit test)'
 } else {
-    Write-Output 'LAYOUT_PLANNING: PASS (COM skipped)'
-    Write-Output 'ALIGNMENT_AUDIT: SKIPPED (COM skipped)'
+    Write-Output 'COM_REOPEN: SKIPPED'
+    Write-Output 'PAGE_BOUNDS: SKIPPED'
 }
-
-Write-Output 'DELIVERY: PASS'
-Write-Output 'Quality gates: OK'
+Write-Output 'AUTOMATED_CHECKS: PASS'
+Write-Output 'VISUAL_REVIEW: REQUIRED (inspect text, icons, layout and meaning against the reference)'

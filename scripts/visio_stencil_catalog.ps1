@@ -110,7 +110,7 @@ function ConvertTo-StencilMarkdown([object[]]$items, [string[]]$roots) {
     return ($lines -join [Environment]::NewLine)
 }
 
-$roots = @($RootPath)
+$roots = @($RootPath | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 if ($roots.Count -eq 0) { $roots = Get-DefaultStencilRoots }
 $formatToUse = if ($PSBoundParameters.ContainsKey('Format')) {
     $Format
@@ -166,8 +166,11 @@ if ($OutputPath) {
     if ($formatToUse -eq 'markdown') {
         $encoding = New-Object System.Text.UTF8Encoding($false)
         [IO.File]::WriteAllText($OutputPath, (ConvertTo-StencilMarkdown -items $results -roots $roots), $encoding)
-    } else {
+    } elseif ($formatToUse -eq 'json') {
         $results | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+    } else {
+        $results | Sort-Object File | Format-Table File, MasterCount, SampleMasters, Note -AutoSize |
+            Out-String -Width 240 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
     }
     Write-Output "Catalog written: $OutputPath"
 } else {

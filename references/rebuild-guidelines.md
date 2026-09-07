@@ -2,7 +2,7 @@
 
 Use this reference when reconstructing a scientific, technical, or academic diagram from a PNG/JPG/screenshot into editable Microsoft Visio `.vsdx` content.
 
-The goal is visual and semantic equivalence using native Visio shapes, text, connectors, groups, and styles. Do not treat any example below as a fixed domain template. Use `.vsdx` as the editable source, then export SVG/PDF/PPTX deliverables from that source.
+The goal is visual and semantic equivalence using native Visio shapes, text, connectors, groups, and styles. Do not treat any example below as a fixed domain template. Use `.vsdx` as the editable source; export other formats only when requested.
 
 ## Reference Analysis
 
@@ -58,9 +58,9 @@ Use a reference coordinate system in pixels or normalized units, then convert to
 
 ```powershell
 $PageW = 16.0
-$PageH = 12.0
-$RefW = 1448.0
-$RefH = 1086.0
+# With a reference image, obtain RefW/RefH from its actual pixel dimensions.
+# Derive PageH unless an intentional target page ratio is supplied.
+$PageH = $PageW * $RefH / $RefW
 function VX([double]$x) { $PageW * $x / $RefW }
 function VY([double]$y) { $PageH - ($PageH * $y / $RefH) }
 ```
@@ -98,7 +98,7 @@ Before delivery, inspect the preview for:
 - Match structure before decoration. Panel placement, reading order, and flow arrows matter more than texture detail.
 - Preserve semantic grouping. Containers, modules, legends, charts, and subgraphs should be separate editable groups.
 - Use local panel coordinates for nested diagrams so internal edits cannot drift into neighboring panels.
-- Preserve scientific labels exactly when legible. If text is unreadable, use a close placeholder and report the limitation.
+- Preserve scientific labels exactly when legible. If unreadable text changes the meaning, ask the user instead of inventing a label.
 - Use simplified native motifs for dense image-like content: stacked rounded rectangles, small dots, mini heatmaps, line charts, bar charts, tables, and graph nodes.
 - Keep equations editable as text when practical. Use plain text approximations if Visio equation objects are unavailable.
 - Use color as semantic grouping, not decoration. Reuse one accent per panel or module unless the reference clearly uses another scheme.
@@ -165,7 +165,9 @@ Score the result before delivery:
 - Layout: major panels and their children stay within calibrated bounds without visible overlap.
 - Editability: no full-page image; major objects are native shapes.
 - Outputs: requested PNG/SVG/PDF/PPTX files exist, are non-empty, and were exported from the same saved `.vsdx`.
-- Robustness: target file has a backup; preview or package checks are recorded.
+- Robustness: draw and validate a staging file before replacing the target. A failed build
+  leaves the original unchanged; `-KeepBackup` explicitly retains a previous-version copy.
+  Temporary previews are removed after verification; explicitly requested outputs are retained.
 
 If any category is weak, either fix it or state the limitation explicitly.
 
@@ -174,7 +176,7 @@ If any category is weak, either fix it or state the limitation explicitly.
 Final response should include:
 
 - Target `.vsdx` path.
-- Backup path.
+- Backup path only if explicitly retained.
 - Preview path if exported.
 - SVG/PDF/PPTX paths if requested.
 - Whether the `.vsdx` file is native editable Visio shapes.

@@ -1,245 +1,159 @@
-# 通用 Visio 自动化工具包
+# 通用 Visio 工具包
 
-这是一个面向 Microsoft Visio 的通用自动化工具包，当前保持为初版。它支持创建、编辑、检查、显式导出和图片反推，并将结果维护为 **`.vsdx` 原生可编辑图形**。
+创建、编辑、检查、按需导出 Visio 图形，并把参考图片重建为原生可编辑的
+`.vsdx`。核心由 Markdown、PowerShell 和本机 Visio COM 构成，不限定调用方：
+任何能够读取说明并运行本地脚本的 Agent 或自动化流程都可以使用。
+`agents/openai.yaml` 只是可选界面元数据。
 
-核心内容由 Markdown 说明、参考索引和 PowerShell 脚本组成。任何能读取这些说明并执行本地脚本的 AI Agent 或自动化流程都可以复用；`agents/openai.yaml` 只是 Codex 的可选界面元数据，不是功能依赖。
+## 使用边界
 
-## 注意！
-图片重建适合结构图、流程图、架构图和多面板示意图。真实数据指标图仍应优先使用 Python/R 生成，再按需把版式元素整理到 Visio。
+支持 Create、Edit、Rebuild-image、Inspect、Export 五种工作模式。
+默认只交付 VSDX，不额外输出 SVG、PDF、PPTX。图片重建面向结构图、流程图、
+架构图和概念示意图，不把整张参考图嵌入页面冒充可编辑内容。
+真实数据指标图应由真实数据和可追溯的 Python/R 绘图脚本生成。
 
-当前后端使用 Visio COM，因此完整绘图需要 Windows 和 Microsoft Visio。工具包不把调用方限定为某个 Agent；如果要接入 Draw.io 或其他绘图应用，应保留这里的对象清单、输出边界和验收规则，再替换对应后端。
+完整绘制和渲染需要 Windows、PowerShell 7（`pwsh`）与已授权的 Microsoft Visio。
+请在 `pwsh` 中执行下方命令。COM 后端会在 Windows PowerShell 5.1 中提前报错，
+避免在不支持的宿主中挂起；只读包检查和母版目录扫描不启动 COM。
+PowerPoint 仅在用户请求 PPTX 时需要。缺失软件先说明环境要求和安装来源；
+不自动下载或部署需要用户授权的 Office 产品。
 
+## 安装与维护
 
-## 工作模式
+只维护一份工作目录，再按各调用方的发现机制注册或链接。
+使用 CC Switch 时，以其管理的 skill 目录为唯一来源，不再分别克隆到多个
+Agent 的目录。已经安装时直接更新现有目录。
 
-- `Create`：创建流程图、架构图、时序图、网络拓扑、泳道图或科学示意图。
-- `Edit`：修改已有 `.vsdx` 的文字、布局、配色、字体、分组和连接线。
-- `Rebuild-image`：把 PNG/JPG/截图/扫描图重建为原生 Visio 形状。
-- `Inspect`：检查页面、形状数量、关键文字、媒体条目、文件锁和可编辑性。
-- `Export`：只导出用户明确要求的 PNG、SVG、PDF 或 PPTX。
+仓库：[Heaven-y/edit-visio-skill](https://github.com/Heaven-y/edit-visio-skill)。
+这是独立维护的个人工具包，不自动追踪参考项目的上游改动。
+实际同步以本仓库的提交与推送结果为准，不把本地修改称为远程更新。
 
-默认只交付 `.vsdx`；为质量门禁生成的预览图仅写入系统临时目录并在成功后删除。
-其他格式必须显式请求；临时 JSON、预览图和日志应放到构建目录或系统临时目录。
-写入期间最多创建一个临时滚动备份用于回滚；成功保存并验证后自动清理，失败时才保留并报告备份路径。
-脚手架可传入 `-KeepBackup` 保留成功运行后的备份；普通运行不留下 `.backup.vsdx`。
-脚手架支持 `-Phase 1|2|3` 的累积构建，并在保存后调用 `scripts/visio_quality_gates.ps1`；
-只有显式传入 `-SkipQualityGates` 才会跳过门禁。
+## 图标与母版
 
-实现参考了 [deermiya/visio-skill](https://github.com/deermiya/visio-skill) 的通用模式划分、时序图、Stencil 和图片反推思路；COM 会话、备份和输出策略按本地 Windows/Visio 环境重新实现。
+普通框、矩阵、坐标轴和连线用基本形状；服务器、设备和领域对象先查本机
+Stencil。按稳定的 NameU 查找，再渲染样例确认外观与语义。
 
-## 图标与 Stencil 策略
+母版名相近不等于语义或外观匹配。部分母版的子形状是备选样式或隐藏层，
+不一定是独立部件；改色前必须检查。
+没有合适母版时使用原生曲线和分组部件，不默认导入自制 SVG。
+仓库只记录母版名称和路径，不复制或分发 Microsoft Stencil 文件。
 
-不要为了“有图标”而把低质量剪贴画、Emoji 或整张位图塞进 Visio。按下面的顺序选择：
+入口：
 
-1. 普通流程、数据和连接关系使用 Visio 原生基本形状。
-2. 服务器、数据库、网络设备、云服务和领域对象先查本机 Visio Stencil 母版。
-3. 本机没有合适母版时，使用可编辑的原生形状组合 fallback。
-4. 外部 SVG/EMF 只有在用户明确同意来源和许可证后才允许导入；整张参考图始终不能作为最终页面。
+- [图标策略](references/icon-strategy.md)
+- [常用母版速查](references/stencil-reference.md)
+- [完整索引](references/visio-stencil-index.md)
+- [图片重建准则](references/rebuild-guidelines.md)
+- [版式配方](references/template-library.md)，不是已打包的 VSDX 模板
 
-图标应满足：轮廓清楚、缩小后仍可辨认、使用有限的填充色和统一线宽，不依赖渐变或照片质感。农业/生物图建议使用“茎、叶、果穗/种子”等少量语义部件表达对象，而不是用多个随意椭圆堆叠。详细选择、导入和许可规则见 [`references/icon-strategy.md`](references/icon-strategy.md)。
+## 创建、编辑与重建
 
-`scripts/visio_stencil_catalog.ps1` 可以只读扫描本机 `.vssx/.vss` 文件并列出母版名称，避免凭文件名猜测图标库；完整结果见 [`references/visio-stencil-index.md`](references/visio-stencil-index.md)，常用入口见 [`references/icon-strategy.md`](references/icon-strategy.md)。
+脚手架支持三种明确的写入模式，`PageIndex` 从 1 开始：
 
-## 适用场景
+- `Create`：目标必须不存在；若提供模板，保留模板内容。
+- `Edit`：目标必须存在；保留已有对象和页面尺寸，由回调只修改指定对象。
+- `Rebuild`：清空指定页重绘，不自动清空其他页。旧调用默认此模式。
 
-适合：
-
-- 根据 PNG/JPG/截图重建 Visio 图。
-- 将 AI 生成的论文模型图转成可编辑 `.vsdx`。
-- 按参考图修改已有 Visio 文件的布局、配色、字体或模块结构。
-- 对复杂多面板科学图进行结构化复刻。
-- 检查 `.vsdx` 是否误用了整张参考图嵌入。
-- 给 Visio 图统一论文风格字体、配色和线条规范。
-- 按需从保存后的 `.vsdx` 导出 SVG、PDF、PPTX 或 PNG。
-- 对复杂多面板图先做面板四角/边界标定，减少子模块移位、串区和重叠。
-
-不适合：
-
-- 只需要把图片插入 Visio 页面。
-- 只需要普通图片编辑、抠图或美化。
-- 不要求 Visio 原生可编辑性的纯位图复刻。
-
-## 核心原则
-
-最终交付的 `.vsdx` 应尽量由以下对象构成：
-
-- Visio 原生矩形、圆形、线条、箭头、连接线。
-- 可编辑文本。
-- 可编辑分组。
-- 原生近似绘制的小图表、热图、节点图、立方体、堆叠图。
-
-禁止用整张参考图作为最终页面内容来冒充还原。参考图只能作为临时描摹依据；最终文件中不应留下完整的大尺寸参考 PNG/JPG。
-
-`.vsdx` 是可编辑母版。SVG/PDF/PPTX 是从这个母版导出的交付物，不应该单独重画出彼此不一致的版本。
-
-## 仓库结构
-
-```text
-.
-├── README.md
-├── SKILL.md
-├── agents/
-│   └── openai.yaml
-├── references/
-│   ├── icon-strategy.md
-│   ├── python-com-backend.md
-│   ├── rebuild-guidelines.md
-│   ├── stencil-reference.md
-│   └── visio-stencil-index.md
-└── scripts/
-    ├── visio_export_formats.ps1
-    ├── visio_page_tools.ps1
-    ├── visio_rebuild_scaffold.ps1
-    ├── visio_stencil_catalog.ps1
-    ├── visio_stencil_helpers.ps1
-    ├── visio_validate.ps1
-    └── visio_quality_gates.ps1
-```
-
-文件说明：
-
-- `SKILL.md`：通用入口，包含 Visio 模式、工作流、验收标准和安全规则。
-- `agents/openai.yaml`：可选的 Codex UI 元数据，不影响脚本在其他 Agent 中使用。
-- `references/icon-strategy.md`：内置母版、原生 fallback 和外部资产的选择规则。
-- `references/stencil-reference.md`：常用 Stencil 文件和经核对的本地化 Master 名称速查。
-- `references/visio-stencil-index.md`：从本机 Visio 2052 内容目录生成的 362 个 Stencil 完整索引，包含本地化 `Name`、稳定 `NameU` 和 ID。
-- `references/python-com-backend.md`：PowerShell COM 不稳定时的可选 Python `pywin32` 后端约定。
-- `references/rebuild-guidelines.md`：复杂科学图还原准则，包括面板拆解、绘图顺序、样式参数、导出策略和验证 rubric。
-- `scripts/visio_export_formats.ps1`：可复用导出函数，支持 PNG、SVG、PDF、PPTX。
-- `scripts/visio_page_tools.ps1`：辅助检查脚本，用于备份、导出、检查 `.vsdx` 包结构。
-- `scripts/visio_rebuild_scaffold.ps1`：Visio 原生绘图脚手架，用于新建或重建图形，并内置全局坐标和面板局部坐标 helper。
-- `scripts/visio_stencil_catalog.ps1`：只读扫描本机 Stencil 并输出母版目录。
-- `scripts/visio_stencil_helpers.ps1`：只读打开 Stencil、按 Name/NameU 精确或关键词查找 Master、放置并校准图标、关闭 COM 文档的可复用函数。
-- `scripts/visio_validate.ps1`：统一检查 VSDX 包结构、原生 Shape、关键文字、COM 重开和进程清理。
-- `scripts/visio_quality_gates.ps1`：统一执行输入、文件大小、媒体、文字、颜色、预览、页面边界、COM 重开和进程清理门禁。
-
-## 环境要求
-
-推荐环境：
-
-- Windows。
-- Microsoft Visio。
-- PowerShell。
-- Microsoft PowerPoint，用于 PPTX 导出。
-- Git。
-- 任意支持本地文件和脚本调用的 AI Agent 或自动化流程（Codex 可通过 `agents/openai.yaml` 获得额外界面集成）。
-
-说明：
-
-- 完整 Visio 自动绘图依赖 Visio COM Automation，因此主要面向 Windows + Microsoft Visio。
-- SVG 和 PNG 由 Visio 页面导出。
-- PDF 由 Visio 固定格式导出。
-- PPTX 默认由 PowerPoint COM 创建单页演示文稿，并插入 Visio 导出的 SVG 页面渲染。
-- 导出脚本默认隐藏 Visio 和 PowerPoint；只有显式传入 `-Visible` 才显示窗口。
-- 脚手架默认使用 Arial，可通过 `-FontName` 指定论文字体；绘图 helper 默认释放 Shape，只有显式使用 `-PassThru` 才返回 COM 对象。
-- 不安装 Visio 时，仍可做 `.vsdx` 包结构检查或有限 XML 修改，但不适合完整一比一重建。
-
-关闭已经打开的目标文档时，`scripts/visio_page_tools.ps1 -CloseOpenDocument` 默认丢弃未保存界面修改，
-不会主动写入文件；只有显式添加 `-SaveOpenDocument` 才会先保存。
-
-## 安装方式
-
-将本仓库克隆或复制到调用方可读取的 skill/tool 目录。核心功能不依赖 Codex；若使用 Codex，可额外放入其 skills 目录以启用自动发现。
-
-Windows 示例：
+新建无参考图的流程图：
 
 ```powershell
-git clone https://github.com/Heaven-y/edit-visio-skill.git "$env:USERPROFILE\.codex\skills\visio-image-rebuilder"
+& "$skillRoot/scripts/visio_rebuild_scaffold.ps1" `
+  -Mode Create -VsdxPath "C:/path/workflow.vsdx" `
+  -PageW 12 -PageH 7.5 -DrawingScript "C:/path/draw.ps1"
 ```
 
-在具体 Agent 中按其 skill 发现机制注册该目录；Codex 用户安装后重启 Codex 或开启新会话即可重新发现。
-
-## 推荐使用方式
-
-示例请求：
-
-```text
-使用 visio-image-rebuilder，根据这张参考图片重建 C:\path\model.vsdx，要求最终是 Visio 原生可编辑形状，不要整图嵌入，并导出 SVG、PDF、PPTX。
-```
-
-```text
-把这个 .vsdx 按参考图更换配色，保持布局不变，最终仍然可编辑，并给我一个 PDF 预览和 PPTX。
-```
-
-```text
-检查这个 .vsdx 是否只是嵌入了整张 PNG，如果是，请改成原生 Visio 形状重建，再导出 SVG。
-```
-
-## 面板标定与防重叠
-
-复杂多面板图使用面板局部坐标和边界断言。推荐流程是：
-
-1. 先标定整张参考图尺寸和 Visio 页面尺寸。
-2. 再标定每个主要 panel 的左上角、宽高，必要时记录四角点。
-3. panel 内部元素使用 0-1 局部坐标绘制，而不是直接手写全图坐标。
-4. 导出预览后检查子模块是否越出父 panel、相邻 panel 是否重叠、箭头和文字是否穿过无关模块。
-
-`visio_rebuild_scaffold.ps1` 中已提供：
-
-- `RectRel`
-- `TextRel`
-- `OvalRel`
-- `LineRel`
-- `Assert-RelBox`
-- `Assert-RelPoint`
-- `Connect-VisioShapes`
-
-这些 helper 会把局部坐标映射回全局参考坐标，并在局部元素越出 panel 边界时直接报错，避免复杂图后半部分出现整体移位或重叠。
-
-保存 VSDX 后可运行统一验收：
+只编辑第二页：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\visio_validate.ps1 `
-  -VsdxPath "C:\path\model.vsdx" `
-  -RequiredText "Independent G×E model runs","Prediction performance"
+& "$skillRoot/scripts/visio_rebuild_scaffold.ps1" `
+  -Mode Edit -PageIndex 2 -VsdxPath "C:/path/workflow.vsdx" `
+  -DrawingScript "C:/path/edit.ps1"
 ```
 
-## 多格式导出
+编辑回调先按稳定的 NameU 或 ID 定位对象，不能顺带全局改色、重设共享母版或
+删除其他页。脚手架负责隔离保存；具体回调仍须遵守用户指定的编辑范围。
 
-导出已有 `.vsdx`：
+图片重建流程：
+
+1. 从参考图实际读取像素宽高，根据长宽比计算页面尺寸；不写死示例画布。
+2. 按参考图整理布局、文字、箭头关系、配色与图标，命名并分组主要模块。
+3. 用任务绘图回调重绘暂存文件，不直接清空并保存用户的原文件。
+4. 关闭独立 COM 会话，检查暂存 VSDX，再替换目标。
+5. 查看渲染预览，与参考图逐区比较后交付。
+
+脚手架接受 `-Phase 1|2|3`。这些是完整重绘到指定阶段的检查点，不是多次运行
+自动续画。简单图可以只运行最终阶段，不规定形状数量或固定耗时。
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\visio_page_tools.ps1 `
-  -VsdxPath "C:\path\model.vsdx" `
-  -ExportFormats svg,pdf,pptx `
-  -OutputDir "C:\path\exports" `
-  -InspectPackage
+& "$skillRoot/scripts/visio_rebuild_scaffold.ps1" `
+  -Mode Rebuild -VsdxPath "C:/path/diagram.vsdx" `
+  -ReferenceImagePath "C:/path/reference.png" `
+  -DrawingScript "C:/path/draw.ps1"
 ```
 
-重建并导出：
+`draw.ps1` 应支持 `param([switch]$LoadDrawing)`，并定义
+`Draw-VisioPage([int]$Phase)`，兼容旧名称 `Draw-ReferenceFigure`。回调可使用脚手架的
+`RectTL/TextTL/OvalTL/LineTL`、面板局部坐标工具和 `Connect-VisioShapes`。
+通过 `$script:Page`、`$script:Visio` 访问本次会话。
+无参考图的新建/重建可指定 `PageW/PageH` 英寸尺寸，或 `RefW/RefH` 坐标画布。
+编辑时若不指定坐标画布，辅助函数使用原页的英寸宽高，左上为原点；直接 COM
+操作仍以左下为原点。有参考图时，像素宽高自动读取，页面比例跟随原图。
+
+## 预览、保存与清理
+
+自动检查用 PNG 默认是临时文件，结束时删除。需要 Agent 查看预览时，将
+`-PreviewPath` 指向任务临时目录，实际查看后清理；用户明确请求保留的 PNG 则保留。
+预览和导出均不得覆盖输入参考图片。
+
+失败重绘不改变原目标，不需要默认堆积 backup。只有 `-KeepBackup` 才保留旧文件，
+备份名唯一，不覆盖已有备份。目标被锁定时停止；覆盖许可不等于丢弃未保存界面修改。
+
+使用独立的 `Visio.InvisibleApp`，只关闭自动化拥有的文档和进程。
+`-CloseOpenDocument` 不会退出用户的 Visio；若目标有未保存修改，必须明确选择
+`-SaveOpenDocument` 或 `-DiscardOpenDocument`。
+
+## 检查与导出
+
+`scripts/visio_quality_gates.ps1` 检查包结构、原生对象、媒体、必要文字和颜色、
+页面及预览比例、几何边界、只读重开和真实 Windows 进程退出。
+`visio_validate.ps1` 复用同一实现，避免两套检查逐渐不一致。
+文字、颜色、比例和边界按 `-PageIndex` 检查，多页修改应逐页验收。
+`visio_page_tools.ps1 -InspectPackage` 只读列出全部页，包括背景页及实际 XML 路径。
+
+默认严格检查原生内容。用户明确允许保留既有 Logo 或导入外部资源时，使用
+`-AllowMedia`，并如实说明文档含非原生对象，不能宣称完全原生可编辑。
+不要为了通过检查而删除用户已有图片。
+
+自动检查不能证明文字不挤压、图标正确、图形没有视觉重叠或图片相似。
+缺失的检查报告 SKIPPED，不把参数值或未执行的检查称为 PASS。
+
+只有明确请求时才导出 PNG、SVG、PDF、PPTX：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\visio_rebuild_scaffold.ps1 `
-  -VsdxPath "C:\path\model.vsdx" `
-  -PageW 16 `
-  -ReferenceImagePath "C:\path\reference.png" `
-  # RefW/RefH/PageH are derived from the reference image when omitted.
-  # By default a temporary PNG preview is generated for quality gates and
-  # deleted after success. Use -PreviewPath only when you explicitly want
-  # to retain a preview; use -SkipPreview to disable preview generation.
-  -ExportFormats svg,pdf,pptx `
-  -OutputDir "C:\path\exports"
+& "$skillRoot/scripts/visio_page_tools.ps1" `
+  -VsdxPath "C:/path/diagram.vsdx" -ExportFormats svg,pdf -OutputDir "C:/path/exports"
 ```
 
-## 验收标准
+PNG、SVG、PPTX 导出 `-PageIndex` 选定页，PDF 导出全部前景页并应用各自背景。
+PPTX 包含 Visio 页面的 SVG 渲染，不承诺拆分为 PowerPoint 原生形状。
+全部格式从同一保存后的 VSDX 生成，不能分别重画。
 
-一个合格的 Visio 还原结果应满足：
+## 代码入口
 
-- 主体布局和参考图一致。
-- 主要模块、标题、编号、箭头和说明文字齐全。
-- 文字可编辑。
-- 图形对象可单独选中和修改。
-- 没有整张参考图作为最终底图。
-- 配色、字体和线条风格统一。
-- 领域图标使用合适的 Visio 母版或小型矢量资产，不使用 Emoji、低质量剪贴画或大幅位图替代。
-- 复杂多面板图的内部元素不应明显移位、跨 panel 串区或互相重叠。
-- 有原文件备份。
-- 请求的 PNG/SVG/PDF/PPTX 从同一个保存后的 `.vsdx` 导出，并且文件非空。
+- `SKILL.md`：工作模式、执行约束和验收入口。
+- `scripts/visio_runtime.ps1`：图片尺寸、隔离会话、COM 释放与胶合连接器。
+- `scripts/visio_package.ps1`：不启动 Visio 的多页关系、文字与媒体读取。
+- `scripts/visio_rebuild_scaffold.ps1`：绘图回调、坐标工具、暂存与替换。
+- `scripts/visio_stencil_helpers.ps1`：母版查找、只读打开与放置。
+- `scripts/visio_stencil_catalog.ps1`：无 COM 的本机母版索引扫描。
+- `scripts/visio_export_formats.ps1`：页面等比例导出。
+- `scripts/visio_page_tools.ps1`：包检查、显式备份、关闭指定文档及导出。
 
-## 当前范围
+## 来源与许可
 
-这是一个可直接使用的通用初版，已覆盖五种工作模式、原生形状重建、面板局部坐标、COM 资源释放、动态连接、按需导出、Stencil 候选查询、累积阶段构建和统一验收。后续新增能力应直接更新当前说明和脚本，不再维护容易失真的版本历史表。
+设计参考了 [deermiya/visio-skill](https://github.com/deermiya/visio-skill)
+的通用模式、Stencil 索引及图片反推思路，也参考了
+[pengjunchi0/codex-visio-paper-figure-skill](https://github.com/pengjunchi0/codex-visio-paper-figure-skill)
+的论文图处理思路。运行时和输出规则按本工具包的实际行为维护。
 
-## 开源许可证
-
-本项目采用 [MIT License](LICENSE) 开源。
+本项目采用 [MIT License](LICENSE)。Microsoft 图标库仍受其自身许可约束。

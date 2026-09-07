@@ -52,15 +52,16 @@ C:\Program Files\Microsoft Office\root\Office16\Visio Content\1033\
 
 | 本地化 Name | NameU | 语义 |
 | --- | --- | --- |
-| `玉米` | `Corn` | 玉米植株/果穗 |
+| `玉米` | `Corn` | 玉米果穗，不是完整植株 |
 
-当前 Figure 3-1 使用的玉米图标应调用 `Corn`，不应再导入自制 SVG。
+适合果穗示意。实心与单线两套子形状由 `User.Monoline` 切换，不能按子形状
+编号假设果穗/叶片部件。不同部位改色需先核对可编辑结构或组合原生部件。
 
 ### `OFFACC_VISIO2013_M.VSSX`
 
 | 本地化 Name | NameU | 语义 |
 | --- | --- | --- |
-| `植物` | `Plant` | 通用植物 |
+| `植物` | `Plant` | 俯视盆栽，不适合玉米株高 |
 | `小型植物` | `Small plant` | 小型植物 |
 | `大植物` | `Large plant` | 大型植物 |
 
@@ -77,7 +78,7 @@ C:\Program Files\Microsoft Office\root\Office16\Visio Content\1033\
 | --- | --- | --- |
 | `云` | `Cloud` | 云 |
 | `叶子` | `Foliage` | 叶片 |
-| `植物` | `Plant` | 植物 |
+| `植物` | `Plant` | 宽叶幼苗剪影，不等同于玉米 |
 
 ### `ANALYTICS_M.VSSX`
 
@@ -114,9 +115,9 @@ C:\Program Files\Microsoft Office\root\Office16\Visio Content\1033\
 $stencil = Open-VisioStencil -Visio $visio -Path 'NETSYM_M.VSSX'
 try {
     $shape = Drop-VisioStencilMaster -Page $page -Stencil $stencil `
-        -MasterName '路由器' -PinX 4.0 -PinY 3.0 -Width 1.2 -Height 0.9
+        -MasterName 'Router' -PinX 4.0 -PinY 3.0 -Width 1.2 -Height 0.9
     try { $shape.Text = 'Core Router' } finally {
-        [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shape) | Out-Null
+        Release-VisioComObject $shape
     }
 } finally {
     Close-VisioStencil $stencil

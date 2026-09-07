@@ -9,8 +9,8 @@
 2. **本机 Visio Stencil Master**：服务器、数据库、网络设备、云服务、标准人物或
    领域对象。先查 [visio-stencil-index.md](visio-stencil-index.md)，不要猜文件名或
    Master 名称。
-3. **原生形状组合 fallback**：母版不存在、语言版本不匹配或 COM 无法稳定打开时，
-   用可单独编辑的矩形、椭圆、线段和多边形表达最少必要语义。
+3. **原生形状组合 fallback**：母版不存在、外观或语义不匹配时，
+   用可编辑曲线、线段和多边形表达必要轮廓，并按部件分组。
 4. **外部 SVG/EMF**：只有用户明确要求、确认来源和许可后才导入；不得作为默认
    图标方案，也不得把整张参考图导入页面。
 
@@ -20,14 +20,14 @@
 
 ```powershell
 . "$PSScriptRoot\visio_stencil_helpers.ps1"
-$stencil = Open-VisioStencil -Visio $visio -Path 'HOLIDAYS_M.VSSX'
+$stencil = Open-VisioStencil -Visio $visio -Path 'NETSYM_M.VSSX'
 try {
     $shape = Drop-VisioStencilMaster `
         -Page $page `
         -Stencil $stencil `
-        -MasterName 'Corn' `
+        -MasterName 'Router' `
         -PinX 8.0 -PinY 4.0 `
-        -Width 1.0 -Height 1.4
+        -Width 1.2 -Height 0.9
     try { [void]($shape.Text = '') } finally { Release-VisioComObject $shape }
 } finally {
     Close-VisioStencil $stencil
@@ -36,8 +36,8 @@ try {
 
 助手的关键约定：
 
-- 通过 `Documents.OpenEx(path, 64)` 只读打开母版文件，不修改或保存 Stencil。
-- 优先用 `Masters.Item(name)` 精确查找；失败时再按 `Name` 和稳定的 `NameU` 遍历，
+- 通过 `Documents.OpenEx(path, 66)` 只读隐藏打开母版文件；2 是只读，64 是隐藏。
+- 优先用 `Masters.ItemU(name)` 按稳定名称查找；失败时再按 `Name` 和 `NameU` 遍历，
   并在报错中列出候选名称。
 - 用 `Page.Drop(master, pinX, pinY)` 放置后再设置 `Width`、`Height`、`PinX`、`PinY`。
   `PinX/PinY` 是页面英寸坐标，通常使用图标中心点。
@@ -53,15 +53,17 @@ try {
 [visio-stencil-index.md](visio-stencil-index.md)。两个文件都只记录名称和路径，不
 复制或重新分发 Microsoft Stencil 文件。
 
-每个 Stencil 通常包含一个名为 `动态连接线` 的母版；它不是图标。连接关系应使用
-`ConnectorToolDataObject` 或普通 `DrawLine`/连接线形状，避免把连接线母版误当节点。
+有些 Stencil 包含连接线母版；它不是节点图标。需要随对象移动的关系使用
+`Connect-VisioShapes` 胶合连接线；`DrawLine` 适合固定的轴线、分隔线等几何图元。
 
 ## 领域图标规则
 
-- 论文图中的玉米、DNA、植物器官等对象，先查本机 Stencil。当前环境已验证
-  `HOLIDAYS_M.VSSX` 的 `玉米 / Corn`，因此不应默认制作新的玉米 SVG。
+- 网络、办公、工程和其他领域对象都先查本机 Stencil，不能把某一台电脑的
+  索引当作所有 Visio 安装都具备的资源清单。
 - Stencil 风格与图表其他部分差异过大时，保留母版的语义轮廓，只统一尺寸和周围
-  文字；不要把它拆成无法维护的路径。
+  文字；确实无法匹配时采用原生 fallback，不必强行使用。
+- 新的领域图标应先渲染样例，检查轮廓、默认比例与样式控制项。子形状可能是
+  备选样式或隐藏层，不一定是独立语义部件；具体母版注意事项见速查表。
 - 没有合适母版时，fallback 必须保留决定语义的轮廓和少量局部结构，并让每个部件
   可单独选择、缩放和移动。
 - 外部资产若获批准，必须记录来源、许可证、导入格式和回退方案；导入后检查
@@ -69,13 +71,14 @@ try {
 
 ## 发现与验证
 
-先运行目录脚本，生成或更新完整索引：
+先搜索已有索引；仅在文件缺失、名称不匹配或目标电脑不同的时候重新扫描。
+将扫描结果写到任务临时目录，不自动修改安装的 skill：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\visio_stencil_catalog.ps1 `
   -RootPath 'C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052' `
   -Format markdown `
-  -OutputPath references\visio-stencil-index.md
+  -OutputPath C:\path\task-temp\visio-stencil-index.md
 ```
 
 该脚本只读取 `.vssx/.vss` 文件，不启动 Visio；`.vssx` 从压缩包中的
