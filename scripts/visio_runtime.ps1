@@ -116,30 +116,98 @@ function Get-VisioPageSize($Page) {
     }
 }
 
+function Set-VisioLineStyle {
+    param(
+        [Parameter(Mandatory = $true)]$Shape,
+        [string]$Color = 'RGB(17,17,17)',
+        [ValidateRange(0, 1000)][double]$LinePt = 0.8,
+        [ValidateRange(0, 23)][int]$Dash = 1,
+        [ValidateRange(0, 45)][int]$BeginArrow = 0,
+        [ValidateRange(0, 45)][int]$EndArrow = 0,
+        [ValidateRange(0, 6)][int]$ArrowSize = 2
+    )
+    Set-VisioCell $Shape 'LinePattern' ([string]$Dash)
+    Set-VisioCell $Shape 'LineColor' $Color
+    Set-VisioCell $Shape 'LineWeight' ($LinePt.ToString([Globalization.CultureInfo]::InvariantCulture) + ' pt')
+    Set-VisioCell $Shape 'BeginArrow' ([string]$BeginArrow)
+    Set-VisioCell $Shape 'EndArrow' ([string]$EndArrow)
+    Set-VisioCell $Shape 'BeginArrowSize' ([string]$ArrowSize)
+    Set-VisioCell $Shape 'EndArrowSize' ([string]$ArrowSize)
+}
+
+function Set-VisioEndpointGlue($Cell, $Shape, [string]$Side) {
+    if ($Side -eq 'Auto') {
+        $pin = $null
+        try { $pin = $Shape.CellsU('PinX'); [void]$Cell.GlueTo($pin) }
+        finally { Release-VisioComObject $pin }
+        return
+    }
+    $point = switch ($Side) {
+        'Left' { @(0.0, 0.5) }
+        'Right' { @(1.0, 0.5) }
+        'Top' { @(0.5, 1.0) }
+        'Bottom' { @(0.5, 0.0) }
+    }
+    # GlueToPos creates a real connection point in the target's local coordinates.
+    [void]$Cell.GlueToPos($Shape, $point[0], $point[1])
+}
+
 function Connect-VisioShapes {
     param(
         [Parameter(Mandatory = $true)]$From,
         [Parameter(Mandatory = $true)]$To,
-        [switch]$PassThru
+        [switch]$PassThru,
+        [ValidateSet('Auto', 'Left', 'Right', 'Top', 'Bottom')][string]$FromSide = 'Auto',
+        [ValidateSet('Auto', 'Left', 'Right', 'Top', 'Bottom')][string]$ToSide = 'Auto',
+        [ValidateSet('Auto', 'Orthogonal', 'Straight')][string]$Routing = 'Auto',
+        [string]$Color = 'RGB(17,17,17)',
+        [double]$LinePt = 0.8,
+        [int]$Dash = 1,
+        [int]$BeginArrow = 0,
+        [int]$EndArrow = 0,
+        [int]$ArrowSize = 2,
+        [ValidateRange(-1000, 1000)][double]$LabelOffsetXPt = 0,
+        [ValidateRange(-1000, 1000)][double]$LabelOffsetYPt = 0
     )
     $page = $null; $app = $null; $tool = $null; $connector = $null
-    $begin = $null; $end = $null; $fromPin = $null; $toPin = $null
+    $begin = $null; $end = $null; $toPage = $null
     $returned = $false
     try {
         $page = $From.ContainingPage
+        $toPage = $To.ContainingPage
+        if (-not [object]::ReferenceEquals($page, $toPage)) {
+            throw 'Connector endpoints must belong to the same page.'
+        }
+        if ($From.OneD -ne 0 -or $To.OneD -ne 0) { throw 'This helper connects 2-D shapes, not line endpoints.' }
         $app = $page.Application
         $tool = $app.ConnectorToolDataObject
         $connector = $page.Drop($tool, 0, 0)
+        Set-VisioLineStyle $connector -Color $Color -LinePt $LinePt -Dash $Dash `
+            -BeginArrow $BeginArrow -EndArrow $EndArrow -ArrowSize $ArrowSize
+        if ($Routing -ne 'Auto') {
+            $routeStyle = if ($Routing -eq 'Orthogonal') { '1' } else { '2' }
+            Set-VisioCell $connector 'ShapeRouteStyle' $routeStyle
+        }
         $begin = $connector.CellsU('BeginX'); $end = $connector.CellsU('EndX')
-        $fromPin = $From.CellsU('PinX'); $toPin = $To.CellsU('PinX')
-        $begin.GlueTo($fromPin)
-        $end.GlueTo($toPin)
+        Set-VisioEndpointGlue $begin $From $FromSide
+        Set-VisioEndpointGlue $end $To $ToSide
+        foreach ($axis in @('X', 'Y')) {
+            $offset = if ($axis -eq 'X') { $LabelOffsetXPt } else { $LabelOffsetYPt }
+            if ($offset -eq 0) { continue }
+            $labelCell = $null
+            try {
+                $labelCell = $connector.CellsU("TxtPin$axis")
+                $baseFormula = $labelCell.FormulaU
+                # Bypass SETATREF write redirection or the control would refer to itself.
+                $labelCell.FormulaForceU = '(' + $baseFormula + ') + ' + $offset.ToString([Globalization.CultureInfo]::InvariantCulture) + ' pt'
+            } finally { Release-VisioComObject $labelCell }
+        }
         if ($PassThru) { $returned = $true; return ,$connector }
     } catch {
         if ($connector) { $connector.Delete() }
         throw
     } finally {
-        foreach ($item in @($begin, $end, $fromPin, $toPin, $tool, $app, $page)) {
+        foreach ($item in @($begin, $end, $tool, $app, $toPage, $page)) {
             Release-VisioComObject $item
         }
         if (-not $returned) { Release-VisioComObject $connector }

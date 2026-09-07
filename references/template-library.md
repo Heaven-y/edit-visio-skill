@@ -56,7 +56,11 @@ Actual statistical plots should come from the user's data and plotting workflow.
 - `-Mode Rebuild -PageIndex N` clears only the selected page before drawing.
 - `-Mode Edit -PageIndex N` preserves objects and page size; the callback changes
   only explicitly identified shapes, text or connections.
-- With an image, use measured `RefW/RefH`; page height follows its aspect ratio.
+- With an image, use measured `RefW/RefH` and explicit physical size where known;
+  either physical dimension can derive the other from the aspect ratio.
+- For fixed pages with another ratio, `CanvasFit Contain` adds centered whitespace.
+  See [canvas and connectors](canvas-and-connectors.md) for millimeters, lengths,
+  connector ports/routes and final-size checks.
 - Without an image, pass `PageW/PageH` in inches, or `RefW/RefH` for a separate
   coordinate grid. For Edit with no dimensions, helpers use the existing page's
   inch dimensions, with the origin at the top left. Direct Visio COM uses bottom left.

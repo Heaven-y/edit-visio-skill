@@ -14,6 +14,15 @@ param(
     [double]$PageH = 0.0,
     [double]$RefW = 0.0,
     [double]$RefH = 0.0,
+    [double]$PageWidthMm = 0.0,
+    [double]$PageHeightMm = 0.0,
+    [ValidateSet('MatchReference', 'Contain')]
+    [string]$CanvasFit = 'MatchReference',
+    [double]$MarginMm = 0.0,
+    [ValidateRange(1, 2400)][int]$PreviewDpi = 144,
+    [ValidateRange(0, 1000)][double]$MinFontPt = 0,
+    [ValidateRange(0, 1000)][double]$MinLinePt = 0,
+    [ValidateRange(0, 100000)][double]$FinalWidthMm = 0,
 
     [ValidateSet(1, 2, 3)]
     [int]$Phase = 3,
@@ -35,15 +44,19 @@ param(
     [switch]$SkipPreview,
     [switch]$SkipQualityGates,
     [switch]$AllowMedia,
+    [switch]$AllowEmptyPage,
     [switch]$Visible
 )
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'visio_export_formats.ps1')
 . (Join-Path $PSScriptRoot 'visio_stencil_helpers.ps1')
+. (Join-Path $PSScriptRoot 'visio_canvas.ps1')
 
-function VX([double]$x) { $script:PageW * $x / $script:RefW }
-function VY([double]$y) { $script:PageH - ($script:PageH * $y / $script:RefH) }
+function VX([double]$x) { $script:Canvas.OffsetX + $x * $script:Canvas.Scale }
+function VY([double]$y) { $script:PageH - $script:Canvas.OffsetY - $y * $script:Canvas.Scale }
+function VL([double]$length) { $length * $script:Canvas.Scale }
+function VPT([double]$length) { (VL $length) * 72.0 }
 function RGBF([int]$r, [int]$g, [int]$b) { "RGB($r,$g,$b)" }
 
 $C = @{
@@ -81,8 +94,8 @@ function Style-Shape($shape, [string]$fill, [string]$line, [double]$linePt = 0.8
     }
     if ($roundPx -lt 0) {
         Set-Cell $shape 'Rounding' '0.06 in'
-    } elseif ($roundPx -gt 0) {
-        Set-Cell $shape 'Rounding' ((VX $roundPx).ToString([Globalization.CultureInfo]::InvariantCulture) + ' in')
+    } else {
+        Set-Cell $shape 'Rounding' ((VL $roundPx).ToString([Globalization.CultureInfo]::InvariantCulture) + ' in')
     }
 }
 
@@ -136,11 +149,8 @@ function LineTL([double]$x1, [double]$y1, [double]$x2, [double]$y2, [string]$col
     $s = $script:Page.DrawLine((VX $x1), (VY $y1), (VX $x2), (VY $y2))
     $returned = $false
     try {
-        Set-Cell $s 'LineColor' $color
-        Set-Cell $s 'LineWeight' "$linePt pt"
-        Set-Cell $s 'LinePattern' ([string]$dash)
-        if ($arrowEnd) { Set-Cell $s 'EndArrow' '4' }
-        if ($arrowBegin) { Set-Cell $s 'BeginArrow' '4' }
+        Set-VisioLineStyle $s -Color $color -LinePt $linePt -Dash $dash `
+            -EndArrow $(if ($arrowEnd) { 4 } else { 0 }) -BeginArrow $(if ($arrowBegin) { 4 } else { 0 })
         if ($PassThru) { $returned = $true; return $s }
     } finally { if (-not $returned) { Release-VisioComObject $s } }
 }
@@ -195,7 +205,7 @@ $targetExists = Test-Path -LiteralPath $VsdxPath -PathType Leaf
 if ($Mode -eq 'Create' -and $targetExists) { throw 'Create mode refuses to overwrite an existing VSDX. Use Edit or Rebuild explicitly.' }
 if ($Mode -eq 'Edit' -and -not $targetExists) { throw 'Edit mode requires an existing VSDX.' }
 if ($TemplatePath -and $targetExists) { throw 'TemplatePath applies only when creating a document.' }
-foreach ($dimension in @($PageW, $PageH, $RefW, $RefH)) {
+foreach ($dimension in @($PageW, $PageH, $PageWidthMm, $PageHeightMm, $RefW, $RefH, $MarginMm)) {
     if ($dimension -lt 0 -or [double]::IsNaN($dimension) -or [double]::IsInfinity($dimension)) {
         throw 'Canvas dimensions must be finite and non-negative (0 selects the default).'
     }
@@ -208,9 +218,9 @@ if ($ReferenceImagePath) {
     $RefW = $imageSize.Width; $RefH = $imageSize.Height
 }
 if (($RefW -gt 0) -xor ($RefH -gt 0)) { throw 'Supply both RefW and RefH, or neither.' }
-if ($Mode -ne 'Edit' -and $RefW -eq 0 -and ($PageW -eq 0 -or $PageH -eq 0)) {
-    throw 'Without a reference, supply RefW/RefH or PageW/PageH for a new/rebuilt page.'
-}
+$canvasArgs = @{ PageW = $PageW; PageH = $PageH; RefW = $RefW; RefH = $RefH
+    PageWidthMm = $PageWidthMm; PageHeightMm = $PageHeightMm; CanvasFit = $CanvasFit; MarginMm = $MarginMm }
+if ($Mode -ne 'Edit') { $script:Canvas = Resolve-VisioCanvas @canvasArgs }
 $effectivePreview = $PreviewPath
 if (-not $effectivePreview -and $formats -contains 'png') {
     $effectivePreview = Resolve-VisioExportPath $VsdxPath 'png' $OutputDir $OutputBaseName
@@ -267,17 +277,10 @@ try {
         $script:Page = $page
         $existingSize = Get-VisioPageSize $page
         if ($Mode -eq 'Edit') {
-            if ($PageW -eq 0) { $PageW = $existingSize.Width }
-            if ($PageH -eq 0) { $PageH = $existingSize.Height }
-        } else {
-            if ($PageW -eq 0) { $PageW = 16.0 }
-            if ($PageH -eq 0) { $PageH = $PageW * $RefH / $RefW }
+            $script:Canvas = Resolve-VisioCanvas @canvasArgs -Edit -ExistingWidth $existingSize.Width -ExistingHeight $existingSize.Height
         }
-        if ($RefW -eq 0) { $RefW = $PageW; $RefH = $PageH }
-        if ($PageW -le 0 -or $PageH -le 0) { throw 'Page dimensions must be positive.' }
-        if ([math]::Abs(($PageW / $PageH) / ($RefW / $RefH) - 1) -gt 0.015) {
-            throw 'Page aspect ratio does not match the drawing canvas. Edit mode preserves page size unless explicitly overridden.'
-        }
+        $script:PageW = $Canvas.PageW; $script:PageH = $Canvas.PageH
+        $script:RefW = $Canvas.RefW; $script:RefH = $Canvas.RefH
         $pageSheet = $page.PageSheet
         if ($Mode -ne 'Edit' -or $PageW -ne $existingSize.Width -or $PageH -ne $existingSize.Height) {
             Set-VisioCell $pageSheet 'PageWidth' ($PageW.ToString([Globalization.CultureInfo]::InvariantCulture) + ' in')
@@ -308,8 +311,9 @@ try {
         }
         [void]$doc.SaveAs($stagePath)
         if ($stagePreview) {
-            Export-VisioPageFormats $doc $page $stagePath @('png') -PreviewPath $stagePreview
+            Export-VisioPageFormats $doc $page $stagePath @('png') -PreviewPath $stagePreview -PngDpi $PreviewDpi
         }
+        Write-Output ("Canvas: page={0:F2}x{1:F2} mm; fit={2}; grid unit={3:F4} pt" -f ($PageW * 25.4), ($PageH * 25.4), $CanvasFit, (VPT 1))
         Write-Output ("Drawing callback completed: mode={0}, page={1}, phase={2}, coordinates={3}x{4}" -f $Mode, $PageIndex, $Phase, $RefW, $RefH)
     } finally {
         try {
@@ -326,7 +330,9 @@ try {
         }
     }
     if (-not $SkipQualityGates) {
-        $qualityArgs = @{ VsdxPath = $stagePath; PageIndex = $PageIndex; Phase = $Phase; StrictProcess = $true; AllowMedia = $AllowMedia }
+        $qualityArgs = @{ VsdxPath = $stagePath; PageIndex = $PageIndex; Phase = $Phase; StrictProcess = $true
+            AllowMedia = $AllowMedia; AllowEmptyPage = $AllowEmptyPage; CanvasFit = $CanvasFit; MarginMm = $MarginMm
+            MinFontPt = $MinFontPt; MinLinePt = $MinLinePt; FinalWidthMm = $FinalWidthMm }
         if ($ReferenceImagePath) { $qualityArgs.ReferenceImagePath = $ReferenceImagePath }
         if ($stagePreview) { $qualityArgs.PreviewPath = $stagePreview }
         if ($RequiredText) { $qualityArgs.RequiredText = $RequiredText }

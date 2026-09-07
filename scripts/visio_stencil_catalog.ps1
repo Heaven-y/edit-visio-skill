@@ -7,6 +7,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+. (Join-Path $PSScriptRoot 'visio_package.ps1')
 
 function Get-DefaultStencilRoots {
     $roots = @()
@@ -31,19 +32,13 @@ function Read-VssxMasters([string]$path) {
         $entry = $archive.Entries |
             Where-Object { $_.FullName -ieq 'visio/masters/masters.xml' } |
             Select-Object -First 1
-        if ($null -eq $entry) { return @($masters) }
-
-        $reader = New-Object IO.StreamReader($entry.Open())
-        try {
-            [xml]$xml = $reader.ReadToEnd()
-        } finally {
-            $reader.Dispose()
-        }
+        if ($null -eq $entry) { throw 'Missing visio/masters/masters.xml' }
+        $xml = Read-VisioPackageXml $archive $entry.FullName
 
         foreach ($master in @($xml.SelectNodes("//*[local-name()='Master']"))) {
             $displayName = [string]$master.Name
             $nameU = [string]$master.NameU
-            $key = [string]$(if ($displayName) { $displayName } else { $nameU })
+            $key = [string]$master.ID
             if ($key -and -not $seen.ContainsKey($key)) {
                 $seen[$key] = $true
                 $masters += [pscustomobject]@{
@@ -78,7 +73,7 @@ function ConvertTo-StencilMarkdown([object[]]$items, [string[]]$roots) {
     foreach ($item in @($items | Sort-Object File)) {
         $names = @($item.Masters | ForEach-Object { if ($_.Name) { $_.Name } else { $_.NameU } })
         $sample = (@($names | Select-Object -First 8) -join '; ').Replace('|', '\|')
-        $count = if ($null -eq $item.MasterCount) { 'COM required' } else { [string]$item.MasterCount }
+        $count = if ($null -eq $item.MasterCount) { 'unavailable' } else { [string]$item.MasterCount }
         $lines.Add('| `' + $item.File + '` | ' + $count + ' | ' + $sample + ' |')
     }
     $lines.Add('')
@@ -91,7 +86,7 @@ function ConvertTo-StencilMarkdown([object[]]$items, [string[]]$roots) {
         $lines.Add('')
         $lines.Add('- File path: `' + $item.Path + '`')
         if ($null -eq $item.MasterCount) {
-            $lines.Add('- Master count: enumerate with Visio COM (legacy binary `.vss`)')
+            $lines.Add('- Master count: unavailable')
             if ($item.Note) { $lines.Add('- Note: ' + $item.Note) }
             continue
         }
@@ -151,7 +146,7 @@ foreach ($filePath in $files) {
     $results.Add([pscustomobject]@{
         File = $file.Name
         Path = $file.FullName
-        MasterCount = if ($file.Extension -ieq '.vss') { $null } else { $masters.Count }
+        MasterCount = if ($file.Extension -ieq '.vss' -or $note) { $null } else { $masters.Count }
         SampleMasters = $sample
         Masters = @($masters)
         Note = $note

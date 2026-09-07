@@ -9,6 +9,7 @@ param(
     [string]$OutputDir,
     [string]$OutputBaseName,
     [ValidateRange(1, 2147483647)][int]$PageIndex = 1,
+    [ValidateRange(1, 2400)][int]$PngDpi = 144,
 
     [switch]$Backup,
     [switch]$ExportPreview,
@@ -102,5 +103,6 @@ if ($formatsToExport.Count -gt 0) {
         -OutputBaseName $OutputBaseName `
         -PageIndex $PageIndex `
         -PreviewPath $PreviewPath `
+        -PngDpi $PngDpi `
         -Visible:$Visible
 }

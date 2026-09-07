@@ -10,6 +10,12 @@ param(
     [ValidateRange(1, 2147483647)]
     [int]$PageIndex = 1,
     [switch]$AllowMedia,
+    [switch]$AllowEmptyPage,
+    [ValidateSet('MatchReference', 'Contain')][string]$CanvasFit = 'MatchReference',
+    [double]$MarginMm = 0,
+    [ValidateRange(0, 1000)][double]$MinFontPt = 0,
+    [ValidateRange(0, 1000)][double]$MinLinePt = 0,
+    [ValidateRange(0, 100000)][double]$FinalWidthMm = 0,
 
     [ValidateSet(1, 2, 3)]
     [int]$Phase = 3,
@@ -23,6 +29,7 @@ param(
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'visio_stencil_helpers.ps1')
 . (Join-Path $PSScriptRoot 'visio_package.ps1')
+. (Join-Path $PSScriptRoot 'visio_canvas.ps1')
 $RequiredText = @($RequiredText | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 $RequiredColor = @($RequiredColor | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 
@@ -63,6 +70,42 @@ function Assert-AspectRatio([double]$ActualWidth, [double]$ActualHeight,
     Write-Output ("  Aspect ratio {0}: {1:F6} (expected {2:F6})" -f $Label, $actualRatio, $expectedRatio)
 }
 
+function Test-VisioStyleSizes($Shape, [double]$Scale, $Issues) {
+    $cell = $null; $children = $null
+    try {
+        if ($MinFontPt -gt 0 -and -not [string]::IsNullOrWhiteSpace([string]$Shape.Text)) {
+            # Inspect declared character rows, including mixed formatting and inherited rows.
+            for ($row = 0; $row -lt $Shape.RowCount(3); $row++) {
+                try {
+                    $cell = $Shape.CellsSRC(3, $row, 7)
+                    $points = [double]$cell.ResultIU * 72 * $Scale
+                    if ($points + 0.000001 -lt $MinFontPt) {
+                        $Issues.Add(("{0} / character row {1}: {2:F3} pt < {3} pt" -f $Shape.NameU, $row, $points, $MinFontPt))
+                    }
+                } finally { Release-VisioComObject $cell; $cell = $null }
+            }
+        }
+        if ($MinLinePt -gt 0) {
+            $cell = $Shape.CellsU('LinePattern'); $pattern = $cell.ResultIU
+            Release-VisioComObject $cell; $cell = $null
+            if ($pattern -ne 0) {
+                $cell = $Shape.CellsU('LineWeight')
+                $points = [double]$cell.ResultIU * 72 * $Scale
+                if ($points + 0.000001 -lt $MinLinePt) {
+                    $Issues.Add(("{0} / line: {1:F3} pt < {2} pt" -f $Shape.NameU, $points, $MinLinePt))
+                }
+                Release-VisioComObject $cell; $cell = $null
+            }
+        }
+        $children = $Shape.Shapes
+        for ($index = 1; $index -le $children.Count; $index++) {
+            $child = $null
+            try { $child = $children.Item($index); Test-VisioStyleSizes $child $Scale $Issues }
+            finally { Release-VisioComObject $child }
+        }
+    } finally { Release-VisioComObject $cell; Release-VisioComObject $children }
+}
+
 if (-not (Test-Path -LiteralPath $VsdxPath -PathType Leaf)) {
     throw "INPUT_VALIDATION failed: VSDX not found: $VsdxPath"
 }
@@ -91,7 +134,10 @@ $package = Read-VsdxPackage $fullPath
 if ($package.PageCount -lt 1) { throw 'INTEGRITY_VERIFICATION failed: no Visio page XML.' }
 if ($PageIndex -gt $package.PageCount) { throw "PageIndex $PageIndex exceeds page count $($package.PageCount)." }
 $selectedPage = $package.Pages[$PageIndex - 1]
-if ($selectedPage.ShapeCount -lt 1) { throw 'INTEGRITY_VERIFICATION failed: selected page has no shapes.' }
+if ($selectedPage.ShapeCount -lt 1 -and -not $AllowEmptyPage) {
+    throw 'INTEGRITY_VERIFICATION failed: selected page has no shapes. AllowEmptyPage is only for an intentional blank page.'
+}
+if ($selectedPage.ShapeCount -lt 1) { Write-Output 'EMPTY_PAGE: ALLOWED (explicit intent, not proof of drawing)' }
 if (-not $AllowMedia -and ($package.Media.Count -gt 0 -or $package.ForeignCount -gt 0)) {
     throw 'INTEGRITY_VERIFICATION failed: non-native media remains in the VSDX.'
 }
@@ -121,7 +167,7 @@ if ($PreviewPath) {
     $previewFile = Get-Item -LiteralPath $PreviewPath
     if ($previewFile.Length -le 0) { throw 'DELIVERY failed: preview is empty.' }
     $previewSize = Get-ReferenceImageDimensions $PreviewPath
-    if ($referenceSize) {
+    if ($referenceSize -and $CanvasFit -eq 'MatchReference') {
         Assert-AspectRatio $previewSize.Width $previewSize.Height $referenceSize.Width $referenceSize.Height 'preview/reference'
     }
     Write-Output ("  Preview: {0} ({1} bytes)" -f $previewFile.FullName, $previewFile.Length)
@@ -133,6 +179,7 @@ if ($PreviewPath) {
 if (-not $SkipCom) {
     $visio = $null; $documents = $null; $doc = $null; $pages = $null; $page = $null; $shapes = $null
     $outOfBounds = New-Object System.Collections.Generic.List[string]
+    $styleIssues = [Collections.Generic.List[string]]::new()
     try {
         $visio = New-VisioApplication
         $documents = $visio.Documents
@@ -146,12 +193,18 @@ if (-not $SkipCom) {
         $pageW = $size.Width; $pageH = $size.Height
         if ($pageW -le 0 -or $pageH -le 0) { throw 'Invalid page dimensions.' }
         if ($referenceSize) {
-            Assert-AspectRatio $pageW $pageH $referenceSize.Width $referenceSize.Height 'page/reference'
+            $canvas = Resolve-VisioCanvas -PageW $pageW -PageH $pageH -RefW $referenceSize.Width -RefH $referenceSize.Height -CanvasFit $CanvasFit -MarginMm $MarginMm
+            if ($CanvasFit -eq 'MatchReference') {
+                Assert-AspectRatio $pageW $pageH $referenceSize.Width $referenceSize.Height 'page/reference'
+            } else {
+                Write-Output ("  Contained reference: content={0:F4}x{1:F4} in; left/top={2:F4}/{3:F4} in; visual placement requires review" -f $canvas.ContentW, $canvas.ContentH, $canvas.OffsetX, $canvas.OffsetY)
+            }
         }
         if ($previewFile) {
             Assert-AspectRatio $previewSize.Width $previewSize.Height $pageW $pageH 'preview/page'
         }
         $shapes = $page.Shapes
+        $styleScale = if ($FinalWidthMm -gt 0) { $FinalWidthMm / ($pageW * 25.4) } else { 1.0 }
         for ($i = 1; $i -le $shapes.Count; $i++) {
             $shape = $shapes.Item($i)
             try {
@@ -162,6 +215,7 @@ if (-not $SkipCom) {
                 if ($left -lt -$tol -or $bottom -lt -$tol -or $right -gt ($pageW + $tol) -or $top -gt ($pageH + $tol)) {
                     $outOfBounds.Add("page $PageIndex / $($shape.NameU)")
                 }
+                if ($MinFontPt -gt 0 -or $MinLinePt -gt 0) { Test-VisioStyleSizes $shape $styleScale $styleIssues }
             } finally { Release-VisioComObject $shape }
         }
         Write-Output ("COM reopen: page={0}, top-level shapes={1}, size={2:F4}x{3:F4}in" -f $PageIndex, $shapes.Count, $pageW, $pageH)
@@ -184,9 +238,15 @@ if (-not $SkipCom) {
     }
     Write-Output 'COM_REOPEN: PASS'
     Write-Output 'PAGE_BOUNDS: PASS (not an overlap or text-fit test)'
+    if ($styleIssues.Count -gt 0) { throw ('STYLE_SIZE failed: ' + ($styleIssues -join '; ')) }
+    if ($MinFontPt -gt 0 -or $MinLinePt -gt 0) {
+        Write-Output ("STYLE_SIZE: PASS (nominal ShapeSheet sizes, scale={0:F4}; not a rendered-glyph or text-fit check)" -f $styleScale)
+    } else { Write-Output 'STYLE_SIZE: SKIPPED (no task-specific minimum sizes supplied)' }
 } else {
     Write-Output 'COM_REOPEN: SKIPPED'
     Write-Output 'PAGE_BOUNDS: SKIPPED'
+    Write-Output 'STYLE_SIZE: SKIPPED (requires COM)'
+    Write-Output 'PAGE_REFERENCE_RATIO: SKIPPED (requires COM)'
 }
 Write-Output 'AUTOMATED_CHECKS: PASS'
 Write-Output 'VISUAL_REVIEW: REQUIRED (inspect text, icons, layout and meaning against the reference)'

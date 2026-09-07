@@ -54,15 +54,14 @@ The archetype only guides layout and helper functions. The actual labels, colors
 
 ## Coordinate Strategy
 
-Use a reference coordinate system in pixels or normalized units, then convert to Visio page inches:
+Use the shared scaffold's measured reference grid and a separately chosen physical
+page size. See [canvas and connectors](canvas-and-connectors.md); do not duplicate
+position mapping in the callback, because a fitted canvas can include offsets.
 
 ```powershell
-$PageW = 16.0
-# With a reference image, obtain RefW/RefH from its actual pixel dimensions.
-# Derive PageH unless an intentional target page ratio is supplied.
-$PageH = $PageW * $RefH / $RefW
-function VX([double]$x) { $PageW * $x / $RefW }
-function VY([double]$y) { $PageH - ($PageH * $y / $RefH) }
+& "$skillRoot/scripts/visio_rebuild_scaffold.ps1" `
+    -Mode Rebuild -VsdxPath $target -DrawingScript $drawing `
+    -ReferenceImagePath $reference -PageWidthMm 180
 ```
 
 Draw from top-left bounds as `RectTL(x, y, w, h)` so the script remains readable against screenshots.
@@ -117,9 +116,10 @@ Before delivery, inspect the preview for:
 
 ## Scientific Figure Style Tokens
 
-Use these defaults unless the reference clearly differs:
+Choose tokens at the final physical size, preserving the reference or requested
+notation. These are starting points, not a universal academic standard:
 
-- Font: Times New Roman for manuscript-style figures; Arial or Helvetica for clean technical UI-style diagrams.
+- Font: preserve the reference; otherwise use a consistent readable family such as Arial. Use Times New Roman only when requested by the document style.
 - Main border: 0.9-1.2 pt.
 - Internal border: 0.5-0.8 pt.
 - Rounded rectangle radius: small, usually 4-8 px equivalent.

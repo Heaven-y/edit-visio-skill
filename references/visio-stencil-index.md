@@ -31,16 +31,16 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `AWSARVR_M.VSSX` | 2 | Amazon Sumerian; AR VR |
 | `AWSBLK_M.VSSX` | 4 | Amazon 托管区块链; Amazon 量子分类帐数据库; 区块链资源; 区块链 |
 | `AWSBUSINESSAPP_M.VSSX` | 4 | Alexa for Business; Amazon 提示音; Amazon 工作邮件; 业务应用程序 |
-| `AWSCOMPUTE_M.VSSX` | 70 | A1 实例; Amazon 应用程序自动伸缩; Amazon EC2 容器注册表; Amazon EC2; Amazon 弹性容器服务; Amazon 弹性 Kubernetes 服务; Amazon Lightsail; AMI |
+| `AWSCOMPUTE_M.VSSX` | 71 | A1 实例; Amazon 应用程序自动伸缩; Amazon EC2 容器注册表; Amazon EC2; Amazon 弹性容器服务; Amazon 弹性 Kubernetes 服务; Amazon Lightsail; AMI |
 | `AWSCONTAINERS_M.VSSX` | 18 | 区域; AWS 云 1; 公司数据中心; 弹性 Beanstalk 容器; 公共子网; 服务器内容; 通用组 1; 专用子网 2 |
 | `AWSCOSTMGMT_M.VSSX` | 6 | AWS 预算; AWS 成本和使用情况报告; AWS 成本资源管理器; AWS Cost Management; 保留实例报告; 储蓄计划 |
 | `AWSCUSTENB_M.VSSX` | 5 | AWS IQ; AWS 托管服务; AWS 专业服务; AWS 支持; 客户支持 |
 | `AWSCUSTENG_M.VSSX` | 5 | Amazon Connect; Amazon Pinpoint; Amazon Simple Email Service; 客户参与; 电子邮件 |
-| `AWSDB_M.VSSX` | 38 | Amazon Aurora 实例替代项; Amazon Aurora 实例; Amazon Aurora; Amazon DynamoDB Accelerator (DAX); Amazon DynamoDB; Amazon ElastiCache; Amazon Managed Apache Cassandra Service; Amazon Neptune |
+| `AWSDB_M.VSSX` | 40 | Amazon Aurora 实例替代项; Amazon Aurora 实例; Amazon Aurora; Amazon DynamoDB Accelerator (DAX); Amazon DynamoDB; Amazon ElastiCache; Amazon Managed Apache Cassandra Service; Amazon Neptune |
 | `AWSDEVTOOLS_M.VSSX` | 13 | Amazon DynamoDB DAX; AWS 云开发工具包; AWS Cloud9; AWS CodeBuild; AWS CodeCommit; AWS CodeDeploy; AWS CodePipeline; AWS CodeStar |
 | `AWSENDUSERCOMPUTE_M.VSSX` | 5 | Amazon Appstream 2.0; Amazon WorkDocs; Amazon WorkLink; Amazon Workspaces; 最终用户计算 |
 | `AWSGAMETECH_M.VSSX` | 2 | Amazon GameLift; 游戏技术 |
-| `AWSGEN_M.VSSX` | 21 | AWS 电子邮件; AWS Marketplace; 客户端; 磁盘; 论坛; 常规; 通用数据库; 通用防火墙 |
+| `AWSGEN_M.VSSX` | 22 | AWS 电子邮件; AWS Marketplace; 客户端; 磁盘; 论坛; 常规; 通用数据库; 通用防火墙 |
 | `AWSIOT_M.VSSX` | 60 | Amazon FreeRTOS; AWS IoT 1 Click; AWS IoT Analytics; AWS IoT Button; AWS IoT 核心; AWS IoT Device Defender; AWS IoT Events; AWS IoT Greengrass |
 | `AWSMEDIASERV_M.VSSX` | 9 | Amazon Elastic Transcoder; Amazon Kinesis Video Streams; AWS Elemental Conductor; AWS Elemental Delta; AWS Elemental Live; AWS Elemental MediaConnect; AWS Elemental MediaLive; AWS Elemental Server |
 | `AWSMGMTGOV_M.VSSX` | 50 | 帐户; 警报; Amazon CloudWatch; 应用; 自动化; AWS 应用配置; AWS 自动缩放; AWS CloudFormation |
@@ -58,7 +58,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `AZUREAPPSERVICES_M.VSSX` | 10 | Azure 应用程序配置; API 管理服务; 应用服务证书; 应用服务域; 应用服务环境; 应用服务计划; 应用服务; CDN 配置文件 |
 | `AZUREBLOCKCHAIN_M.VSSX` | 1 | Azure 区块链服务 |
 | `AZURECLOUD_M.VSSX` | 205 | Microsoft Azure; 虚拟机; Azure SQL 数据库; Azure  Active Directory; Azure VPN 网关; DNS; 地缘组; Analysis Services |
-| `AZURECOMMAND_M.VSSX` | 167 | 活动命令; 活动蓝色粗体命令; 活动蓝色命令; 活动粗体命令; 添加磁贴命令 ; 添加命令 ; 添加团队成员命令 ; 警报对话框命令 |
+| `AZURECOMMAND_M.VSSX` | 168 | 活动命令; 活动蓝色粗体命令; 活动蓝色命令; 活动粗体命令; 添加磁贴命令 ; 添加命令 ; 添加团队成员命令 ; 警报对话框命令 |
 | `AZURECOMPUTE_M.VSSX` | 21 | 应用服务; 可用性集; Azure 工作区; 云服务 (经典); 容器服务 (已弃用); 磁盘 (经典); 磁盘快照; 磁盘 |
 | `AZURECONTAINERS_M.VSSX` | 6 | 应用服务; Azure Batch帐户; 容器实例; 容器注册表; Kubernetes 服务; Service Fabric 群集 |
 | `AZUREDATABASES_M.VSSX` | 19 | Azure Cosmos DB; Azure 数据资源管理器群集; Azure 数据库 MariaDB 服务器; Azure 数据库 MySQL 服务器; Azure 数据管道; Azure 数据库 PostgreSQL 服务器; Azure SQL VM; Azure Synapse Analytics |
@@ -67,16 +67,16 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `AZUREDRAWING_M.VSSX` | 35 | 方框 1; 线条 1; 箭头(Azure 海报样式); 多树枝; 一维双向宽箭头; 三级框颜色; 对齐帮助程序 2; 箭头(Azure 海报样式).131 |
 | `AZUREECOSYSTEM_M.VSSX` | 3 | Applens Azure 生态系统; Azure 混合中心 Azure 生态系统; 协作服务 Azure 生态系统 |
 | `AZUREENTERPRISE_M.VSSX` | 158 | 应用程序服务器; 存储; Web 服务器; 服务器目录; Internet; 路由器; .rdp 远程文件; .rdp 远程文件(可堆叠) |
-| `AZUREGENERAL_M.VSSX` | 81 | 所有资源; Biz Talk; Blob 块; Blob 页面; 分支; 浏览器; 虫子; 版本 |
+| `AZUREGENERAL_M.VSSX` | 83 | 所有资源; Biz Talk; Blob 块; Blob 页面; 分支; 浏览器; 虫子; 版本 |
 | `AZUREGENERALSYMBOLS_M.VSSX` | 46 | 隧道; 用户; 任务; 齿轮; 音频; 视频; 附件(nc); 音频(可堆叠) |
 | `AZUREIDENTITY_M.VSSX` | 8 | Azure Active Directory Connect Health; 应用注册; Azure  Active Directory; Azure AD 域服务; 企业应用程序; 组; 身份管理; 用户 |
 | `AZUREINTEGRATION_M.VSSX` | 11 | API 管理服务; Azure 数据目录; 数据工厂; 事件网格域; 事件网格订阅; 事件网格主题; 集成帐户; 逻辑应用 |
 | `AZUREINTUNE_M.VSSX` | 18 | Azure AD 角色和管理员; 客户端应用; 设备合规性; 设备配置; 设备注册; 设备安全 Apple; 设备安全 Google; 设备安全 Windows |
 | `AZUREIOT_M.VSSX` | 9 | 事件网格订阅; 事件中心; 函数应用; IoT 中心应用程序; IoT 中心; 逻辑应用; Azure Maps帐户; 通知中心命名空间 |
 | `AZUREMANAGEMENTGOVERNANCE_M.VSSX` | 21 | 活动日志; 顾问; 警报; Application Insights; 自动化帐户; Azure Arc; Azure Lighthouse; 蓝图 |
-| `AZUREMENU1_M.VSSX` | 156 | AAD 管理单元菜单; AAD 云同步菜单; 帐户保护菜单; ACG 共享菜单; ACR 作用域映射菜单; Azure 任务菜单; ACR 令牌菜单; ACS 电子邮件菜单 |
+| `AZUREMENU1_M.VSSX` | 157 | AAD 管理单元菜单; AAD 云同步菜单; 帐户保护菜单; ACG 共享菜单; ACR 作用域映射菜单; Azure 任务菜单; ACR 令牌菜单; ACS 电子邮件菜单 |
 | `AZUREMENU2_M.VSSX` | 157 | 自定义属性目录菜单; 自定义属性菜单; 自定义位置菜单; 自定义指标定义菜单; 自定义视觉菜单; 客户用户体验菜单; 客户控制的恢复菜单; 客户见解菜单 |
-| `AZUREMENU3_M.VSSX` | 148 | 个性化体验创建服务评估菜单; 个性化体验创建服务事件菜单; 个性化体验创建服务获取建议菜单; 个性化体验创建服务菜单; Playfab 帐户池菜单; Playfab 概述菜单; PlayFab 服务菜单; 策略菜单 |
+| `AZUREMENU3_M.VSSX` | 149 | 个性化体验创建服务评估菜单; 个性化体验创建服务事件菜单; 个性化体验创建服务获取建议菜单; 个性化体验创建服务菜单; Playfab 帐户池菜单; Playfab 概述菜单; PlayFab 服务菜单; 策略菜单 |
 | `AZUREMIGRATE_M.VSSX` | 3 | Data Box Edge; 数据框; 恢复服务保管库 |
 | `AZUREMIXEDREALITY_M.VSSX` | 2 | 远程渲染; 空间定位标记帐户 |
 | `AZUREMONITOR_M.VSSX` | 1 | SAP |
@@ -99,7 +99,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `BA_DEC_M.VSSX` | 17 | 折角形; 笑脸; 无表情脸; 哭脸; 红心; 闪电; 太阳; 月亮 |
 | `BA_GRP_M.VSSX` | 10 | 维恩图形状; 饼图扇区; 饼图弧; 多行; 加号; 减号; 乘号; 除号 |
 | `BASFLO_M.VSSX` | 15 | 流程; 判定; 子流程; 开始/结束; 文档; 数据; 数据库; 外部数据 |
-| `BASIC_M.VSSX` | 57 | 矩形; 正方形; 圆形; 椭圆形; 直角三角形; 三角形; 旋转三角形; 五边形 |
+| `BASIC_M.VSSX` | 58 | 矩形; 正方形; 圆形; 椭圆形; 直角三角形; 三角形; 旋转三角形; 五边形 |
 | `BASICORGCHART_M.VSSX` | 6 | 高管; 管理人员; 助理; 顾问; 员工; 空缺 |
 | `BCKGRN_M.VSSX` | 11 | 无 ; 实心; 垂直渐变; 水平渐变; 角部渐变; 中心渐变; 世界; 活力 |
 | `BLDCOR_M.VSSX` | 26 | 直楼梯; 楼梯平台; 自动扶梯; 电梯; 装饰性楼梯; 剪式楼梯; 盘旋楼梯; 拐角平台 |
@@ -125,9 +125,9 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `CAUSEF_M.VSSX` | 12 | 效果; 类别 1; 类别 2; 鱼骨框架; 主要原因 1; 主要原因 2; 次要原因 1; 次要原因 2 |
 | `CELEBRATION_M.VSSX` | 15 | 气球; 蛋糕; 跳舞; 文凭; 鞭炮; 奖牌; 派对帽; 指挥台 |
 | `CHART_M.VSSX` | 40 | 条形图 1; 条形图 2; 三维条形图; 三维轴; 竖排文本三维条形; 横排文本三维条形; 饼图; 饼图扇区 |
-| `CISCONETWORKSHAPES_M.VSSX` | 290 | 100BaseT 集线器; 15200; 3174 (桌面)群集控制; 3X74 (楼层)群集控制; 6700 系列; 7500ARS (7513); 10700; 10GE_FCoE |
+| `CISCONETWORKSHAPES_M.VSSX` | 292 | 100BaseT 集线器; 15200; 3174 (桌面)群集控制; 3X74 (楼层)群集控制; 6700 系列; 7500ARS (7513); 10700; 10GE_FCoE |
 | `COMMERCE_M.VSSX` | 16 | 银行支票; 条形码; 箱车; 框; 硬币; 信用卡; 金条; 标签 |
-| `COMMUNICATION_M.VSSX` | 21 | 呼叫中心; 聊天; 从云中下载; 下载; 电子邮件; 信封; 链接; 扩音器 |
+| `COMMUNICATION_M.VSSX` | 22 | 呼叫中心; 聊天; 从云中下载; 下载; 电子邮件; 信封; 链接; 扩音器 |
 | `COMOLE_M.VSSX` | 16 | COM 对象; 引用; 弱引用; Vtable; 接口; 流程边界; OLE 服务器/应用程序; 对象层次结构 |
 | `COMPLN_M.VSSX` | 7 | 风险; 控件; 输入; 输出; 声明; 校对人; 角色 |
 | `COMPME_M.VSSX` | 12 | PC; 虚拟 PC; 终端; 波分复用器(WDM); 数据管道; 候选设备; 平板设备; 笔记本电脑 |
@@ -173,7 +173,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `EEVHF_M.VSSX` | 32 | 不连续性; 等效串联; 电容性阻抗; 电感性阻抗; 电阻; 电感电容; 等效并联; 电容性电纳 |
 | `ELETEL_M.VSSX` | 31 | 顶灯底座; 隐形式顶灯; 开关; 插座; 壁灯; 多灯灯柱; 下照灯; 户外照明 |
 | `EMBELL_M.VSSX` | 41 | 波形饰段; 波形转角; 编织物饰段; 编织物转角; 编织物接头; 埃及式饰段; 埃及式转角; 埃及式接头 |
-| `ENTAPP_M.VSSX` | 18 | 服务器; 主机; 工作站; 用户; 多个服务器; 多台主机; 多个工作站; 备件 |
+| `ENTAPP_M.VSSX` | 19 | 服务器; 主机; 工作站; 用户; 多个服务器; 多台主机; 多个工作站; 备件 |
 | `ENTITY_M.VSSX` | 9 | 实体; 关系; 视图; 父表与类别; 类别; 类别与子表; 动态连接线; 水印标题 |
 | `EPC_M.VSSX` | 12 | 事件; 函数; 流程路径; 组织单元; XOR; OR; AND; 信息/ 材料 |
 | `EVIDENCE_M.VSSX` | 40 | 一般证据; 步枪; 猎枪; 削短型猎枪; 手枪; 左轮手枪; 手枪夹; 弹壳 |
@@ -203,7 +203,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `HVACD_M.VSSX` | 20 | 直管; 分支管道; 可调弯头; 45 度角斜接弯头; T 型接合; Y 型接合; 三向接合; 接合 |
 | `HVACEQ_M.VSSX` | 19 | 旋转泵; 泵; 离心泵; 风机扇叶; 往复式泵; 螺旋泵; 离心风机; 轴流风机 |
 | `IDEF0_M.VSSX` | 9 | 活动框; 标签; 标题块; 文本块 8pt; 节点; 实心连接线; 单线连接线; IDEF0 连接线 |
-| `INDOOR_M.VSSX` | 57 | 墙壁; 门; 灯; 双人床; 标题块; 灯 (侧面) ; Wall.127; L 形房间 |
+| `INDOOR_M.VSSX` | 58 | 墙壁; 门; 灯; 双人床; 标题块; 灯 (侧面) ; Wall.127; L 形房间 |
 | `INTANN_M.VSSX` | 9 | 复合面板; 控制面板; CPU; 键盘; 打印机; 音频设备; 对讲机; 双向无线电对讲机 |
 | `INTERFACE_M.VSSX` | 20 | 添加; 后退; 上旬; 复选标记; 关闭; 弹出; 空电池; 结束 |
 | `IRRIG_M.VSSX` | 11 | 各种圆形喷头; 各种矩形喷头; 支管; 主管; 滴管; 阀门; 阀门栓符号; 控制器 |
@@ -258,7 +258,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `ORGPIP_M.VSSX` | 15 | 高管种子; 经理种子; 职位种子; 助理种子; 顾问种子; 空缺种子; 员工种子; 小组框架 |
 | `ORGSTO_M.VSSX` | 15 | 高管石; 经理石; 职位石; 助理石; 顾问石; 空缺石; 员工石; 小组框架 |
 | `ORGTAC_M.VSSX` | 15 | 总经理精彩图形; 经理精彩图形; 职位精彩图形; 助理精彩图形; 顾问精彩图形; 空缺精彩图形; 员工精彩图形; 小组框架 |
-| `OUTDOOR_M.VSSX` | 27 | 引用点; 警车; 中型轿车 (顶部); 标题块; 树篱; 仙人掌; 灌木; 盆栽植物 |
+| `OUTDOOR_M.VSSX` | 28 | 引用点; 警车; 中型轿车 (顶部); 标题块; 树篱; 仙人掌; 灌木; 盆栽植物 |
 | `PEANNT_M.VSSX` | 22 | 接口点 1; 接口点 2; 斜面; 表外标签 1; 表外标签 2; 表外标签 3; 标注 1; 标注 2 |
 | `PEEQP_M.VSSX` | 40 | 轧碎机; 破碎机; 搅拌机; 旋流器 1; 滚筒式破碎机; 锤式破碎机; 各种破碎机 1; 各种破碎机 2 |
 | `PEHEAT_M.VSSX` | 28 | 热交换器 1; 锅炉; 冷却塔 1; 冷凝器; 热交换器 2; 套管; 管束 1; 管束 2 |
@@ -286,7 +286,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `PTSINT_M.VSSX` | 75 | 您的位置; 抽水马桶; 禁止吸烟; 出口; 航空运输; 行李; 行李寄放柜; 公共汽车 |
 | `PTSINT_VISIO2013_M.VSSX` | 53 | 您的位置 1; 抽水马桶; 禁止吸烟; 出口; 您的位置 2; 访问; 电话; 会议室 |
 | `PTUSCL_M.VSSX` | 46 | 图案帮助; 星形; Ar-parq1; 三角形; 之字; Escher; 黏土; 软木塞 |
-| `PUZZLESANDGAMES_M.VSSX` | 19 | 棍棒套件; 国际象棋棋子; 钻石套装; 多米诺瓷砖; 骰子 ; 赌博芯片; 游戏控制器; 大小王 |
+| `PUZZLESANDGAMES_M.VSSX` | 20 | 棍棒套件; 国际象棋棋子; 钻石套装; 多米诺瓷砖; 骰子 ; 赌博芯片; 游戏控制器; 大小王 |
 | `PYRAMID_SHAPES_M.VSSX` | 11 | 基本棱锥图; 倒棱锥图; 分层棱锥图; 倒圆锥; 带标题的基本棱锥图; 带标题的倒棱锥图; 带标签的棱锥图; 漏斗 |
 | `RCKEQP_M.VSSX` | 19 | 机架; 机柜; 服务器; RAID 阵列; 路由器 1; 交换机; 路由器 2; 独立文件存储 |
 | `RCKSME_M.VSSX` | 17 | Web 服务器; 文件服务器; 应用程序服务器; 证书服务器; 电子商务服务器; 移动信息服务器; FTP 服务器; CMS 服务器 |
@@ -331,11 +331,11 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `TRANSP_M.VSSX` | 29 | 红绿灯; 停止; 让行; 1 号路线; 禁止进入; 禁止停车; 单行; 铁路 |
 | `UACTME_M.VSSX` | 15 | 动作; 判定; 合并节点; 初始节点; 终止节点; 分叉节点; 汇合节点; 泳道(垂直) |
 | `UCMNME_M.VSSX` | 5 | 生命线; 参与者; 消息; 返回消息; 关系图概述 |
-| `UCOMME_M.VSSX` | 10 | 组件; 提供的接口; 所需的接口; 关联; 包; 注释; 定向关联; 依赖关系 |
-| `UDEPME_M.VSSX` | 20 | 节点; 节点实例; 项目; 项目实例; 部署规范; 部署规范实例; 组件; 组件实例 |
+| `UCOMME_M.VSSX` | 11 | 组件; 提供的接口; 所需的接口; 关联; 包; 注释; 定向关联; 依赖关系 |
+| `UDEPME_M.VSSX` | 21 | 节点; 节点实例; 项目; 项目实例; 部署规范; 部署规范实例; 组件; 组件实例 |
 | `USEQME_M.VSSX` | 12 | 激活; 对象生命线; 参与者生命线; 循环片段; 可选片段; 备用片段; 交互操作数; 其他片段 |
 | `USTAME_M.VSSX` | 8 | 状态; 内部行为与状态; 复合状态; 子机状态; 初始状态; 最终状态; 选择; 注释 |
-| `USTRME_M.VSSX` | 15 | 类; 成员; 分隔符; 接口; 枚举; 包(展开); 包(折叠); 注释 |
+| `USTRME_M.VSSX` | 16 | 类; 成员; 分隔符; 接口; 枚举; 包(展开); 包(折叠); 注释 |
 | `UUSEME_M.VSSX` | 8 | 参与者; 用例; 子系统; 关联; 依赖关系; 归纳; 包含; 扩展 |
 | `VALVE1_M.VSSX` | 21 | 同轴阀; 旋拧阀; 安全阀; 角阀; 止回阀; 浮式阀; 带法兰的阀门; 蝶形阀 |
 | `VALVE2_M.VSSX` | 17 | 同轴阀; 手动分隔; 功率信号; 静态压入式; 弹簧压入式; 遥控; 隔膜; 链式操作 |
@@ -349,7 +349,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | `WALL_M.VSSX` | 41 | 房间; 墙壁; 窗户; 门; "L"形房间; "T"形房间; 空间; "L"形空间 |
 | `WEATHERSEASONS_M.VSSX` | 16 | 沙滩伞; 云; 叶子; 闪电; 月亮和星星; 局部太阳; 植物; 阴雨 |
 | `WEBMAP_M.VSSX` | 79 | HTML; 图形(位图); 文本; 样式表; 脚本(客户端); 脚本(服务器端); Web 服务; Java |
-| `WEBSIT_M.VSSX` | 18 | 组; 主对象; 网页; 页组; 页元素; 页元素组; 弹出框; 小型站点图节点 |
+| `WEBSIT_M.VSSX` | 19 | 组; 主对象; 网页; 页组; 页元素; 页元素组; 弹出框; 小型站点图节点 |
 | `WELD_M.VSSX` | 27 | 点焊; 电阻缝焊; 槽焊/塞焊; 双头螺栓; 箭头; 带弯头的箭头; 附加箭头; 特形焊接 |
 | `WFCICN_M.VSSX` | 22 | 后退; 转发; 展开; 折叠; 添加; 删除; 放大; 缩小 |
 | `WFCRS_M.VSSX` | 14 | 选择; 移动; 忙; 链接选择; 垂直调整; 水平调整; 对角线调整 1; 对角线调整 2 |
@@ -889,7 +889,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 20. `AWSCOMPUTE_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\AWSCOMPUTE_M.VSSX`
-- Master count: 70
+- Master count: 71
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -940,29 +940,30 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 45 | I3 实例 | `I3 Instance` |
 | 46 | 带 CloudWatch 的实例 | `Instance with CloudWatch` |
 | 47 | 实例 | `Instance` |
-| 48 | Lambda 函数 | `Lambda Function` |
-| 49 | M4 实例 | `M4 Instance` |
-| 50 | M5 实例 | `M5 Instance` |
-| 51 | M5a 实例 | `M5a Instance` |
-| 52 | 优化的实例 | `Optimized Instance` |
-| 53 | P2 实例 | `P2 Instance` |
-| 54 | P3 实例 | `P3 Instance` |
-| 55 | 并行群集 | `Parallel Cluster` |
-| 56 | R4 实例 | `R4 Instance` |
-| 57 | R5 实例 | `R5 Instance` |
-| 58 | R5a 实例 | `R5a Instance` |
-| 59 | 注册表 | `Registry` |
-| 60 | 救援 | `Rescue` |
-| 61 | 服务 | `Service` |
-| 62 | Spot 实例 | `Spot instance` |
-| 63 | T3 实例轻型 bg 副本 | `T3 Instance light bg copy` |
-| 64 | T3 实例 | `T3 Instance` |
-| 65 | T3a 实例 | `T3a Instance` |
-| 66 | 任务 | `Task` |
-| 67 | VMware Cloud On AWS | `VMware Cloud On AWS` |
-| 68 | X1 实例 | `X1 Instance` |
-| 69 | X1e 实例 | `X1e Instance` |
-| 70 | z1d 实例 | `z1d Instance` |
+| 48 | 实例 | `Instances` |
+| 49 | Lambda 函数 | `Lambda Function` |
+| 50 | M4 实例 | `M4 Instance` |
+| 51 | M5 实例 | `M5 Instance` |
+| 52 | M5a 实例 | `M5a Instance` |
+| 53 | 优化的实例 | `Optimized Instance` |
+| 54 | P2 实例 | `P2 Instance` |
+| 55 | P3 实例 | `P3 Instance` |
+| 56 | 并行群集 | `Parallel Cluster` |
+| 57 | R4 实例 | `R4 Instance` |
+| 58 | R5 实例 | `R5 Instance` |
+| 59 | R5a 实例 | `R5a Instance` |
+| 60 | 注册表 | `Registry` |
+| 61 | 救援 | `Rescue` |
+| 62 | 服务 | `Service` |
+| 63 | Spot 实例 | `Spot instance` |
+| 64 | T3 实例轻型 bg 副本 | `T3 Instance light bg copy` |
+| 65 | T3 实例 | `T3 Instance` |
+| 66 | T3a 实例 | `T3a Instance` |
+| 67 | 任务 | `Task` |
+| 68 | VMware Cloud On AWS | `VMware Cloud On AWS` |
+| 69 | X1 实例 | `X1 Instance` |
+| 70 | X1e 实例 | `X1e Instance` |
+| 71 | z1d 实例 | `z1d Instance` |
 
 ### 21. `AWSCONTAINERS_M.VSSX`
 
@@ -1033,7 +1034,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 25. `AWSDB_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\AWSDB_M.VSSX`
-- Master count: 38
+- Master count: 40
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -1052,29 +1053,31 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 13 | Amazon Redshift | `Amazon Redshift` |
 | 14 | Amazon Timestream | `Amazon Timestream` |
 | 15 | 属性 | `Attribute` |
-| 16 | AWS Database Migration Service | `AWS Database Migration Service` |
-| 17 | 缓存节点 | `Cache Node` |
-| 18 | 数据库迁移工作流 | `Database Migration Workflow` |
-| 19 | 数据库 | `Database` |
-| 20 | 密集计算节点 | `Dense Compute Node` |
-| 21 | 密集存储节点 | `Dense Storage Node` |
-| 22 | ElastiCache For Memcached | `ElastiCache For Memcached` |
-| 23 | ElastiCache For Redis | `ElastiCache For Redis` |
-| 24 | 全局辅助索引 | `Global Secondary Index` |
-| 25 | 项目 | `Item` |
-| 26 | MariaDB 实例替代项 | `MariaDB instance alt` |
-| 27 | MariaDB 实例 | `MariaDB instance` |
-| 28 | MySQL 实例替代项 | `MySQL instance alt` |
-| 29 | MySQL 实例 | `MySQL instance` |
-| 30 | Oracle 实例替代项 | `Oracle instance alt` |
-| 31 | Oracle 实例 | `Oracle instance` |
-| 32 | PIOP | `PIOP` |
-| 33 | PIOPS | `PIOPS` |
-| 34 | PostgreSQL 实例替代项 | `PostgreSQL instance alt` |
-| 35 | PostgreSQL 实例 | `PostgreSQL instance` |
-| 36 | SQL Server 实例替代项 | `SQL Server instance alt` |
-| 37 | SQL Server 实例 | `SQL Server instance` |
-| 38 | 桌子 | `Table` |
+| 16 | 属性 | `Attributes` |
+| 17 | AWS Database Migration Service | `AWS Database Migration Service` |
+| 18 | 缓存节点 | `Cache Node` |
+| 19 | 数据库迁移工作流 | `Database Migration Workflow` |
+| 20 | 数据库 | `Database` |
+| 21 | 密集计算节点 | `Dense Compute Node` |
+| 22 | 密集存储节点 | `Dense Storage Node` |
+| 23 | ElastiCache For Memcached | `ElastiCache For Memcached` |
+| 24 | ElastiCache For Redis | `ElastiCache For Redis` |
+| 25 | 全局辅助索引 | `Global Secondary Index` |
+| 26 | 项目 | `Item` |
+| 27 | 项目 | `Items` |
+| 28 | MariaDB 实例替代项 | `MariaDB instance alt` |
+| 29 | MariaDB 实例 | `MariaDB instance` |
+| 30 | MySQL 实例替代项 | `MySQL instance alt` |
+| 31 | MySQL 实例 | `MySQL instance` |
+| 32 | Oracle 实例替代项 | `Oracle instance alt` |
+| 33 | Oracle 实例 | `Oracle instance` |
+| 34 | PIOP | `PIOP` |
+| 35 | PIOPS | `PIOPS` |
+| 36 | PostgreSQL 实例替代项 | `PostgreSQL instance alt` |
+| 37 | PostgreSQL 实例 | `PostgreSQL instance` |
+| 38 | SQL Server 实例替代项 | `SQL Server instance alt` |
+| 39 | SQL Server 实例 | `SQL Server instance` |
+| 40 | 桌子 | `Table` |
 
 ### 26. `AWSDEVTOOLS_M.VSSX`
 
@@ -1123,7 +1126,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 29. `AWSGEN_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\AWSGEN_M.VSSX`
-- Master count: 21
+- Master count: 22
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -1148,6 +1151,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 19 | 工具包 | `Toolkit` |
 | 20 | 传统服务器 | `Traditional server` |
 | 21 | 用户 | `User` |
+| 22 | 用户 | `Users` |
 
 ### 30. `AWSIOT_M.VSSX`
 
@@ -1804,7 +1808,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 47. `AZURECOMMAND_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\AZURECOMMAND_M.VSSX`
-- Master count: 167
+- Master count: 168
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -1946,35 +1950,36 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 136 | 笑脸中性命令  | `Smiley Neutral Command ` |
 | 137 | Snapshot Debugger 命令  | `Snapshot Debugger Command ` |
 | 138 | 拆分可用命令 | `Split Available Command` |
-| 139 | 停止命令  | `Stop Command ` |
-| 140 | 订阅命令  | `Subscription Command ` |
-| 141 | 减法命令  | `Subtract Command ` |
-| 142 | 支持命令  | `Support Command ` |
-| 143 | 切换命令  | `Swap Command ` |
-| 144 | 表命令  | `Table Command ` |
-| 145 | 标记命令  | `Tags Command ` |
-| 146 | 任务命令  | `Tasks Command ` |
-| 147 | 温度 GaugeA 命令 | `Temp GaugeA command` |
-| 148 | 温度 GaugeB 命令 | `Temp GaugeB command` |
-| 149 | 租户命令  | `Tenant Command ` |
-| 150 | 拇指向下命令  | `Thumbs Down Command ` |
-| 151 | 拇指向上命令 | `Thumbs Up Command` |
-| 152 | 工具命令  | `Tools Command ` |
-| 153 | 工具提示命令  | `Tooltip command ` |
-| 154 | 回收站轮廓命令  | `Trash Outline Command ` |
-| 155 | 趋势向下命令  | `Trend Down Command ` |
-| 156 | 趋势向上命令  | `Trend Up Command ` |
-| 157 | 三角形命令  | `Triangle Command ` |
-| 158 | 撤消命令  | `Undo Command ` |
-| 159 | 解除锁定命令  | `Unlock Command ` |
-| 160 | 取消固定命令  | `Unpin Command ` |
-| 161 | 取消共享命令  | `Unshare Command ` |
-| 162 | 上传命令  | `Upload Command ` |
-| 163 | 追加销售命令  | `Upsell Command ` |
-| 164 | 变量命令  | `Variables Command ` |
-| 165 | 查看配额命令 | `View Quota Command` |
-| 166 | 警告命令  | `Warning Command ` |
-| 167 | 扳手命令  | `Wrench Command ` |
+| 139 | 开始命令  | `Start Command ` |
+| 140 | 停止命令  | `Stop Command ` |
+| 141 | 订阅命令  | `Subscription Command ` |
+| 142 | 减法命令  | `Subtract Command ` |
+| 143 | 支持命令  | `Support Command ` |
+| 144 | 切换命令  | `Swap Command ` |
+| 145 | 表命令  | `Table Command ` |
+| 146 | 标记命令  | `Tags Command ` |
+| 147 | 任务命令  | `Tasks Command ` |
+| 148 | 温度 GaugeA 命令 | `Temp GaugeA command` |
+| 149 | 温度 GaugeB 命令 | `Temp GaugeB command` |
+| 150 | 租户命令  | `Tenant Command ` |
+| 151 | 拇指向下命令  | `Thumbs Down Command ` |
+| 152 | 拇指向上命令 | `Thumbs Up Command` |
+| 153 | 工具命令  | `Tools Command ` |
+| 154 | 工具提示命令  | `Tooltip command ` |
+| 155 | 回收站轮廓命令  | `Trash Outline Command ` |
+| 156 | 趋势向下命令  | `Trend Down Command ` |
+| 157 | 趋势向上命令  | `Trend Up Command ` |
+| 158 | 三角形命令  | `Triangle Command ` |
+| 159 | 撤消命令  | `Undo Command ` |
+| 160 | 解除锁定命令  | `Unlock Command ` |
+| 161 | 取消固定命令  | `Unpin Command ` |
+| 162 | 取消共享命令  | `Unshare Command ` |
+| 163 | 上传命令  | `Upload Command ` |
+| 164 | 追加销售命令  | `Upsell Command ` |
+| 165 | 变量命令  | `Variables Command ` |
+| 166 | 查看配额命令 | `View Quota Command` |
+| 167 | 警告命令  | `Warning Command ` |
+| 168 | 扳手命令  | `Wrench Command ` |
 
 ### 48. `AZURECOMPUTE_M.VSSX`
 
@@ -2335,7 +2340,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 56. `AZUREGENERAL_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\AZUREGENERAL_M.VSSX`
-- Master count: 81
+- Master count: 83
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -2364,62 +2369,64 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 23 | 错误 | `Error` |
 | 24 | 扩展 | `Extensions` |
 | 25 | 文件 | `File` |
-| 26 | 文件夹为空 | `Folder Blank` |
-| 27 | 文件夹网站 | `Folder Website` |
-| 28 | FTP | `FTP` |
-| 29 | 球体错误 | `Globe Error` |
-| 30 | 环球成功 | `Globe Success` |
-| 31 | 全球警告 | `Globe Warning` |
-| 32 | 地球仪 | `Globe` |
-| 33 | 指南 | `Guide` |
-| 34 | 红心 | `Heart` |
-| 35 | 图像 | `Image` |
-| 36 | 信息 | `Information` |
-| 37 | 输入输出 | `Input Output` |
-| 38 | 旅程中心 | `Journey Hub` |
-| 39 | 启动门户 | `Launch Portal` |
-| 40 | 学习 | `Learn` |
-| 41 | 负载测试 | `Load Test` |
-| 42 | 位置 | `Location` |
-| 43 | 日志流 | `Log Streaming` |
-| 44 | 管理组 | `Management Groups` |
-| 45 | 管理门户 | `Management Portal` |
-| 46 | 市场 | `Marketplace` |
-| 47 | 媒体文件 | `Media File` |
-| 48 | Mobile Engagement | `Mobile Engagement` |
-| 49 | 移动 | `Mobile` |
-| 50 | 打开电源 | `Power Up` |
-| 51 | 电源 | `Power` |
-| 52 | Powershell | `Powershell` |
-| 53 | 预览 | `Preview` |
-| 54 | 流程资源管理器 | `Process Explorer` |
-| 55 | 生产就绪数据库 | `Production Ready Database` |
-| 56 | 快速入门中心 | `Quickstart Center` |
-| 57 | 最近 | `Recent` |
-| 58 | 资源组列表 | `Resource Group List` |
-| 59 | 资源组 | `Resource Groups` |
-| 60 | 链接的资源 | `Resource Linked` |
-| 61 | 比例 | `Scale` |
-| 62 | 计划程序 | `Scheduler` |
-| 63 | 搜索 | `Search` |
-| 64 | 服务器场 | `Server Farm` |
-| 65 | 服务总线 | `Service Bus` |
-| 66 | 服务运行状况 | `Service Health` |
-| 67 | SSD | `SSD` |
-| 68 | 存储 Azure 文件 | `Storage Azure Files` |
-| 69 | 存储容器 | `Storage Container` |
-| 70 | 存储队列 | `Storage Queue` |
-| 71 | 订阅 | `Subscriptions` |
-| 72 | 桌子 | `Table` |
-| 73 | 标记 | `Tags` |
-| 74 | TFS VC 存储库 | `TFS VC Repository` |
-| 75 | 工具箱 | `Toolbox` |
-| 76 | Web 槽 | `Web Slots` |
-| 77 | Web 测试 | `Web Test` |
-| 78 | 网站功能 | `Website Power` |
-| 79 | 网站暂存 | `Website Staging` |
-| 80 | 工作簿 | `Workbooks` |
-| 81 | 工作流 | `Workflow` |
+| 26 | 文件 | `Files` |
+| 27 | 文件夹为空 | `Folder Blank` |
+| 28 | 文件夹网站 | `Folder Website` |
+| 29 | FTP | `FTP` |
+| 30 | 球体错误 | `Globe Error` |
+| 31 | 环球成功 | `Globe Success` |
+| 32 | 全球警告 | `Globe Warning` |
+| 33 | 地球仪 | `Globe` |
+| 34 | 指南 | `Guide` |
+| 35 | 红心 | `Heart` |
+| 36 | 图像 | `Image` |
+| 37 | 信息 | `Information` |
+| 38 | 输入输出 | `Input Output` |
+| 39 | 旅程中心 | `Journey Hub` |
+| 40 | 启动门户 | `Launch Portal` |
+| 41 | 学习 | `Learn` |
+| 42 | 负载测试 | `Load Test` |
+| 43 | 位置 | `Location` |
+| 44 | 日志流 | `Log Streaming` |
+| 45 | 管理组 | `Management Groups` |
+| 46 | 管理门户 | `Management Portal` |
+| 47 | 市场 | `Marketplace` |
+| 48 | 媒体文件 | `Media File` |
+| 49 | Mobile Engagement | `Mobile Engagement` |
+| 50 | 移动 | `Mobile` |
+| 51 | 打开电源 | `Power Up` |
+| 52 | 电源 | `Power` |
+| 53 | Powershell | `Powershell` |
+| 54 | 预览 | `Preview` |
+| 55 | 流程资源管理器 | `Process Explorer` |
+| 56 | 生产就绪数据库 | `Production Ready Database` |
+| 57 | 快速入门中心 | `Quickstart Center` |
+| 58 | 最近 | `Recent` |
+| 59 | 资源组列表 | `Resource Group List` |
+| 60 | 资源组 | `Resource Groups` |
+| 61 | 链接的资源 | `Resource Linked` |
+| 62 | 比例 | `Scale` |
+| 63 | 计划程序 | `Scheduler` |
+| 64 | 搜索 | `Search` |
+| 65 | 服务器场 | `Server Farm` |
+| 66 | 服务总线 | `Service Bus` |
+| 67 | 服务运行状况 | `Service Health` |
+| 68 | SSD | `SSD` |
+| 69 | 存储 Azure 文件 | `Storage Azure Files` |
+| 70 | 存储容器 | `Storage Container` |
+| 71 | 存储队列 | `Storage Queue` |
+| 72 | 订阅 | `Subscriptions` |
+| 73 | 桌子 | `Table` |
+| 74 | 标记 | `Tags` |
+| 75 | TFS VC 存储库 | `TFS VC Repository` |
+| 76 | 工具箱 | `Toolbox` |
+| 77 | 版本 | `Versions` |
+| 78 | Web 槽 | `Web Slots` |
+| 79 | Web 测试 | `Web Test` |
+| 80 | 网站功能 | `Website Power` |
+| 81 | 网站暂存 | `Website Staging` |
+| 82 | 工作簿 | `Workbooks` |
+| 83 | 工作流 | `Workflow` |
 
 ### 57. `AZUREGENERALSYMBOLS_M.VSSX`
 
@@ -2585,7 +2592,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 63. `AZUREMENU1_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\AZUREMENU1_M.VSSX`
-- Master count: 156
+- Master count: 157
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -2704,47 +2711,48 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 113 | 区块链流式处理菜单 | `Blockchain Streaming Menu` |
 | 114 | 区块链代币菜单 | `Blockchain Token Menu` |
 | 115 | 区块链代币模板菜单 | `Blockchain Token Template Menu` |
-| 116 | 房间数据管道文件菜单 | `Chamber Data Pipeline File Menu` |
-| 117 | 房间数据管道菜单 | `Chamber Data Pipeline Menu` |
-| 118 | 房间数据管道请求菜单 | `Chamber Data Pipeline Request Menu` |
-| 119 | 房间菜单 | `Chamber Menu` |
-| 120 | 房间配置文件菜单 | `Chamber Profile Menu` |
-| 121 | 更改分析菜单 | `Change Analysis Menu` |
-| 122 | 更改跟踪菜单 | `Change Tracking Menu` |
-| 123 | 聊天菜单 | `Chat Menu` |
-| 124 | ChromeOS 菜单 | `ChromeOS Menu` |
-| 125 | 云连接器菜单 | `Cloud Connector Menu` |
-| 126 | 云菜单 | `Cloud Menu` |
-| 127 | 云同步连接菜单 | `Cloud Sync Connect Menu` |
-| 128 | 云同步按需预配菜单 | `Cloud Sync Provision on Demand Menu` |
-| 129 | 代码菜单 | `Code Menu` |
-| 130 | 集合菜单 | `Collections Menu` |
-| 131 | 合规性产品/服务菜单 | `Compliance Offerings Menu` |
-| 132 | 压缩菜单 | `Compression Menu` |
-| 133 | 计算机视觉菜单 | `Computer Vision Menu` |
-| 134 | 配置资源管理器菜单 | `Configuration Explorer Menu` |
-| 135 | 连接的镜像菜单 | `Connected Mirror Menu` |
-| 136 | 连接的注册表菜单 | `Connected Registry Menu` |
-| 137 | 连接器令牌菜单 | `Connectors Tokens Menu` |
-| 138 | 容器见解控制者对象菜单 | `Container Insights Controller Object Menu` |
-| 139 | 容器见解节点菜单 | `Container Insights Node Menu` |
-| 140 | 容器菜单 | `Container Menu` |
-| 141 | 容器修订活动菜单 | `Container Revision Active Menu` |
-| 142 | 容器修订管理菜单 | `Container Revision Management Menu` |
-| 143 | 容器缩放菜单 | `Container Scale Menu` |
-| 144 | 内容审查器菜单 | `Content Moderator Menu` |
-| 145 | 连续访问评估菜单 | `Continuous Access Evaluation Menu` |
-| 146 | CORS 菜单 | `CORS Menu` |
-| 147 | 成本警报菜单 | `Cost Alerts Menu` |
-| 148 | 成本分配菜单 | `Cost Allocation Menu` |
-| 149 | 成本分析菜单 | `Cost Analysis Menu` |
-| 150 | 成本链接菜单 | `Cost Links Menu` |
-| 151 | 成本管理菜单 | `Cost Management Menu` |
-| 152 | 凭据菜单 | `Credentials Menu` |
-| 153 | 额度菜单 | `Credits Menu` |
-| 154 | 跨租户访问请求菜单 | `Cross Tenant Access Requests Menu` |
-| 155 | 23gzprb.bc3eb0e6-948e-4b87-9a676 | `23gzprb.bc3eb0e6-948e-4b87-9a676` |
-| 156 | w4gzprb.a979c1fe-7891-49a3-a82e5 | `w4gzprb.a979c1fe-7891-49a3-a82e5` |
+| 116 | 区块链代币菜单 | `Blockchain Tokens Menu` |
+| 117 | 房间数据管道文件菜单 | `Chamber Data Pipeline File Menu` |
+| 118 | 房间数据管道菜单 | `Chamber Data Pipeline Menu` |
+| 119 | 房间数据管道请求菜单 | `Chamber Data Pipeline Request Menu` |
+| 120 | 房间菜单 | `Chamber Menu` |
+| 121 | 房间配置文件菜单 | `Chamber Profile Menu` |
+| 122 | 更改分析菜单 | `Change Analysis Menu` |
+| 123 | 更改跟踪菜单 | `Change Tracking Menu` |
+| 124 | 聊天菜单 | `Chat Menu` |
+| 125 | ChromeOS 菜单 | `ChromeOS Menu` |
+| 126 | 云连接器菜单 | `Cloud Connector Menu` |
+| 127 | 云菜单 | `Cloud Menu` |
+| 128 | 云同步连接菜单 | `Cloud Sync Connect Menu` |
+| 129 | 云同步按需预配菜单 | `Cloud Sync Provision on Demand Menu` |
+| 130 | 代码菜单 | `Code Menu` |
+| 131 | 集合菜单 | `Collections Menu` |
+| 132 | 合规性产品/服务菜单 | `Compliance Offerings Menu` |
+| 133 | 压缩菜单 | `Compression Menu` |
+| 134 | 计算机视觉菜单 | `Computer Vision Menu` |
+| 135 | 配置资源管理器菜单 | `Configuration Explorer Menu` |
+| 136 | 连接的镜像菜单 | `Connected Mirror Menu` |
+| 137 | 连接的注册表菜单 | `Connected Registry Menu` |
+| 138 | 连接器令牌菜单 | `Connectors Tokens Menu` |
+| 139 | 容器见解控制者对象菜单 | `Container Insights Controller Object Menu` |
+| 140 | 容器见解节点菜单 | `Container Insights Node Menu` |
+| 141 | 容器菜单 | `Container Menu` |
+| 142 | 容器修订活动菜单 | `Container Revision Active Menu` |
+| 143 | 容器修订管理菜单 | `Container Revision Management Menu` |
+| 144 | 容器缩放菜单 | `Container Scale Menu` |
+| 145 | 内容审查器菜单 | `Content Moderator Menu` |
+| 146 | 连续访问评估菜单 | `Continuous Access Evaluation Menu` |
+| 147 | CORS 菜单 | `CORS Menu` |
+| 148 | 成本警报菜单 | `Cost Alerts Menu` |
+| 149 | 成本分配菜单 | `Cost Allocation Menu` |
+| 150 | 成本分析菜单 | `Cost Analysis Menu` |
+| 151 | 成本链接菜单 | `Cost Links Menu` |
+| 152 | 成本管理菜单 | `Cost Management Menu` |
+| 153 | 凭据菜单 | `Credentials Menu` |
+| 154 | 额度菜单 | `Credits Menu` |
+| 155 | 跨租户访问请求菜单 | `Cross Tenant Access Requests Menu` |
+| 156 | 23gzprb.bc3eb0e6-948e-4b87-9a676 | `23gzprb.bc3eb0e6-948e-4b87-9a676` |
+| 157 | w4gzprb.a979c1fe-7891-49a3-a82e5 | `w4gzprb.a979c1fe-7891-49a3-a82e5` |
 
 ### 64. `AZUREMENU2_M.VSSX`
 
@@ -2914,7 +2922,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 65. `AZUREMENU3_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\AZUREMENU3_M.VSSX`
-- Master count: 148
+- Master count: 149
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -2957,115 +2965,116 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 37 | 路由映射菜单 | `Route Maps Menu` |
 | 38 | 路由菜单 | `Routes Menu` |
 | 39 | 已接收路由菜单 | `Routes Received Menu` |
-| 40 | 路由策略菜单 | `Routing Policies Menu` |
-| 41 | 规则分析菜单 | `Rule Analytics Menu` |
-| 42 | 规则集菜单 | `Ruleset Menu` |
-| 43 | S 详细信息菜单 | `S Details Menu` |
-| 44 | S 商城菜单 | `S Marketplace Menu` |
-| 45 | S 概述菜单 | `S Overview Menu` |
-| 46 | S 报表菜单 | `S Reports Menu` |
-| 47 | Santa Cruz 设备菜单 | `Santa Cruz Device Menu` |
-| 48 | SBOM 菜单 | `SBOM Menu` |
-| 49 | 横向扩展菜单 | `Scale Out Menu` |
-| 50 | 架构菜单 | `Schema Menu` |
-| 51 | 范围筛选器菜单 | `Scoping Filters Menu` |
-| 52 | SCVMM 菜单 | `SCVMM Menu` |
-| 53 | SDN 监视菜单 | `SDN Monitoring Menu` |
-| 54 | SDW 房间工作负载菜单 | `SDW Chamber Workload Menu` |
-| 55 | SDW 实例菜单 | `SDW Instance Menu` |
-| 56 | SDWAN 菜单 | `SDWAN Menu` |
-| 57 | 安全管理菜单 | `Security Management Menu` |
-| 58 | Sentinel 域对象攻击模式菜单 | `Sentinel Domain Object Attack Pattern Menu` |
-| 59 | Sentinel 域对象市场活动菜单 | `Sentinel Domain Object Campaign Menu` |
-| 60 | Sentinel 域对象操作过程菜单 | `Sentinel Domain Object Course Of Action Menu` |
-| 61 | Sentinel 域对象标识菜单 | `Sentinel Domain Object Identity Menu` |
-| 62 | Sentinel 域对象指示器菜单 | `Sentinel Domain Object Indicator Menu` |
-| 63 | Sentinel 域对象基础结构菜单 | `Sentinel Domain Object Infrastructure Menu` |
-| 64 | Sentinel 域对象入侵集菜单 | `Sentinel Domain Object Intrusion Set Menu` |
-| 65 | Sentinel 域对象观察数据菜单 | `Sentinel Domain Object Observed Data Menu` |
-| 66 | Sentinel 域对象报告菜单 | `Sentinel Domain Object Reports Menu` |
-| 67 | Sentinel 域对象威胁行动者菜单 | `Sentinel Domain Object Threat Actor Menu` |
-| 68 | Sentinel 域对象工具菜单 | `Sentinel Domain Object Tool Menu` |
-| 69 | Sentinel 域对象漏洞菜单 | `Sentinel Domain Object Vulnerability Menu` |
-| 70 | Sentinetl 域对象恶意软件菜单 | `Sentinetl Domain Object Malware Menu` |
-| 71 | 服务器菜单 | `Servers Menu` |
-| 72 | 服务终结点菜单 | `Service Endpoints Menu` |
-| 73 | 影子模式菜单 | `Shadow Mode Menu` |
-| 74 | 共享仪表板菜单 | `Shared Dashboards Menu` |
-| 75 | 共享存储菜单 | `Shared Storage Menu` |
-| 76 | 防护菜单 | `Shield Menu` |
-| 77 | 短代码菜单 | `Short Codes Menu` |
-| 78 | SIM 菜单 | `SIM Menu` |
-| 79 | SIM 策略菜单 | `SIM Policy Menu` |
-| 80 | SIP 服务菜单 | `SIP Service Menu` |
-| 81 | 通过 QUIC 的 SMB 菜单 | `SMB Over QUIC Menu` |
-| 82 | SMode 策略菜单 | `SMode Policy Menu` |
-| 83 | 短信消息菜单 | `SMS Messaging Menu` |
-| 84 | 社交媒体见解菜单 | `Social Insights Menu` |
-| 85 | 软件菜单 | `Software Menu` |
-| 86 | 空间菜单 | `Space Menu` |
-| 87 | 语音菜单 | `Speech Menu` |
-| 88 | SPOffers 菜单 | `SPOffers menu` |
-| 89 | SSL 终止菜单 | `SSL Termination Menu` |
-| 90 | 有状态集菜单 | `Stateful Sets Menu` |
-| 91 | 静态应用环境菜单 | `Static Apps Environments Menu` |
-| 92 | 存储菜单 | `Storage Menu` |
-| 93 | 学生菜单 | `Student Menu` |
-| 94 | 子网菜单 | `Subnet Menu` |
-| 95 | Surface 管理门户菜单 | `Surface Management Portal Menu` |
-| 96 | 目标菜单 | `Targets Menu` |
-| 97 | 电话服务活动菜单 | `Telephony Active Menu` |
-| 98 | 电话服务默认菜单 | `Telephony Default Menu` |
-| 99 | 租户管理员菜单 | `Tenant Admin Menu` |
-| 100 | 文本分析菜单 | `Text Analytics Menu` |
-| 101 | 威胁情报菜单 | `Threat Intelligence Menu` |
-| 102 | Ti 指示器菜单 | `Ti Indicator Menu` |
-| 103 | Ti 新菜单 | `Ti New Menu` |
-| 104 | 时间线菜单 | `Timeline Menu` |
-| 105 | 传输请求菜单 | `Transfer Requests Menu` |
-| 106 | 趋势菜单 | `Trends Menu` |
-| 107 | 通用打印连接器菜单 | `Universal Print Connectors Menu` |
-| 108 | 更新管理菜单 | `Update Management Menu` |
-| 109 | 用户设置菜单 | `User Settings Menu` |
-| 110 | 用户 VPN 菜单 | `User VPN Menu` |
-| 111 | 供应商资源菜单 | `Vendor Resource Menu` |
-| 112 | 视频索引器菜单 | `Video Indexer Menu` |
-| 113 | 虚拟中心菜单 | `Virtual Hubs Menu` |
-| 114 | 虚拟网络连接菜单 | `Virtual Network Connections Menu` |
-| 115 | 虚拟网络函数菜单 | `Virtual Network Functions Menu` |
-| 116 | VM 运行状况菜单 | `VM Health Menu` |
-| 117 | VM 检查器菜单 | `VM Inspector Menu` |
-| 118 | VMSS 健康状况修复菜单 | `VMSS Health Repair Menu` |
-| 119 | VMSS 升级策略菜单 | `VMSS Upgrade Policy Menu` |
-| 120 | VMware Vcenter 菜单 | `VMware Vcenter Menu` |
-| 121 | 语音和视频通话菜单 | `Voice And Video Calling Menu` |
-| 122 | VPN 站点菜单 | `VPN Sites Menu` |
-| 123 | WAC 群集菜单 | `WAC Cluster Menu` |
-| 124 | WAC 计算机菜单 | `WAC Computer Menu` |
-| 125 | WAC 设备菜单 | `WAC Devices Menu` |
-| 126 | WAC DHCP 菜单 | `WAC DHCP Menu` |
-| 127 | WAC 边缘容器平台菜单 | `WAC Edge Container Platform Menu` |
-| 128 | WAC 网络配置菜单 | `WAC Network Configuration Menu` |
-| 129 | WAC PacketMon 菜单 | `WAC PacketMon menu` |
-| 130 | WAC 进程菜单 | `WAC Processes Menu` |
-| 131 | WAC 角色功能菜单 | `WAC Roles Features Menu` |
-| 132 | WAC 存储迁移菜单 | `WAC Storage Migration Menu` |
-| 133 | WAC 存储副本菜单 | `WAC Storage Replica Menu` |
-| 134 | WAC 虚拟交换机菜单 | `WAC Virtual Switch Menu` |
-| 135 | WC 驱动器菜单 | `WC Drives Menu` |
-| 136 | Web 类别菜单 | `Web Categories Menu` |
-| 137 | Web 类别静态菜单 | `Web Categories Static Menu` |
-| 138 | Web 环境菜单 | `Web Environments Menu` |
-| 139 | Web 保护菜单 | `Web Protection Menu` |
-| 140 | Webhook 菜单 | `Webhook Menu` |
-| 141 | Windows MAK 密钥菜单 | `Windows MAK Key Menu` |
-| 142 | Windows 注册表项菜单 | `Windows Registry Key Menu` |
-| 143 | 工作区菜单 | `Workspaces Menu` |
-| 144 | 整理数据流菜单 | `Wrangling DataFlow menu` |
-| 145 | X 证书菜单 | `X Certificate Menu` |
-| 146 | 适用于 AKS 的 YAML 菜单 | `YAML for AKS Menu` |
-| 147 | cbhzprb.ae3745aa-f063-4a3e-991b5 | `cbhzprb.ae3745aa-f063-4a3e-991b5` |
-| 148 | ibhzprb.ba8f6b1c-0f2e-414f-96938 | `ibhzprb.ba8f6b1c-0f2e-414f-96938` |
+| 40 | 路由菜单 | `Routing Menu` |
+| 41 | 路由策略菜单 | `Routing Policies Menu` |
+| 42 | 规则分析菜单 | `Rule Analytics Menu` |
+| 43 | 规则集菜单 | `Ruleset Menu` |
+| 44 | S 详细信息菜单 | `S Details Menu` |
+| 45 | S 商城菜单 | `S Marketplace Menu` |
+| 46 | S 概述菜单 | `S Overview Menu` |
+| 47 | S 报表菜单 | `S Reports Menu` |
+| 48 | Santa Cruz 设备菜单 | `Santa Cruz Device Menu` |
+| 49 | SBOM 菜单 | `SBOM Menu` |
+| 50 | 横向扩展菜单 | `Scale Out Menu` |
+| 51 | 架构菜单 | `Schema Menu` |
+| 52 | 范围筛选器菜单 | `Scoping Filters Menu` |
+| 53 | SCVMM 菜单 | `SCVMM Menu` |
+| 54 | SDN 监视菜单 | `SDN Monitoring Menu` |
+| 55 | SDW 房间工作负载菜单 | `SDW Chamber Workload Menu` |
+| 56 | SDW 实例菜单 | `SDW Instance Menu` |
+| 57 | SDWAN 菜单 | `SDWAN Menu` |
+| 58 | 安全管理菜单 | `Security Management Menu` |
+| 59 | Sentinel 域对象攻击模式菜单 | `Sentinel Domain Object Attack Pattern Menu` |
+| 60 | Sentinel 域对象市场活动菜单 | `Sentinel Domain Object Campaign Menu` |
+| 61 | Sentinel 域对象操作过程菜单 | `Sentinel Domain Object Course Of Action Menu` |
+| 62 | Sentinel 域对象标识菜单 | `Sentinel Domain Object Identity Menu` |
+| 63 | Sentinel 域对象指示器菜单 | `Sentinel Domain Object Indicator Menu` |
+| 64 | Sentinel 域对象基础结构菜单 | `Sentinel Domain Object Infrastructure Menu` |
+| 65 | Sentinel 域对象入侵集菜单 | `Sentinel Domain Object Intrusion Set Menu` |
+| 66 | Sentinel 域对象观察数据菜单 | `Sentinel Domain Object Observed Data Menu` |
+| 67 | Sentinel 域对象报告菜单 | `Sentinel Domain Object Reports Menu` |
+| 68 | Sentinel 域对象威胁行动者菜单 | `Sentinel Domain Object Threat Actor Menu` |
+| 69 | Sentinel 域对象工具菜单 | `Sentinel Domain Object Tool Menu` |
+| 70 | Sentinel 域对象漏洞菜单 | `Sentinel Domain Object Vulnerability Menu` |
+| 71 | Sentinetl 域对象恶意软件菜单 | `Sentinetl Domain Object Malware Menu` |
+| 72 | 服务器菜单 | `Servers Menu` |
+| 73 | 服务终结点菜单 | `Service Endpoints Menu` |
+| 74 | 影子模式菜单 | `Shadow Mode Menu` |
+| 75 | 共享仪表板菜单 | `Shared Dashboards Menu` |
+| 76 | 共享存储菜单 | `Shared Storage Menu` |
+| 77 | 防护菜单 | `Shield Menu` |
+| 78 | 短代码菜单 | `Short Codes Menu` |
+| 79 | SIM 菜单 | `SIM Menu` |
+| 80 | SIM 策略菜单 | `SIM Policy Menu` |
+| 81 | SIP 服务菜单 | `SIP Service Menu` |
+| 82 | 通过 QUIC 的 SMB 菜单 | `SMB Over QUIC Menu` |
+| 83 | SMode 策略菜单 | `SMode Policy Menu` |
+| 84 | 短信消息菜单 | `SMS Messaging Menu` |
+| 85 | 社交媒体见解菜单 | `Social Insights Menu` |
+| 86 | 软件菜单 | `Software Menu` |
+| 87 | 空间菜单 | `Space Menu` |
+| 88 | 语音菜单 | `Speech Menu` |
+| 89 | SPOffers 菜单 | `SPOffers menu` |
+| 90 | SSL 终止菜单 | `SSL Termination Menu` |
+| 91 | 有状态集菜单 | `Stateful Sets Menu` |
+| 92 | 静态应用环境菜单 | `Static Apps Environments Menu` |
+| 93 | 存储菜单 | `Storage Menu` |
+| 94 | 学生菜单 | `Student Menu` |
+| 95 | 子网菜单 | `Subnet Menu` |
+| 96 | Surface 管理门户菜单 | `Surface Management Portal Menu` |
+| 97 | 目标菜单 | `Targets Menu` |
+| 98 | 电话服务活动菜单 | `Telephony Active Menu` |
+| 99 | 电话服务默认菜单 | `Telephony Default Menu` |
+| 100 | 租户管理员菜单 | `Tenant Admin Menu` |
+| 101 | 文本分析菜单 | `Text Analytics Menu` |
+| 102 | 威胁情报菜单 | `Threat Intelligence Menu` |
+| 103 | Ti 指示器菜单 | `Ti Indicator Menu` |
+| 104 | Ti 新菜单 | `Ti New Menu` |
+| 105 | 时间线菜单 | `Timeline Menu` |
+| 106 | 传输请求菜单 | `Transfer Requests Menu` |
+| 107 | 趋势菜单 | `Trends Menu` |
+| 108 | 通用打印连接器菜单 | `Universal Print Connectors Menu` |
+| 109 | 更新管理菜单 | `Update Management Menu` |
+| 110 | 用户设置菜单 | `User Settings Menu` |
+| 111 | 用户 VPN 菜单 | `User VPN Menu` |
+| 112 | 供应商资源菜单 | `Vendor Resource Menu` |
+| 113 | 视频索引器菜单 | `Video Indexer Menu` |
+| 114 | 虚拟中心菜单 | `Virtual Hubs Menu` |
+| 115 | 虚拟网络连接菜单 | `Virtual Network Connections Menu` |
+| 116 | 虚拟网络函数菜单 | `Virtual Network Functions Menu` |
+| 117 | VM 运行状况菜单 | `VM Health Menu` |
+| 118 | VM 检查器菜单 | `VM Inspector Menu` |
+| 119 | VMSS 健康状况修复菜单 | `VMSS Health Repair Menu` |
+| 120 | VMSS 升级策略菜单 | `VMSS Upgrade Policy Menu` |
+| 121 | VMware Vcenter 菜单 | `VMware Vcenter Menu` |
+| 122 | 语音和视频通话菜单 | `Voice And Video Calling Menu` |
+| 123 | VPN 站点菜单 | `VPN Sites Menu` |
+| 124 | WAC 群集菜单 | `WAC Cluster Menu` |
+| 125 | WAC 计算机菜单 | `WAC Computer Menu` |
+| 126 | WAC 设备菜单 | `WAC Devices Menu` |
+| 127 | WAC DHCP 菜单 | `WAC DHCP Menu` |
+| 128 | WAC 边缘容器平台菜单 | `WAC Edge Container Platform Menu` |
+| 129 | WAC 网络配置菜单 | `WAC Network Configuration Menu` |
+| 130 | WAC PacketMon 菜单 | `WAC PacketMon menu` |
+| 131 | WAC 进程菜单 | `WAC Processes Menu` |
+| 132 | WAC 角色功能菜单 | `WAC Roles Features Menu` |
+| 133 | WAC 存储迁移菜单 | `WAC Storage Migration Menu` |
+| 134 | WAC 存储副本菜单 | `WAC Storage Replica Menu` |
+| 135 | WAC 虚拟交换机菜单 | `WAC Virtual Switch Menu` |
+| 136 | WC 驱动器菜单 | `WC Drives Menu` |
+| 137 | Web 类别菜单 | `Web Categories Menu` |
+| 138 | Web 类别静态菜单 | `Web Categories Static Menu` |
+| 139 | Web 环境菜单 | `Web Environments Menu` |
+| 140 | Web 保护菜单 | `Web Protection Menu` |
+| 141 | Webhook 菜单 | `Webhook Menu` |
+| 142 | Windows MAK 密钥菜单 | `Windows MAK Key Menu` |
+| 143 | Windows 注册表项菜单 | `Windows Registry Key Menu` |
+| 144 | 工作区菜单 | `Workspaces Menu` |
+| 145 | 整理数据流菜单 | `Wrangling DataFlow menu` |
+| 146 | X 证书菜单 | `X Certificate Menu` |
+| 147 | 适用于 AKS 的 YAML 菜单 | `YAML for AKS Menu` |
+| 148 | cbhzprb.ae3745aa-f063-4a3e-991b5 | `cbhzprb.ae3745aa-f063-4a3e-991b5` |
+| 149 | ibhzprb.ba8f6b1c-0f2e-414f-96938 | `ibhzprb.ba8f6b1c-0f2e-414f-96938` |
 
 ### 66. `AZUREMIGRATE_M.VSSX`
 
@@ -3580,7 +3589,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 88. `BASIC_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\BASIC_M.VSSX`
-- Master count: 57
+- Master count: 58
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -3605,42 +3614,43 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 19 | 立方体 | `Cube` |
 | 20 | 水滴 | `Drop` |
 | 21 | 半圆 | `Semi Circle` |
-| 22 | 圆锥 | `Cone` |
-| 23 | 倒圆锥 | `Inverted Cone` |
-| 24 | 棱锥 | `Pyramid` |
-| 25 | 尖的椭圆形 | `Pointed Oval` |
-| 26 | 漏斗 | `Funnel` |
-| 27 | 齿轮 | `Gear` |
-| 28 | 四角星 | `4-Point Star` |
-| 29 | 五角星 | `5-Point Star` |
-| 30 | 六角星 | `6-Point Star` |
-| 31 | 七角星 | `7-Point Star` |
-| 32 | 十六角星 | `16-Point Star` |
-| 33 | 二十四角星 | `24-Point Star` |
-| 34 | 三十二角星 | `32-Point Star` |
-| 35 | 圆角矩形 | `Rounded Rectangle` |
-| 36 | 剪去单角的矩形 | `Single Snip Corner Rectangle` |
-| 37 | 剪去同侧角的矩形 | `Snip Same Side Corner Rectangle` |
-| 38 | 剪去对角的矩形 | `Snip Diagonal Corner Rectangle` |
-| 39 | 单圆角矩形 | `Single Round Corner Rectangle` |
-| 40 | 同侧圆角矩形 | `Round Same Side Corner Rectangle` |
-| 41 | 对角圆角矩形 | `Round Diagonal Corner Rectangle` |
-| 42 | 剪去单圆角矩形 | `Snip and Round Single Corner Rectangle` |
-| 43 | 剪去角的矩形 | `Snip Corner Rectangle` |
-| 44 | 圆角的矩形 | `Round Corner Rectangle` |
-| 45 | 剪去角的和圆角矩形 | `Snip and Round Corner Rectangle` |
-| 46 | 框架 | `Frame` |
-| 47 | 框架角 | `Frame Corner` |
-| 48 | L 形状 | `L Shape` |
-| 49 | 斜纹 | `Diagonal Stripe` |
-| 50 | 徽章 | `Plaque` |
-| 51 | 环形 | `Donut` |
-| 52 | 无符号 | `No Symbol` |
-| 53 | 中心拖动圆形 | `Center Drag Circle` |
-| 54 | 左圆括号 | `Left Parenthesis` |
-| 55 | 右圆括号 | `Right Parenthesis` |
-| 56 | 左括号 | `Left Brace` |
-| 57 | 右括号 | `Right Brace` |
+| 22 | 半圆 | `Semi Ellipse` |
+| 23 | 圆锥 | `Cone` |
+| 24 | 倒圆锥 | `Inverted Cone` |
+| 25 | 棱锥 | `Pyramid` |
+| 26 | 尖的椭圆形 | `Pointed Oval` |
+| 27 | 漏斗 | `Funnel` |
+| 28 | 齿轮 | `Gear` |
+| 29 | 四角星 | `4-Point Star` |
+| 30 | 五角星 | `5-Point Star` |
+| 31 | 六角星 | `6-Point Star` |
+| 32 | 七角星 | `7-Point Star` |
+| 33 | 十六角星 | `16-Point Star` |
+| 34 | 二十四角星 | `24-Point Star` |
+| 35 | 三十二角星 | `32-Point Star` |
+| 36 | 圆角矩形 | `Rounded Rectangle` |
+| 37 | 剪去单角的矩形 | `Single Snip Corner Rectangle` |
+| 38 | 剪去同侧角的矩形 | `Snip Same Side Corner Rectangle` |
+| 39 | 剪去对角的矩形 | `Snip Diagonal Corner Rectangle` |
+| 40 | 单圆角矩形 | `Single Round Corner Rectangle` |
+| 41 | 同侧圆角矩形 | `Round Same Side Corner Rectangle` |
+| 42 | 对角圆角矩形 | `Round Diagonal Corner Rectangle` |
+| 43 | 剪去单圆角矩形 | `Snip and Round Single Corner Rectangle` |
+| 44 | 剪去角的矩形 | `Snip Corner Rectangle` |
+| 45 | 圆角的矩形 | `Round Corner Rectangle` |
+| 46 | 剪去角的和圆角矩形 | `Snip and Round Corner Rectangle` |
+| 47 | 框架 | `Frame` |
+| 48 | 框架角 | `Frame Corner` |
+| 49 | L 形状 | `L Shape` |
+| 50 | 斜纹 | `Diagonal Stripe` |
+| 51 | 徽章 | `Plaque` |
+| 52 | 环形 | `Donut` |
+| 53 | 无符号 | `No Symbol` |
+| 54 | 中心拖动圆形 | `Center Drag Circle` |
+| 55 | 左圆括号 | `Left Parenthesis` |
+| 56 | 右圆括号 | `Right Parenthesis` |
+| 57 | 左括号 | `Left Brace` |
+| 58 | 右括号 | `Right Brace` |
 
 ### 89. `BASICORGCHART_M.VSSX`
 
@@ -4361,7 +4371,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 114. `CISCONETWORKSHAPES_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\CISCONETWORKSHAPES_M.VSSX`
-- Master count: 290
+- Master count: 292
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -4488,173 +4498,175 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 121 | ITP | `ITP` |
 | 122 | JBOD | `JBOD` |
 | 123 | 密钥 | `Key` |
-| 124 | LAN 到 LAN | `LAN to LAN` |
-| 125 | 笔记本电脑 | `Laptop` |
-| 126 | 第 2 层远程交换机 | `Layer 2 remote switch` |
-| 127 | 第 3 层交换机 | `Layer 3 switch` |
-| 128 | 轻型 AP | `Lightweight AP` |
-| 129 | Localdirector | `Localdirector` |
-| 130 | 锁定 | `Lock` |
-| 131 | 长距离 CPE | `Longreach CPE` |
-| 132 | Mac 女士 | `Mac woman` |
-| 133 | Macintosh | `Macintosh` |
-| 134 | Man_woman | `Man_woman` |
-| 135 | MAS 网关 | `MAS gateway` |
-| 136 | MAU | `MAU` |
-| 137 | MCU | `MCU` |
-| 138 | MDU | `MDU` |
-| 139 | ME | `ME` |
-| 140 | 中介者 | `Mediator` |
-| 141 | 会议位置 | `Meetingplace` |
-| 142 | 网格 | `Mesh` |
-| 143 | Metro 1500 | `Metro 1500` |
-| 144 | MGX 8000 多服务交换机 | `MGX 8000 multiservice switch` |
-| 145 | 扩音器 | `Microphone` |
-| 146 | Microwebserver | `Microwebserver` |
-| 147 | 迷你 VAX | `Mini VAX` |
-| 148 | 移动访问 IP 电话 | `Mobile access IP phone` |
-| 149 | 移动访问路由器 | `Mobile access router` |
-| 150 | 移动流式传输器 | `Mobile streamer` |
-| 151 | 调制解调器 | `Modem` |
-| 152 | MSE | `MSE` |
-| 153 | MOH 服务器 | `MOH server` |
-| 154 | 多路开关 | `Multiswitch` |
-| 155 | 多构造服务器交换机 | `Multi-fabric server switch` |
-| 156 | 多层远程交换机 | `Multilayer remote switch` |
-| 157 | MUX | `MUX` |
-| 158 | MXE | `MXE` |
-| 159 | NAC 设备 | `NAC appliance` |
-| 160 | NCE | `NCE` |
-| 161 | NCE 路由器 | `NCE router` |
-| 162 | Netflow 路由器 | `Netflow router` |
-| 163 | Netranger | `Netranger` |
-| 164 | Netsonar | `Netsonar` |
-| 165 | 网络管理 | `Network management` |
-| 166 | 网络安全 | `Network security` |
-| 167 | Nexus 1000 | `Nexus 1000` |
-| 168 | Nexus 2000 | `Nexus 2000` |
-| 169 | Nexus 5000 | `Nexus 5000` |
-| 170 | Nexus 7000 | `Nexus 7000` |
-| 171 | Octel | `Octel` |
-| 172 | ONS15500 | `ONS15500` |
-| 173 | 光学放大器 | `Optical amplifier` |
-| 174 | 光学服务路由器 | `Optical services router` |
-| 175 | 光学传输 | `Optical transort` |
-| 176 | PAD x.28 | `PAD x.28` |
-| 177 | Pad | `Pad` |
-| 178 | 页面图标 | `Page icon` |
-| 179 | 专用交换机 | `PBX switch` |
-| 180 | PBX | `PBX` |
-| 181 | 电脑适配器卡 | `PC adapter card` |
-| 182 | 电脑城域网 | `PC man` |
-| 183 | 电脑路由器卡 | `PC routercard` |
-| 184 | 电脑软件 | `PC sosftware` |
-| 185 | 电脑视频 | `PC video` |
-| 186 | PC | `PC` |
-| 187 | PDA | `PDA` |
-| 188 | 电话 | `Phone` |
-| 189 | 电话传真 | `Phone-fax` |
-| 190 | PIX 防火墙 | `PIX firewall` |
-| 191 | PMC | `PMC` |
-| 192 | 打印机 | `Printer` |
-| 193 | 程序交换机 | `Programmble switch` |
-| 194 | 协议转换器 | `Protocol translator` |
-| 195 | PXF | `PXF` |
-| 196 | 无线电发射塔 | `Radio tower` |
-| 197 | Ratemux | `Ratemux` |
-| 198 | 关系数据库 | `Relational database` |
-| 199 | 中继器 | `Repeater` |
-| 200 | RF 调制解调器 | `RF modem` |
-| 201 | 路由交换机 | `Route switch` |
-| 202 | 带芯片交换机的路由器 | `Router with silicon switch` |
-| 203 | 路由器 | `Router` |
-| 204 | Router_firewall | `Router_firewall` |
-| 205 | 生成中的路由器 | `Router in building` |
-| 206 | RPSRPS | `RPSRPS` |
-| 207 | 跑步的男人 | `Running man` |
-| 208 | Safeharbor 图标 | `Safeharbor icon` |
-| 209 | 卫星天线 | `Sattelite dish` |
-| 210 | 卫星 | `Sattelite` |
-| 211 | 扫描仪 | `Scanner` |
-| 212 | 服务器交换机 | `Server switch` |
-| 213 | 具有路由器的服务器 | `Server with router` |
-| 214 | 服务控制 | `Service control` |
-| 215 | 服务模块 | `Service Module` |
-| 216 | 服务路由器 | `Service router` |
-| 217 | 服务 | `Services` |
-| 218 | 机顶盒 | `Set top box` |
-| 219 | Simultlayer 交换机 | `Simultlayer switch` |
-| 220 | SIP 代理服务器 | `SIP proxy server` |
-| 221 | 坐着的女人 | `Sitting woman` |
-| 222 | Amall 业务 | `Amall business` |
-| 223 | 小型集线器 | `Small hub` |
-| 224 | 软件电话 | `Softphone` |
-| 225 | 软交换机 PGW MGC | `Softswitch PGW MGC` |
-| 226 | 基于软件的服务器 | `Software based server` |
-| 227 | 空间路由器 | `Space router` |
-| 228 | 扬声器 | `Speaker` |
-| 229 | SSC | `SSC` |
-| 230 | SSL 终止符 | `SSL terminator` |
-| 231 | 标准主机 | `Standard host` |
-| 232 | 站着的男人 | `Standing man` |
-| 233 | 站着的女人 | `Standing woman` |
-| 234 | STB | `STB` |
-| 235 | 存储路由器 | `Storage router` |
-| 236 | 存储服务器 | `Storge server` |
-| 237 | STP | `STP` |
-| 238 | 流式传输器 | `Streamer` |
-| 239 | 太阳工作站 | `Sun workstation` |
-| 240 | 超级计算机 | `Supercomputer` |
-| 241 | SVX | `SVX` |
-| 242 | 系统控制器 | `System controller` |
-| 243 | 平板电脑 | `Tablet` |
-| 244 | 磁带阵列 | `Tape array` |
-| 245 | TDM 路由器 | `TDM router` |
-| 246 | 远程办公人员房屋电脑 | `Telecommuter house PC` |
-| 247 | 远程办公人员房屋 | `Telecommuter house` |
-| 248 | 远程办公人员图标 | `Telecommuter icon` |
-| 249 | 终端 | `Terminal` |
-| 250 | 令牌 | `Token` |
-| 251 | TP MCU | `TP MCU` |
-| 252 | 转路径 | `Transpath` |
-| 253 | 卡车 | `Truck` |
-| 254 | 转塔 | `Turret` |
-| 255 | 电视 | `TV` |
-| 256 | UBR910 | `UBR910` |
-| 257 | UMG 系列 | `UMG series` |
-| 258 | Unity 服务器 | `Unity server` |
-| 259 | 大学 | `University` |
-| 260 | UPC | `UPC` |
-| 261 | UPS | `UPS` |
-| 262 | 保管库 | `Vault` |
-| 263 | 遥测 3200 | `Telepresence 3200` |
-| 264 | 摄像机 | `Video camera` |
-| 265 | VIP | `VIP` |
-| 266 | 虚拟层交换机 | `Virtual layer switch` |
-| 267 | 虚拟交换机控制器 (vsc3) | `Virtual switch controller (vsc3` |
-| 268 | 语音 ATM 交换机 | `Voice ATM switch` |
-| 269 | 语音通信服务器 | `Voice commserver` |
-| 270 | 语音路由器 | `Voice router` |
-| 271 | 语音交换机 | `Voice switch` |
-| 272 | VPN 中心 | `VPN concentrator` |
-| 273 | VPN 网关 | `VPN gateway` |
-| 274 | VSS | `VSS` |
-| 275 | WAE | `WAE` |
-| 276 | 波长 | `Wavelength` |
-| 277 | Web 浏览器 | `Web browser` |
-| 278 | Web 群集 | `Web cluster` |
-| 279 | Wi-fi 标记 | `Wi-fi tag` |
-| 280 | 有线桥 | `Wirelss bridge` |
-| 281 | 无线位置设备 | `Wireless location appliance` |
-| 282 | 无线路由器 | `Wireless router` |
-| 283 | 无线传输 | `Wireless transport` |
-| 284 | 无线 | `Wireless` |
-| 285 | WISM | `WISM` |
-| 286 | WLAN 控制器 | `WLAN controller` |
-| 287 | 工作组目录 | `Workgroup director` |
-| 288 | 工作组交换机 | `Workgroup switch` |
-| 289 | 工作站 | `Workstation` |
-| 290 | WWW 服务器 | `WWW server` |
+| 124 | 密钥 | `Keys` |
+| 125 | LAN 到 LAN | `LAN to LAN` |
+| 126 | 笔记本电脑 | `Laptop` |
+| 127 | 第 2 层远程交换机 | `Layer 2 remote switch` |
+| 128 | 第 3 层交换机 | `Layer 3 switch` |
+| 129 | 轻型 AP | `Lightweight AP` |
+| 130 | Localdirector | `Localdirector` |
+| 131 | 锁定 | `Lock` |
+| 132 | 长距离 CPE | `Longreach CPE` |
+| 133 | Mac 女士 | `Mac woman` |
+| 134 | Macintosh | `Macintosh` |
+| 135 | Man_woman | `Man_woman` |
+| 136 | MAS 网关 | `MAS gateway` |
+| 137 | MAU | `MAU` |
+| 138 | MCU | `MCU` |
+| 139 | MDU | `MDU` |
+| 140 | ME | `ME` |
+| 141 | 中介者 | `Mediator` |
+| 142 | 会议位置 | `Meetingplace` |
+| 143 | 网格 | `Mesh` |
+| 144 | Metro 1500 | `Metro 1500` |
+| 145 | MGX 8000 多服务交换机 | `MGX 8000 multiservice switch` |
+| 146 | 扩音器 | `Microphone` |
+| 147 | Microwebserver | `Microwebserver` |
+| 148 | 迷你 VAX | `Mini VAX` |
+| 149 | 移动访问 IP 电话 | `Mobile access IP phone` |
+| 150 | 移动访问路由器 | `Mobile access router` |
+| 151 | 移动流式传输器 | `Mobile streamer` |
+| 152 | 调制解调器 | `Modem` |
+| 153 | MSE | `MSE` |
+| 154 | MOH 服务器 | `MOH server` |
+| 155 | 多路开关 | `Multiswitch` |
+| 156 | 多构造服务器交换机 | `Multi-fabric server switch` |
+| 157 | 多层远程交换机 | `Multilayer remote switch` |
+| 158 | MUX | `MUX` |
+| 159 | MXE | `MXE` |
+| 160 | NAC 设备 | `NAC appliance` |
+| 161 | NCE | `NCE` |
+| 162 | NCE 路由器 | `NCE router` |
+| 163 | Netflow 路由器 | `Netflow router` |
+| 164 | Netranger | `Netranger` |
+| 165 | Netsonar | `Netsonar` |
+| 166 | 网络管理 | `Network management` |
+| 167 | 网络安全 | `Network security` |
+| 168 | Nexus 1000 | `Nexus 1000` |
+| 169 | Nexus 2000 | `Nexus 2000` |
+| 170 | Nexus 5000 | `Nexus 5000` |
+| 171 | Nexus 7000 | `Nexus 7000` |
+| 172 | Octel | `Octel` |
+| 173 | ONS15500 | `ONS15500` |
+| 174 | 光学放大器 | `Optical amplifier` |
+| 175 | 光学服务路由器 | `Optical services router` |
+| 176 | 光学传输 | `Optical transort` |
+| 177 | PAD x.28 | `PAD x.28` |
+| 178 | Pad | `Pad` |
+| 179 | 页面图标 | `Page icon` |
+| 180 | 专用交换机 | `PBX switch` |
+| 181 | PBX | `PBX` |
+| 182 | 电脑适配器卡 | `PC adapter card` |
+| 183 | 电脑城域网 | `PC man` |
+| 184 | 电脑路由器卡 | `PC routercard` |
+| 185 | 电脑软件 | `PC sosftware` |
+| 186 | 电脑视频 | `PC video` |
+| 187 | PC | `PC` |
+| 188 | PDA | `PDA` |
+| 189 | 电话 | `Phone` |
+| 190 | 电话传真 | `Phone-fax` |
+| 191 | PIX 防火墙 | `PIX firewall` |
+| 192 | PMC | `PMC` |
+| 193 | 打印机 | `Printer` |
+| 194 | 程序交换机 | `Programmble switch` |
+| 195 | 协议转换器 | `Protocol translator` |
+| 196 | PXF | `PXF` |
+| 197 | 无线电发射塔 | `Radio tower` |
+| 198 | Ratemux | `Ratemux` |
+| 199 | 关系数据库 | `Relational database` |
+| 200 | 中继器 | `Repeater` |
+| 201 | RF 调制解调器 | `RF modem` |
+| 202 | 路由交换机 | `Route switch` |
+| 203 | 带芯片交换机的路由器 | `Router with silicon switch` |
+| 204 | 路由器 | `Router` |
+| 205 | Router_firewall | `Router_firewall` |
+| 206 | 生成中的路由器 | `Router in building` |
+| 207 | RPSRPS | `RPSRPS` |
+| 208 | 跑步的男人 | `Running man` |
+| 209 | Safeharbor 图标 | `Safeharbor icon` |
+| 210 | 卫星天线 | `Sattelite dish` |
+| 211 | 卫星 | `Sattelite` |
+| 212 | 扫描仪 | `Scanner` |
+| 213 | 服务器交换机 | `Server switch` |
+| 214 | 具有路由器的服务器 | `Server with router` |
+| 215 | 服务控制 | `Service control` |
+| 216 | 服务模块 | `Service Module` |
+| 217 | 服务路由器 | `Service router` |
+| 218 | 服务 | `Services` |
+| 219 | 机顶盒 | `Set top box` |
+| 220 | Simultlayer 交换机 | `Simultlayer switch` |
+| 221 | SIP 代理服务器 | `SIP proxy server` |
+| 222 | 坐着的女人 | `Sitting woman` |
+| 223 | Amall 业务 | `Amall business` |
+| 224 | 小型集线器 | `Small hub` |
+| 225 | 软件电话 | `Softphone` |
+| 226 | 软交换机 PGW MGC | `Softswitch PGW MGC` |
+| 227 | 基于软件的服务器 | `Software based server` |
+| 228 | 空间路由器 | `Space router` |
+| 229 | 扬声器 | `Speaker` |
+| 230 | SSC | `SSC` |
+| 231 | SSL 终止符 | `SSL terminator` |
+| 232 | 标准主机 | `Standard host` |
+| 233 | 站着的男人 | `Standing man` |
+| 234 | 站着的女人 | `Standing woman` |
+| 235 | STB | `STB` |
+| 236 | 存储路由器 | `Storage router` |
+| 237 | 存储服务器 | `Storge server` |
+| 238 | STP | `STP` |
+| 239 | 流式传输器 | `Streamer` |
+| 240 | 太阳工作站 | `Sun workstation` |
+| 241 | 超级计算机 | `Supercomputer` |
+| 242 | SVX | `SVX` |
+| 243 | 系统控制器 | `System controller` |
+| 244 | 平板电脑 | `Tablet` |
+| 245 | 磁带阵列 | `Tape array` |
+| 246 | TDM 路由器 | `TDM router` |
+| 247 | 远程办公人员房屋电脑 | `Telecommuter house PC` |
+| 248 | 远程办公人员房屋 | `Telecommuter house` |
+| 249 | 远程办公人员图标 | `Telecommuter icon` |
+| 250 | 终端 | `Terminal` |
+| 251 | 令牌 | `Token` |
+| 252 | TP MCU | `TP MCU` |
+| 253 | 转路径 | `Transpath` |
+| 254 | 卡车 | `Truck` |
+| 255 | 转塔 | `Turret` |
+| 256 | 电视 | `TV` |
+| 257 | UBR910 | `UBR910` |
+| 258 | UMG 系列 | `UMG series` |
+| 259 | Unity 服务器 | `Unity server` |
+| 260 | 通用网关 | `Universal gateway` |
+| 261 | 大学 | `University` |
+| 262 | UPC | `UPC` |
+| 263 | UPS | `UPS` |
+| 264 | 保管库 | `Vault` |
+| 265 | 遥测 3200 | `Telepresence 3200` |
+| 266 | 摄像机 | `Video camera` |
+| 267 | VIP | `VIP` |
+| 268 | 虚拟层交换机 | `Virtual layer switch` |
+| 269 | 虚拟交换机控制器 (vsc3) | `Virtual switch controller (vsc3` |
+| 270 | 语音 ATM 交换机 | `Voice ATM switch` |
+| 271 | 语音通信服务器 | `Voice commserver` |
+| 272 | 语音路由器 | `Voice router` |
+| 273 | 语音交换机 | `Voice switch` |
+| 274 | VPN 中心 | `VPN concentrator` |
+| 275 | VPN 网关 | `VPN gateway` |
+| 276 | VSS | `VSS` |
+| 277 | WAE | `WAE` |
+| 278 | 波长 | `Wavelength` |
+| 279 | Web 浏览器 | `Web browser` |
+| 280 | Web 群集 | `Web cluster` |
+| 281 | Wi-fi 标记 | `Wi-fi tag` |
+| 282 | 有线桥 | `Wirelss bridge` |
+| 283 | 无线位置设备 | `Wireless location appliance` |
+| 284 | 无线路由器 | `Wireless router` |
+| 285 | 无线传输 | `Wireless transport` |
+| 286 | 无线 | `Wireless` |
+| 287 | WISM | `WISM` |
+| 288 | WLAN 控制器 | `WLAN controller` |
+| 289 | 工作组目录 | `Workgroup director` |
+| 290 | 工作组交换机 | `Workgroup switch` |
+| 291 | 工作站 | `Workstation` |
+| 292 | WWW 服务器 | `WWW server` |
 
 ### 115. `COMMERCE_M.VSSX`
 
@@ -4683,7 +4695,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 116. `COMMUNICATION_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\COMMUNICATION_M.VSSX`
-- Master count: 21
+- Master count: 22
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -4695,19 +4707,20 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 6 | 信封 | `Envelope` |
 | 7 | 链接 | `Link` |
 | 8 | 扩音器 | `Megaphone` |
-| 9 | 网络 | `Network` |
-| 10 | 报纸 | `Newspaper` |
-| 11 | 打开的信封 | `Open envelope` |
-| 12 | 无线话筒 | `Radio microphone` |
-| 13 | 听筒 | `Receiver` |
-| 14 | 碟形卫星天线 | `Satellite dish` |
-| 15 | 卫星 | `Satellite` |
-| 16 | 发送 | `Send` |
-| 17 | 共享 | `Share` |
-| 18 | 演讲 | `Speech` |
-| 19 | 邮票 | `Stamp` |
-| 20 | 电话 | `Telephone` |
-| 21 | 思想气泡 | `Thought bubble` |
+| 9 | 扩音器 | `Microphone` |
+| 10 | 网络 | `Network` |
+| 11 | 报纸 | `Newspaper` |
+| 12 | 打开的信封 | `Open envelope` |
+| 13 | 无线话筒 | `Radio microphone` |
+| 14 | 听筒 | `Receiver` |
+| 15 | 碟形卫星天线 | `Satellite dish` |
+| 16 | 卫星 | `Satellite` |
+| 17 | 发送 | `Send` |
+| 18 | 共享 | `Share` |
+| 19 | 演讲 | `Speech` |
+| 20 | 邮票 | `Stamp` |
+| 21 | 电话 | `Telephone` |
+| 22 | 思想气泡 | `Thought bubble` |
 
 ### 117. `COMOLE_M.VSSX`
 
@@ -6196,7 +6209,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 162. `ENTAPP_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\ENTAPP_M.VSSX`
-- Master count: 18
+- Master count: 19
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -6209,15 +6222,16 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 7 | 多个工作站 | `Workstations` |
 | 8 | 备件 | `Spare` |
 | 9 | 笔记本电脑 | `Laptop` |
-| 10 | 边界 | `Boundary` |
-| 11 | 数据存储 | `Datastore` |
-| 12 | 对象 | `Object` |
-| 13 | 流程 | `Process` |
-| 14 | 标签 | `Label` |
-| 15 | 文档 | `Document` |
-| 16 | 组件 | `Component` |
-| 17 | 接口 | `Interface` |
-| 18 | 通信链路 | `Communication Link` |
+| 10 | 笔记本电脑 | `Laptops` |
+| 11 | 边界 | `Boundary` |
+| 12 | 数据存储 | `Datastore` |
+| 13 | 对象 | `Object` |
+| 14 | 流程 | `Process` |
+| 15 | 标签 | `Label` |
+| 16 | 文档 | `Document` |
+| 17 | 组件 | `Component` |
+| 18 | 接口 | `Interface` |
+| 19 | 通信链路 | `Communication Link` |
 
 ### 163. `ENTITY_M.VSSX`
 
@@ -7189,7 +7203,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 192. `INDOOR_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\INDOOR_M.VSSX`
-- Master count: 57
+- Master count: 58
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -7250,6 +7264,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 55 | 尺寸线 | `Dimension line` |
 | 56 | 比例符号 | `Scale symbol` |
 | 57 | 缩放标签 | `Scale label` |
+| 58 | L 形房间 | `T Shaped Room` |
 
 ### 193. `INTANN_M.VSSX`
 
@@ -8678,7 +8693,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 247. `OUTDOOR_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\OUTDOOR_M.VSSX`
-- Master count: 27
+- Master count: 28
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -8696,19 +8711,20 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 12 | 街道 | `Streets` |
 | 13 | 交集 | `Intersection` |
 | 14 | 分隔带通道 | `Divider passing` |
-| 15 | 警车(顶部) | `Police car (top)` |
-| 16 | 中型双门汽车 | `Mid-size 2-dr car` |
-| 17 | 小型取件 | `Mini pickup` |
-| 18 | 微型车 | `Mini van` |
-| 19 | 微型车(顶部) | `Mini van (top)` |
-| 20 | 运动型多功能车 | `Sport utility vehicle` |
-| 21 | 运动型实用工具车(顶部) | `Sport utility vehicle (top)` |
-| 22 | 罗盘 | `Compass` |
-| 23 | 文本块 | `Text block` |
-| 24 | 标注 | `Callout` |
-| 25 | 尺寸线 | `Dimension line` |
-| 26 | 比例符号 | `Scale symbol` |
-| 27 | 缩放标签 | `Scale label` |
+| 15 | 分隔带通道 | `Divider lane` |
+| 16 | 警车(顶部) | `Police car (top)` |
+| 17 | 中型双门汽车 | `Mid-size 2-dr car` |
+| 18 | 小型取件 | `Mini pickup` |
+| 19 | 微型车 | `Mini van` |
+| 20 | 微型车(顶部) | `Mini van (top)` |
+| 21 | 运动型多功能车 | `Sport utility vehicle` |
+| 22 | 运动型实用工具车(顶部) | `Sport utility vehicle (top)` |
+| 23 | 罗盘 | `Compass` |
+| 24 | 文本块 | `Text block` |
+| 25 | 标注 | `Callout` |
+| 26 | 尺寸线 | `Dimension line` |
+| 27 | 比例符号 | `Scale symbol` |
+| 28 | 缩放标签 | `Scale label` |
 
 ### 248. `PEANNT_M.VSSX`
 
@@ -9748,7 +9764,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 275. `PUZZLESANDGAMES_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\PUZZLESANDGAMES_M.VSSX`
-- Master count: 19
+- Master count: 20
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -9761,16 +9777,17 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 7 | 游戏控制器 | `Game controller` |
 | 8 | 大小王 | `Joker` |
 | 9 | 拼图 | `Puzzle` |
-| 10 | 麻将 | `Mahjong` |
-| 11 | 迷宫 | `Maze` |
-| 12 | 抵押 | `Pawn` |
-| 13 | 扑克牌  | `Playing card` |
-| 14 | 台球 | `Pool 8 Ball` |
-| 15 | 陀螺 | `Spin Top` |
-| 16 | 老虎机 | `Slot Machine` |
-| 17 | 老虎机失败 | `Slot Machine Lose` |
-| 18 | 铁锹套件 | `Spade Suit` |
-| 19 | 井字游戏 | `Tic Tac Toe` |
+| 10 | 拼图 | `Puzzle pieces` |
+| 11 | 麻将 | `Mahjong` |
+| 12 | 迷宫 | `Maze` |
+| 13 | 抵押 | `Pawn` |
+| 14 | 扑克牌  | `Playing card` |
+| 15 | 台球 | `Pool 8 Ball` |
+| 16 | 陀螺 | `Spin Top` |
+| 17 | 老虎机 | `Slot Machine` |
+| 18 | 老虎机失败 | `Slot Machine Lose` |
+| 19 | 铁锹套件 | `Spade Suit` |
+| 20 | 井字游戏 | `Tic Tac Toe` |
 
 ### 276. `PYRAMID_SHAPES_M.VSSX`
 
@@ -11026,7 +11043,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 320. `UCOMME_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\UCOMME_M.VSSX`
-- Master count: 10
+- Master count: 11
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -11040,11 +11057,12 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 8 | 依赖关系 | `Dependency` |
 | 9 | 聚合 | `Aggregation` |
 | 10 | 复合 | `Composition` |
+| 11 | 复合 | `Composite` |
 
 ### 321. `UDEPME_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\UDEPME_M.VSSX`
-- Master count: 20
+- Master count: 21
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -11068,6 +11086,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 18 | 复合 | `Composition` |
 | 19 | 清单 | `Manifest` |
 | 20 | 部署 | `Deploy` |
+| 21 | 复合 | `Composite` |
 
 ### 322. `USEQME_M.VSSX`
 
@@ -11108,7 +11127,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 324. `USTRME_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\USTRME_M.VSSX`
-- Master count: 15
+- Master count: 16
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -11127,6 +11146,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 13 | 聚合 | `Aggregation` |
 | 14 | 依赖关系 | `Dependency` |
 | 15 | 复合 | `Composition` |
+| 16 | 复合 | `Composite` |
 
 ### 325. `UUSEME_M.VSSX`
 
@@ -11563,7 +11583,7 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 ### 338. `WEBSIT_M.VSSX`
 
 - File path: `C:\Program Files\Microsoft Office\root\Office16\Visio Content\2052\WEBSIT_M.VSSX`
-- Master count: 18
+- Master count: 19
 
 | # | Master name (localized) | NameU (stable name) |
 | ---: | --- | --- |
@@ -11577,14 +11597,15 @@ Found **362 stencil files**. Legacy binary `.vss` files require Visio COM enumer
 | 8 | 小型站点图节点 | `Small site map node` |
 | 9 | 大型站点图节点 | `Large site map node` |
 | 10 | 主页 | `Home` |
-| 11 | 表单 | `Form` |
-| 12 | 网关 | `Gateway` |
-| 13 | 页面跳转 | `Page jump` |
-| 14 | 双向数据连接 | `2-Way data connection` |
-| 15 | 动态连接线 | `Dynamic connector` |
-| 16 | 曲线连接线 | `Line-curve connector` |
-| 17 | 云 | `Cloud` |
-| 18 | 单向数据连接 | `1-Way data connection` |
+| 11 | 主页 | `Home page` |
+| 12 | 表单 | `Form` |
+| 13 | 网关 | `Gateway` |
+| 14 | 页面跳转 | `Page jump` |
+| 15 | 双向数据连接 | `2-Way data connection` |
+| 16 | 动态连接线 | `Dynamic connector` |
+| 17 | 曲线连接线 | `Line-curve connector` |
+| 18 | 云 | `Cloud` |
+| 19 | 单向数据连接 | `1-Way data connection` |
 
 ### 339. `WELD_M.VSSX`
 

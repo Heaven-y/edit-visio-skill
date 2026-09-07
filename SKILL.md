@@ -12,6 +12,9 @@ Check the host before drawing. Windows PowerShell 5.1 is rejected before COM
 activation because document opening can hang in that host. Report a missing
 PowerShell 7 installation and its proposed source before installing anything.
 Package inspection and stencil catalog scanning do not launch COM.
+For an explicitly requested Python integration, consult
+[Python COM guidance](references/python-com-backend.md). It describes an optional
+integration contract, not a bundled executable backend or a cure for hung sessions.
 
 ## Choose the Mode
 
@@ -36,13 +39,21 @@ Keep source images and unrelated files unchanged.
 
 Read the actual reference dimensions with `Get-ReferenceImageDimensions` in
 `scripts/visio_runtime.ps1`. Do not copy pixel dimensions from an example.
-Derive page height as `PageW * RefH / RefW`; page width is a physical-scale choice.
-The scaffold rejects conflicting dimensions. Without an image, Create/Rebuild
-accept `PageW/PageH` in inches or `RefW/RefH` for a separate coordinate grid.
+Choose the intended physical size separately, using `PageWidthMm/PageHeightMm`
+or `PageW/PageH` in inches. Either dimension alone derives the other from the image.
+The 16-inch fallback is for legacy callers, not a publication-size recommendation.
+The scaffold rejects conflicting dimensions. `CanvasFit Contain` explicitly fits
+the reference with uniform scale and centered whitespace; optional `MarginMm`
+reserves a minimum margin. It never crops or stretches the reference.
+Without an image, Create/Rebuild accept both physical page dimensions or
+`RefW/RefH` for a separate coordinate grid.
 Edit preserves the existing page dimensions; with no reference/grid override,
 drawing helpers use those inch dimensions with a top-left origin. Direct COM uses
 bottom-left page coordinates. For PDF references, render the selected page
-first and use its measured raster dimensions.
+first and use its measured raster dimensions. Read
+[canvas and connectors](references/canvas-and-connectors.md) for units, final-size
+readability, fixed-page fitting and line helpers. Do not enlarge a user-specified
+print page or shrink labels silently to fit content.
 
 Analyze panel bounds, whitespace, text sizes, colors, arrow topology and repeated
 objects from that reference. Calibrate panel-local coordinates for dense content.
@@ -61,6 +72,10 @@ exists. Do not force an unrelated stencil or create external SVG by default.
 External assets require a user-approved source and license. Never redistribute
 Microsoft stencil files. Group and name related modules, preserving editable text.
 For movable workflow relationships, use glued connectors, not disconnected lines.
+`Connect-VisioShapes` supports local-side attachment, native straight/orthogonal
+routing, arrowheads and line styles. Move a representative node to verify glue;
+inspect labels and route crossings after the move. Native routing does not prove
+collision-free layout. Preserve notation-specific endpoints such as UML inheritance.
 
 ## Execution and Safety
 
@@ -81,6 +96,9 @@ The callback receives `$script:Page`, `$script:Visio`, measured `RefW/RefH`,
 `PageW/PageH`, and `BuildPhase`. Reuse the supplied drawing helpers where suitable.
 Assign `-PassThru` results to variables and release them in `finally`; the scaffold
 rejects COM objects emitted by the callback to prevent object-output floods.
+The callback also receives `$script:Canvas`. Use `VX/VY` for positions,
+`VL` for coordinate lengths in inches and `VPT` for lengths in points;
+position conversion must never be used for a width, radius or line weight.
 Rectangle helpers default to a small physical corner radius; explicit `roundPx`
 values use the drawing coordinate grid, with 0 selecting square corners.
 
@@ -118,7 +136,9 @@ Default deliverable: VSDX only. Render a temporary PNG for verification.
 For visual review by an agent, explicitly set `-PreviewPath` inside a task-owned
 temporary directory, inspect it, then delete it. Without that option the scaffold
 removes its internal preview after automated checks. A user-requested PNG/export
-is retained and must not overwrite the source image.
+is retained and must not overwrite the source image. `PreviewDpi` (scaffold) or
+`PngDpi` (export) defaults to 144; increase it for print or dense details as needed.
+Export temporarily sets and then restores Visio's raster resolution/size settings.
 
 Use `visio_quality_gates.ps1` for package integrity, native-content/media checks,
 required text/color tokens, page/reference and preview/page ratios, read-only COM
@@ -127,6 +147,12 @@ to the same implementation. Text, color, ratio and bounds checks apply to
 `-PageIndex`; repeat them for every changed page. Package inspection reports all
 pages, using relationships and foreground/background ordering, not page filenames.
 Optional size limits must be task-specific.
+Optional `MinFontPt/MinLinePt` check declared ShapeSheet sizes on the selected page,
+including nested shapes; `FinalWidthMm` accounts for uniform downscaling at use.
+Declared rows can be unused/hidden. The check does not measure rendered glyphs,
+clipping or background content. Review those visually and validate changed
+background pages separately.
+`AllowEmptyPage` permits an intentionally blank page, not a missing drawing.
 
 Native-only is the default. If a user explicitly approves retaining or importing
 media (for example an existing logo), pass `-AllowMedia` and report mixed content;
@@ -143,3 +169,16 @@ the selected page; PDF exports all foreground pages with their backgrounds. PPTX
 rendered SVG, not decomposed editable PowerPoint shapes.
 Report the final VSDX, verified editability, visual approximations and any skipped
 checks. Do not claim a remote update without a verified push.
+
+## Scientific Scope and Maintenance
+
+For scientific schematics, separate supplied evidence, schematic illustration and
+inference. An arrow must not imply a measured effect or causal relationship absent
+from the supplied material. Do not invent chart values, significance or citations.
+Keep this evidence discipline conditional on the task; research pipelines, external
+model calls and other skills are not dependencies of this Visio toolkit.
+
+For shared-runtime changes, run `tests/visio_regression.ps1`, then `-WithCom` on
+Windows with Visio. Tests use isolated synthetic documents and clean artifacts by
+default. Use `-KeepArtifacts` only for temporary visual review, then remove them.
+See [sources and licensing](README.md#来源与许可) for the scope of each reference.

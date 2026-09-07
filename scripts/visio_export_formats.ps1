@@ -78,6 +78,42 @@ function Export-VisioPdf {
     }
 }
 
+function Export-VisioPng {
+    param(
+        [Parameter(Mandatory = $true)]$Page,
+        [Parameter(Mandatory = $true)][string]$OutPath,
+        [ValidateRange(1, 2400)][int]$Dpi = 144
+    )
+    $size = Get-VisioPageSize $Page
+    if ($size.Width * $size.Height * $Dpi * $Dpi -gt 100000000) {
+        throw 'PNG would exceed 100 megapixels. Select a lower DPI or export a vector format.'
+    }
+    $app = $null; $settings = $null; $captured = $false
+    [int]$resolution = 0; [double]$resW = 0; [double]$resH = 0; [int]$resUnits = 0
+    [int]$rasterSize = 0; [double]$sizeW = 0; [double]$sizeH = 0; [int]$sizeUnits = 0
+    try {
+        $app = $Page.Application
+        $settings = $app.Settings
+        $settings.GetRasterExportResolution([ref]$resolution, [ref]$resW, [ref]$resH, [ref]$resUnits)
+        $settings.GetRasterExportSize([ref]$rasterSize, [ref]$sizeW, [ref]$sizeH, [ref]$sizeUnits)
+        $captured = $true
+        # 3 = custom resolution, 0 = pixels/inch; 2 = source page size.
+        $settings.SetRasterExportResolution(3, $Dpi, $Dpi, 0)
+        $settings.SetRasterExportSize(2, 0, 0, 0)
+        [void]$Page.Export($OutPath)
+    } finally {
+        try {
+            if ($captured) {
+                try { $settings.SetRasterExportResolution($resolution, $resW, $resH, $resUnits) }
+                finally { $settings.SetRasterExportSize($rasterSize, $sizeW, $sizeH, $sizeUnits) }
+            }
+        } finally {
+            Release-VisioComObject $settings
+            Release-VisioComObject $app
+        }
+    }
+}
+
 function Export-VisioPptx {
     param(
         [Parameter(Mandatory=$true)]
@@ -164,7 +200,8 @@ function Export-VisioPageFormats {
         [string[]]$Formats = @('png'),
         [string]$OutputDir,
         [string]$OutputBaseName,
-        [string]$PreviewPath
+        [string]$PreviewPath,
+        [ValidateRange(1, 2400)][int]$PngDpi = 144
     )
 
     $formatsToExport = Normalize-VisioExportFormats $Formats
@@ -199,7 +236,7 @@ function Export-VisioPageFormats {
             }
             [void][IO.Directory]::CreateDirectory((Split-Path -Parent $outPath))
             switch ($format) {
-                'png' { [void]$Page.Export($outPath) }
+                'png' { Export-VisioPng $Page $outPath -Dpi $PngDpi }
                 'svg' { [void]$Page.Export($outPath) }
                 'pdf' { Export-VisioPdf -Document $Document -OutPath $outPath }
                 'pptx' { Export-VisioPptx -Page $Page -OutPath $outPath }
@@ -226,6 +263,7 @@ function Export-VisioDocumentFormats {
         [string]$OutputBaseName,
         [ValidateRange(1, 2147483647)][int]$PageIndex = 1,
         [string]$PreviewPath,
+        [ValidateRange(1, 2400)][int]$PngDpi = 144,
         [switch]$Visible
     )
 
@@ -241,7 +279,7 @@ function Export-VisioDocumentFormats {
         $pages = $doc.Pages
         if ($PageIndex -gt $pages.Count) { throw "PageIndex $PageIndex exceeds page count $($pages.Count)." }
         $page = $pages.Item($PageIndex)
-        Export-VisioPageFormats -Document $doc -Page $page -SourcePath $VsdxPath -Formats $Formats -OutputDir $OutputDir -OutputBaseName $OutputBaseName -PreviewPath $PreviewPath
+        Export-VisioPageFormats -Document $doc -Page $page -SourcePath $VsdxPath -Formats $Formats -OutputDir $OutputDir -OutputBaseName $OutputBaseName -PreviewPath $PreviewPath -PngDpi $PngDpi
     } finally {
         try {
             Release-VisioComObject $page

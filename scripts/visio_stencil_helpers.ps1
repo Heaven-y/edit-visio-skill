@@ -29,6 +29,7 @@ function Resolve-VisioContentPath {
     if (Test-Path -LiteralPath $Path -PathType Leaf) {
         return (Resolve-Path -LiteralPath $Path).Path
     }
+    if ([IO.Path]::IsPathRooted($Path)) { throw "Explicit Visio content path not found: $Path" }
 
     $leaf = [IO.Path]::GetFileName($Path)
     foreach ($root in Get-VisioContentRoots -PreferredRoot $RootPath) {
