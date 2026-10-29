@@ -67,10 +67,9 @@ A matching name does not prove a matching silhouette or biological meaning.
 Inspect master style controls before recoloring children: child shapes can be
 alternative filled/outline styles, not separate semantic parts.
 
-Use smooth native curves and grouped editable parts when no appropriate master
-exists. Do not force an unrelated stencil or create external SVG by default.
-External assets require a user-approved source and license. Never redistribute
-Microsoft stencil files. Group and name related modules, preserving editable text.
+Choose icons for semantic clarity, visual quality at delivery size, and style consistency first. Native curves, installed masters, licensed vector art, and raster illustrations are all valid choices. Keep text and workflow connectors editable when useful; do not sacrifice delivery quality merely to maximize the native-object count. Honor an explicit native-only requirement, but do not invent one from the VSDX format. Reuse the user's existing authorization for asset choices rather than asking again for each format or source. Clarify only a material change that the session has not authorized.
+
+Simplified concept or measurement symbols can be preferable to full biological specimens. Match the level of realism to the user's purpose; do not interpret "quality" as "more realistic" or "more anatomical detail". Search stencils when they are likely to help, not as a mandatory first step. For third-party assets, verify reuse rights and retain required attribution in an appropriate accompanying file or caption. Do not crowd a concept diagram with provenance text unless the license or a real risk of confusing illustration with experimental evidence requires it. Group and name related modules, preserving editable text.
 For movable workflow relationships, use glued connectors, not disconnected lines.
 `Connect-VisioShapes` supports local-side attachment, native straight/orthogonal
 routing, arrowheads and line styles. Move a representative node to verify glue;
@@ -154,10 +153,7 @@ clipping or background content. Review those visually and validate changed
 background pages separately.
 `AllowEmptyPage` permits an intentionally blank page, not a missing drawing.
 
-Native-only is the default. If a user explicitly approves retaining or importing
-media (for example an existing logo), pass `-AllowMedia` and report mixed content;
-it does not prove full native editability. Never delete existing assets just to make
-a strict gate pass. For read-only inspection use `visio_page_tools.ps1 -InspectPackage`.
+Select the native-content gate to match the chosen deliverable: use strict native validation when no media are intended, and pass `-AllowMedia` when media serve the authorized design. Inspect the media inventory and report the actual editable scope; mixed content must not be called fully native. Never delete useful assets merely to pass a strict gate. For read-only inspection use `visio_page_tools.ps1 -InspectPackage`.
 
 PASS means only the named automated check passed. Skipped tests say SKIPPED.
 Phase completeness, overlap, text fit, icon semantics and visual fidelity require
